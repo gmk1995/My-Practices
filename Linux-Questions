@@ -1,0 +1,5 @@
+Linux Questions:
+
+Q) Create a user named kareem with a non-interactive shell on the App Server 3
+
+Ans) use -s for shell and set shell to /sbin/nologin useradd ammar -s /sbin/nologin
