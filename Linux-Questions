@@ -1,5 +1,16 @@
 Linux Questions:
 
-Q) Create a user named kareem with a non-interactive shell on the App Server 3
+1) Create a user named ammar with a non-interactive shell on the App Server 3
 
 Ans) use -s for shell and set shell to /sbin/nologin useradd ammar -s /sbin/nologin
+
+2) Please give executable permissions to /tmp/xfusioncorp.sh script on App Server 1. Also make sure every user can execute it.
+
+Ans) sudo chmod -R 777 /tmp/xfusioncorp.sh
+
+3) During the daily standup, it was pointed out that the timezone across Nautilus Application Servers in Stratos Datacenter doesn't match with that of the local datacenter's timezone, which is America/Managua. Correct the mismatch.
+
+Ans) run sudo timedatectl to check the timezone
+sudo timedatectl set-timezone America/Managua
+
+4) 
