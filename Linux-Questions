@@ -13,4 +13,60 @@ Ans) sudo chmod -R 777 /tmp/xfusioncorp.sh
 Ans) run sudo timedatectl to check the timezone
 sudo timedatectl set-timezone America/Managua
 
-4) 
+4) The Nautilus system admins team has prepared scripts to automate several day-to-day tasks. They want them to be deployed on all app servers in Stratos DC on a set schedule. Before that they need to test similar functionality with a sample cron job. Therefore, perform the steps below:
+
+a. Install cronie package on all Nautilus app servers and start crond service.
+
+b. Add a cron */5 * * * * echo hello > /tmp/cron_text for root user.
+
+Ans) Log into application servers using "ssh username@ipaddress/hostname"
+      >> check the which Linux Flavour is Installed by running the command " sudo cat /etc/os-release
+      >> Once you confirm the os version check the package is available or not by running " sudo yum search cronie or apt search cronie "
+      >> Once Package is available you can run the following commands to install the Squid Package by running the command " sudo yum install cronie -y or sudo apt install cronie -y "
+      >> Once the Package is installed sucessfully you need to restart the service to run in the background " sudo systemctl restart crond "
+      >> Check the status of the cronie service by running the below command " sudo systemctl status crond "
+      >> To Add a cronjob you need run the below command " crontab -e -u root "
+      >> It will open a vi editor you need to paste the above cronjob " */5 * * * * echo hello > /tmp/cron_text " and save the file
+      >> To verify that the cron job has been added successfully, type the following command " crontab -l -u root "
+
+7)  create a user named ravi on the App Server 1. Set expiry date to 2021-04-15 in Stratos Datacenter. Make sure the user is created as per standard and is in lowercase.
+
+Ans) Log into application servers using "ssh username@ipaddress/hostname"
+      >> Once you log into the App Server 1 you need to run the below command " sudo useradd -m -e 2021-04-15 ravi "
+      >> -m = create the user's home directory
+      >> -e = expiration date of the new account
+
+8) On App Server 1 find all files (not directories) owned by user jim inside /home/usersdata directory and copy them all while keeping the folder structure (preserve the directories path) to /beta directory.
+
+Ans) Log into App Server1 using "ssh username@ipaddress/hostname"
+      >> Once you log into App Server 1 you need to check whether the files with jim user name are there or not by moving to the " /home/usersdata " directory.
+      >> Once you confirm back the user home directory by running the command " cd ~ " 
+      >> To copy jim user files inside /home/usersdata directory  and to keep the folder structure you need to run the below command " sudo find /home/usersdata -type f -user jim -exec cp --parents {} /beta \;
+      >> This command finds all files owned by user "jim" inside the /home/usersdata directory on App Server 1, using the find command with the following options:
+          ** -type f: Find only files, not directories.
+          ** -user jim: Find files owned by the user "jim".
+          ** -exec cp --parents {} /beta \;: Execute the cp command on each file found, copying the file to the /beta directory while preserving the directory structure.
+          ** The cp command with the --parents option is used to preserve the directory structure when copying files. Each file will be copied to the /beta directory with its original directory path preserved. You may need to run this command with sudo or as the root user.
+
+9) Update the message of the day on all application and db servers for Nautilus. Make use of the approved template located at /home/thor/nautilus_banner on jump host.
+
+Ans) Check the motd file available or not in Jump Sever directory /home/thor/nautilus_banner
+       >> Once you confirm /home/thor/nautilus_banner file is available you need to copy the files to App Servers by running the command " scp /home/thor/nautilus_banner username@hostname:/tmp "
+       >> Log into application servers using "ssh username@ipaddress/hostname" and move the "nautilus_banner" file to "/etc/motd" file by running the command " mv /tmp/nautilus_banner /etc/motd"
+       >> Open the "etc/profile" by running the command " sudo vi etc/profile " and add the " cat /etc/motd "
+             
+10) As per details shared by the development team, the new application release has some dependencies on the back end. There are some packages/services that need to be installed on all app servers under Stratos Datacenter. As per requirements please perform the following steps:
+
+a. Install squid package on all the application servers.
+
+b. Once installed, make sure it is enabled to start during boot.
+
+Ans) Log into application servers using "ssh username@ipaddress/hostname"
+      >> check the which Linux Flavour is Installed by running the command " sudo cat /etc/os-release
+      >> Once you confirm the os version check the package is available or not by running " sudo yum search squid or apt search squid "
+      >> Once Package is available you can run the following commands to install the Squid Package by running the command " sudo yum install squid -y or sudo apt install squid -y "
+      >> Once the Package is installed sucessfully you need to enable the services by running the command " sudo systemctl enable squid "
+      >> Once you enable the squid service you need to restart the service to run in the background " sudo systemctl restart squid "
+      >> Check the status of the squid service by running the below command " sudo systemctl status squid "
+      
+      
