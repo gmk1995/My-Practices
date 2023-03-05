@@ -28,6 +28,21 @@ Ans) Log into application servers using "ssh username@ipaddress/hostname"
       >> To Add a cronjob you need run the below command " crontab -e -u root "
       >> It will open a vi editor you need to paste the above cronjob " */5 * * * * echo hello > /tmp/cron_text " and save the file
       >> To verify that the cron job has been added successfully, type the following command " crontab -l -u root "
+      
+5)
+
+6)  There is some data on Nautilus App Server 1 in Stratos DC. Data needs to be altered in several of the files. On Nautilus App Server 1, alter the /home/BSD.txt file as per details given below:
+
+a. Delete all lines containing word copyright and save results in /home/BSD_DELETE.txt file. (Please be aware of case sensitivity)
+
+b. Replace all occurrence of word and to is and save results in /home/BSD_REPLACE.txt file.
+
+Note: Let's say you are asked to replace word to with from. In that case, make sure not to alter any words containing this string; for example upto, contributor etc.
+
+Ans) Log into application servers using "ssh username@ipaddress/hostname"
+      >> Create BSD_DELETE.txt BSD_REPLACE.txt on /home directory by running the command " sudo touch BSD_DELETE.txt BSD_REPLACE.txt " and provide read,write,execute permissions by running the command " sudo chmod 777 BSD_DELETE.txt BSD_REPLACE.txt ".
+      >> Use the Command " sudo grep -v copyright  /home/BSD.txt > /home/BSD_DELETE.txt
+      >> Use the Command " sudo sed 's/\band\b/is/g' /home/BSD.txt > /home/BSD_REPLACE.txt
 
 7)  create a user named ravi on the App Server 1. Set expiry date to 2021-04-15 in Stratos Datacenter. Make sure the user is created as per standard and is in lowercase.
 
@@ -68,5 +83,10 @@ Ans) Log into application servers using "ssh username@ipaddress/hostname"
       >> Once the Package is installed sucessfully you need to enable the services by running the command " sudo systemctl enable squid "
       >> Once you enable the squid service you need to restart the service to run in the background " sudo systemctl restart squid "
       >> Check the status of the squid service by running the below command " sudo systemctl status squid "
-      
+
+11) Copy the file from Jump Server to App Server 1 
+
+Ans) Check the file is available or not in the Jump Server.
+      >> Use the following command to copy the file from Jump Server to App Server 1 " scp /tmp/file1 tony@stapp01:/home/app "
+      >> Log into App Server 1 to check whether you files is copied successfully or not. 
       
