@@ -89,4 +89,18 @@ Ans) Log into application servers using "ssh username@ipaddress/hostname"
 Ans) Check the file is available or not in the Jump Server.
       >> Use the following command to copy the file from Jump Server to App Server 1 " scp /tmp/file1 tony@stapp01:/home/app "
       >> Log into App Server 1 to check whether you files is copied successfully or not. 
-      
+
+12) The system admins team of xFusionCorp Industries has noticed intermittent issues with DNS resolution in several apps . App Server 1 in Stratos Datacenter is having some DNS resolution issues, so we want to add some additional DNS nameservers on this server.
+As a temporary fix we have decided to go with Google public DNS (ipv4). Please make appropriate changes on this server.
+
+Ans) Open the /etc/resolv.conf file with a text editor (e.g., nano or vi).
+
+Add the following line at the top of the file:
+nameserver 8.8.8.8
+This adds Google public DNS (IPv4) as the first DNS nameserver to use.
+Save and close the file.
+Restart the network service to apply the changes:
+sudo systemctl restart network
+Alternatively, you can reboot the server to ensure that the changes take effect after the reboot:
+sudo reboot
+Note: The changes made in /etc/resolv.conf are not persistent across reboots. You may need to modify the appropriate configuration file for your Linux distribution to make the changes persistent. For example, on CentOS/RHEL, you can modify the PEERDNS setting in the network configuration file (/etc/sysconfig/network-scripts/ifcfg-<interface>) to ensure that the additional DNS nameserver is added after reboot.
