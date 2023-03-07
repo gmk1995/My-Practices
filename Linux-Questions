@@ -29,7 +29,11 @@ Ans) Log into application servers using "ssh username@ipaddress/hostname"
       >> It will open a vi editor you need to paste the above cronjob " */5 * * * * echo hello > /tmp/cron_text " and save the file
       >> To verify that the cron job has been added successfully, type the following command " crontab -l -u root "
       
-5)
+5)  The backup server in the Stratos DC contains several template XML files used by the Nautilus application. However, these template XML files must be populated with valid data before they can be used. One of the daily tasks of a system admin working in the xFusionCorp industries is to apply string and file manipulation commands!
+
+      Replace all occurances of the string Sample to Maritime on the XML file /root/nautilus.xml located in the backup server.
+
+Ans) We can use the command sed -i 's/Sample/Maritime/g' /root/nautilus.xml
 
 6)  There is some data on Nautilus App Server 1 in Stratos DC. Data needs to be altered in several of the files. On Nautilus App Server 1, alter the /home/BSD.txt file as per details given below:
 
