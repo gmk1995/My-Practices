@@ -108,3 +108,14 @@ sudo systemctl restart network
 Alternatively, you can reboot the server to ensure that the changes take effect after the reboot:
 sudo reboot
 Note: The changes made in /etc/resolv.conf are not persistent across reboots. You may need to modify the appropriate configuration file for your Linux distribution to make the changes persistent. For example, on CentOS/RHEL, you can modify the PEERDNS setting in the network configuration file (/etc/sysconfig/network-scripts/ifcfg-<interface>) to ensure that the additional DNS nameserver is added after reboot.
+
+13) After doing some security audits of servers, xFusionCorp Industries security team has implemented some new security policies. One of them is to disable direct root login through SSH.
+
+Disable direct SSH root login on all app servers in Stratos Datacenter.
+
+Ans) Log in to the app server as root.
+      >> Edit the sshd_config file located in /etc/ssh/sshd_config using a text editor such as nano or vim.
+      >> Find the line that says "PermitRootLogin yes" and change it to "PermitRootLogin no".
+      >> Save the file and exit the editor.
+      >> Restart the SSH service to apply the changes by running the following command: "systemctl restart sshd".
+After completing these steps, the root user will no longer be able to log in directly through SSH. Instead, the security team should create a separate user account with administrative privileges and use that account to log in and perform administrative tasks. This will help to minimize the risk of unauthorized access and protect the servers from potential security threats.
