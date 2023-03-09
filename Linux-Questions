@@ -119,3 +119,11 @@ Ans) Log in to the app server as root.
       >> Save the file and exit the editor.
       >> Restart the SSH service to apply the changes by running the following command: "systemctl restart sshd".
 After completing these steps, the root user will no longer be able to log in directly through SSH. Instead, the security team should create a separate user account with administrative privileges and use that account to log in and perform administrative tasks. This will help to minimize the risk of unauthorized access and protect the servers from potential security threats.
+
+14) Some users of the monitoring app have reported issues with xFusionCorp Industries mail server. They have a mail server in Stork DC where they are using postfix mail transfer agent. Postfix service seems to fail. Try to identify the root cause and fix it.
+
+Ans) Log in to the mail server by using " ssh groot@stmail "
+      >> Check the postfix status by running the command " systemctl status postfix " and check the error. 
+      >> There is a error in this line on /etc/hosts ::1    localhost ip6-localhost ip6-loopback. I have uncommed this line #::1    localhost ip6-localhost ip6-loopback.
+      >> Did systemctl enable postfix,  systemctl restart postfix and systemctl status postfix.
+      >> postfix mail is working fie
