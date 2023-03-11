@@ -127,3 +127,11 @@ Ans) Log in to the mail server by using " ssh groot@stmail "
       >> There is a error in this line on /etc/hosts ::1    localhost ip6-localhost ip6-loopback. I have uncommed this line #::1    localhost ip6-localhost ip6-loopback.
       >> Did systemctl enable postfix,  systemctl restart postfix and systemctl status postfix.
       >> postfix mail is working fie
+15) New tools have been installed on the app server in Stratos Datacenter. Some of these tools can only be managed from the graphical user interface. Therefore, there are requirements for these app servers.
+On all App servers in Stratos Datacenter change the default runlevel so that they can boot in GUI (graphical user interface) by default. Please do not try to reboot these servers.
+Ans) Log inot App servers using "ssh username@hostname/ipaddress"
+      >> Check /etc/inittab and see the configurations. 
+      >> Run the command "sudo systemctl get-default" to check the default runlevel.
+      >> If the above command is shown it was set to graphical.target, you need to set it as graphical.target.
+      >> To set graphical.target you need to run the below command " sudo systemctl set-default graphical.target ".
+      >> Run the command "sudo systemctl get-default" to check the default runlevel set to graphical.target or not, when yu\ou it wll show graphical.target. 
