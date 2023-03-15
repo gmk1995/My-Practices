@@ -163,3 +163,13 @@ Ans) Log into the App Server 2 by using the command " ssh username@hostname/ipad
       >> Set the default group ownership of any new files or directories created within the /sysops/data directory to sysops using the setgid bit
            " sudo chmod g+s /sysops/data "
       >> This sets the permission bits as follows: rwxrws---, where the setgid bit (s) has been added to the group permission bits (rws).   
+18) The system admins team of xFusionCorp Industries has set up some scripts on jump host that run on regular intervals and perform operations on all app servers in Stratos Datacenter. To make these scripts work properly we need to make sure the thor user on jump host has password-less SSH access to all app servers through their respective sudo users (i.e tony for app server 1). Based on the requirements, perform the following:
+
+Set up a password-less authentication from user thor on jump host to all app servers through their respective sudo users.
+
+Ans) Log into the Jump Server by using the command " ssh username@hostname/IPaddress "
+      >> Genrate the key from the jump server by running the command " ssh-keygen "
+      >> Once the Key is genrated copy the public key to the all the app servers by running the command " ssh-copy-id user1@hostname/IPaddress, ssh-copy-id user2@hostname/IPaddress, ssh-copy-id user3@hostname/IPaddress  "
+      >> It will ask the authorization to add the key on app server press "yes" after that you need to enter the app servers password for one time.
+      >> Once the Password is entered the public key of jump server is added successfully in the "authorized_keys" on the user home directory " /home/user1/.ssh/authorized_keys".
+      >> Now you can log into all the app servers without entering the password by running the command " ssh user1@hostname/IPaddress, ssh user2@hostname/IPaddress, ssh user3@hostname/IPaddress "
