@@ -173,3 +173,17 @@ Ans) Log into the Jump Server by using the command " ssh username@hostname/IPadd
       >> It will ask the authorization to add the key on app server press "yes" after that you need to enter the app servers password for one time.
       >> Once the Password is entered the public key of jump server is added successfully in the "authorized_keys" on the user home directory " /home/user1/.ssh/authorized_keys".
       >> Now you can log into all the app servers without entering the password by running the command " ssh user1@hostname/IPaddress, ssh user2@hostname/IPaddress, ssh user3@hostname/IPaddress "
+      
+19) There is a critical issue going on with the Nautilus application in Stratos DC. The production support team identified that the application is unable to connect to the database. After digging into the issue, the team found that mariadb service is down on the database server.
+
+Look into the issue and fix the same.
+
+Ans) Log into the DB server using "ssh username@ipaddress/hostname"
+      >> Once Log in to check the status of the mariadb is running or not by running the command " sudo systemctl status mariadb"
+	>> If you get an error check the root cause by running the command " sudo journalctl -u mariadb.service" it will provide status.
+	>> Check the log of the mariadb by running the command " sudo /var/log/mariadb/mariadb.log "
+	>> Find the error in my case it is faling on " to permissions on the PID file for the MariaDB service. The error message says "Can't create/write to file '/var/run/mariadb/mariadb.pid' (Errcode: 13)" and "Can't start server: can't create PID file: Permission denied".
+	>> I have checked " sudo ls -ld /var/run/mariadb" permissions, the mysql directory having user owned by root and group owned by mysql.
+	>> I have changed the user to mysql by running the command " sudo chown mysql:mysql /var/run/mariadb "
+	>> Restarted the mariadb service by running the command " sudo systemctl restart mariadb "
+	>> It is successfully started.       
