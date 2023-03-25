@@ -232,3 +232,68 @@ Other Commands which will also useful:
 		>> rsync -av --include='*/' --include='*.js' --exclude='*' /var/www/html/ecommerce/ /ecommerce/
 
 		>> rsync -av --include '*/' --include '*.js' --exclude '*' /var/www/html/ecommerce/ /ecommerce/
+
+23) We have a backup management application UI hosted on Nautilus's backup server in Stratos DC. That backup management application code is deployed under Apache on the backup server itself, and Nginx is running as a reverse proxy on the same server. Apache and Nginx ports are 8086 and 8092, respectively. We have iptables firewall installed on this server. Make the appropriate changes to fulfill the requirements mentioned below:
+
+We want to open all incoming connections to Nginx's port and block all incoming connections to Apache's port. Also make sure rules are permanent.
+
+Ans) To open all incoming connections to Nginx's port and block all incoming connections to Apache's port on your CentOS server, you can follow these steps:
+
+First, check if iptables service is running on your system using the following command:
+
+
+systemctl status iptables
+
+If it is not running, you can start the iptables service using the following command:
+
+
+systemctl start iptables
+Then, list the existing iptables rules using the following command:
+
+Copy code
+iptables -L
+This will show you the current firewall rules set on your server.
+
+Identify the Apache and Nginx ports that need to be opened and closed. In this case, we need to open port 8092 for Nginx and block port 8086 for Apache.
+
+To open port 8092 for Nginx, use the following command:
+
+
+iptables -A INPUT -p tcp --dport 8092 -j ACCEPT
+This command adds a rule to the INPUT chain to accept all incoming traffic on port 8092.
+
+To block port 8086 for Apache, use the following command:
+
+
+iptables -A INPUT -p tcp --dport 8086 -j DROP
+This command adds a rule to the INPUT chain to drop all incoming traffic on port 8086.
+
+Save the changes you made to iptables using the following command:
+
+
+service iptables save
+
+This command saves the current iptables rules to the configuration file, so they are applied automatically upon system boot.
+
+Finally, verify that the rules have been set up correctly by running the following command:
+
+
+iptables -L
+This command should show the new rules you just added.
+
+With these steps, you should have successfully opened all incoming connections to Nginx's port and blocked all incoming connections to Apache's port, while ensuring that the rules are permanent.
+
+24) We have confidential data that needs to be transferred to a remote location, so we need to encrypt that data.We also need to decrypt data we received from a remote location in order to understand its content.
+
+On storage server in Stratos Datacenter we have private and public keys stored /home/*_key.asc. Use those keys to perform the following actions.
+
+Encrypt /home/encrypt_me.txt to /home/encrypted_me.asc.
+
+Decrypt /home/decrypt_me.asc to /home/decrypted_me.txt. (Passphrase for decryption and encryption is kodekloud).
+
+Ans) Log into the Storage Server by running command " ssh username@Ipaddress/hostname "
+	>> Create "/home/encrypted_me.asc" "/home/decrypted_me.txt" files by running the command " sudo touch /home/encrypted_me.asc " and " sudo touch /home/decrypted_me.txt "
+	>> Provide the permissions to the both files "/home/encrypted_me.asc , "/home/decrypted_me.txt" by running the command " sudo chmod 777 /home/encrypted_me.asc" and " sudo chmod 777 /home/decrypted_me.txt"
+	>> To encrypt use this command " sudo gpg --symmetric --cipher-algo AES256 --output /home/encrypted_me.asc --passphrase kodekloud /home/encrypt_me.txt " It will ask password enter the password " kodekloud "
+	>> To decrypt use this command " sudo gpg --passphrase kodekloud -d /home/decrypt_me.asc > /home/decrypted_me.txt. It will ask password enter the password " kodekloud ".
+	
