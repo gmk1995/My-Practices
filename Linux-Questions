@@ -300,19 +300,22 @@ Ans) Log into the Storage Server by running command " ssh username@Ipaddress/hos
 25) Update the package index and upgrade any existing packages:
 
 Ans) Log into the app servers by running the command " ssh username@IPaddress/hostname "
+
 sudo yum update
+
 Install Tomcat package:
 
-Copy code
 sudo yum install tomcat
+
 This will install Tomcat and its dependencies on your system.
 
 To configure log rotation for Tomcat on CentOS, you can follow these steps:
 
 Install logrotate package:
 
-Copy code
+
 sudo yum install logrotate
+
 This will install the logrotate package on your system.
 
 Create a logrotate configuration file for Tomcat:
@@ -340,3 +343,54 @@ Test the logrotate configuration:
 sudo logrotate -f /etc/logrotate.d/tomcat
 
 This will force logrotate to rotate logs based on the configuration file you just created.
+
+26) The Nautilus devops team got some requirements related to some Apache config changes. They need to setup some redirects for some URLs. There might be some more changes need to be done. Below you can find more details regarding that:
+
+httpd is already installed on app server 3. Configure Apache to listen on port 8085.
+
+Configure Apache to add some redirects as mentioned below:
+
+a.) Redirect http://stapp03.stratos.xfusioncorp.com:<Port>/ to http://www.stapp03.stratos.xfusioncorp.com:<Port>/ i.e non www to www. This must be a permanent redirect i.e 301
+
+b.) Redirect http://www.stapp03.stratos.xfusioncorp.com:<Port>/blog/ to http://www.stapp03.stratos.xfusioncorp.com:<Port>/news/. This must be a temporary redirect i.e 302
+
+
+Ans) Log into the App Server 3 using the command " ssh username@IPaddress/HostName "
+		>> Apache httpd server configurations will be in "/etc/httpd/conf/httpd.conf"
+		>> Open the httpd.conf file to make the changes " sudo vi /etc/httpd/conf/httpd.conf "
+		>> On the Listen Port Section change the Port to 8085.
+		>> At the Last of Script add the below details
+		
+				<VirtualHost *:8085>
+					ServerName stapp03.stratos.xfusioncorp.com
+					Redirect permanent http://www.stapp03.stratos.xfusioncorp.com:8085/
+				</VirtualHost>
+				
+				<VirtualHost *:8085>
+					ServerName www.stapp03.stratos.xfusioncorp.com
+					Redirect temp http://www.stapp03.stratos.xfusioncorp.com:8085/news/
+				</VirtualHost>
+				
+		>> Restart the httpd service by running the command " sudo systemctl restart httpd "
+		>> Check the status of the httpd server by running the command " sudo systemctl status httpd "
+		>> If the httpd server is up and running all good.
+		
+				To test the redirect from the non-www version to the www version of the domain:
+				-------------------------------------------------------------------------------
+
+				Open a web browser and navigate to http://stapp03.stratos.xfusioncorp.com:8085
+				
+				The URL should automatically redirect to http://www.stapp03.stratos.xfusioncorp.com:8085
+				
+				Verify that the URL in the address bar shows the www version of the domain.
+				
+				To test the redirect from /blog/ to /news/:
+				-------------------------------------------
+
+				Open a web browser and navigate to http://www.stapp03.stratos.xfusioncorp.com:8085/blog/
+				
+				The URL should automatically redirect to http://www.stapp03.stratos.xfusioncorp.com:8085/news/
+				
+				Verify that the URL in the address bar shows the /news/ path instead of the /blog/ path.
+				
+				If both tests pass successfully, then the redirects have been set up correctly.
