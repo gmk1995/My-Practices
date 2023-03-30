@@ -394,3 +394,72 @@ Ans) Log into the App Server 3 using the command " ssh username@IPaddress/HostNa
 				Verify that the URL in the address bar shows the /news/ path instead of the /blog/ path.
 				
 				If both tests pass successfully, then the redirects have been set up correctly.
+
+27) Add Response Headers in Apache :
+
+We are working on hardening Apache web server on all app servers. As a part of this process we want to add some of the Apache response headers for security purpose. We are testing the settings one by one on all app servers. As per details mentioned below enable these headers for Apache:
+
+Install httpd package on App Server 3 using yum and configure it to run on 6100 port, make sure to start its service.
+
+Create an index.html file under Apache's default document root i.e /var/www/html and add below given content in it.
+
+Welcome to the xFusionCorp Industries!
+
+Configure Apache to enable below mentioned headers:
+
+X-XSS-Protection header with value 1; mode=block
+
+X-Frame-Options header with value SAMEORIGIN
+
+X-Content-Type-Options header with value nosniff
+
+Note: You can test using curl on the given app server as LBR URL will not work for this task.
+
+
+Ans) Log into the App Server 3 using the command " ssh username@IPaddress/Hostname
+
+		>> Install the httpd server using the command " sudo yum install httpd -y "
+		>> To Run on the httpd server on 6100 port we need to add the port number 6100 in the " /etc/httpd/conf/httpd.conf file at Listen Section" 
+		>> Enable the httpd services by running the command " sudo systemctl enable httpd "
+		>> Restart the httpd services by running the command " sudo systemctl restart httpd"
+		>> To Check the Status of the httpd services run the command " sudo systemctl status httpd "
+		>> To Create the index.html file we need to move to the directory /var/www/html and run the command " sudo vi index.html " to create it and then add below html code and save the file by pressing " Esc :wq! "
+				
+				<!DOCTYPE html>
+				<html>
+				<head>
+					<title>Welcome to the xFusionCorp Industries!</title>
+				</head>
+				<body>
+					<h1>Welcome to the xFusionCorp Industries!</h1>
+				</body>
+				</html>
+		
+		>> To Configure Apache to enable below mentioned headers we need add it on "/etc/httpd/conf/httpd.conf" file.
+		>> Once open the "/etc/httpd/conf/httpd.conf "  file search for <Directory  "/var/www/html"> add the header details at the bottom.  
+		
+			<Directory "/var/www/html">
+				Header set X-XSS-Protection "1; mode=block"
+				Header always append X-Frame-Options SAMEORIGIN
+				Header set X-Content-Type-Options nosniff
+			...
+			</Directory>
+
+		>> Save the file by pressing " Esc :wq! " and then Restart the httpd services by running the command " sudo systemctl restart httpd"
+		>> Check the Status of the httpd services run the command " sudo systemctl status httpd "
+		>> To check all the Configurations are working or not we can use command " curl -I http://localhost:6001 "
+		>> You will get the response for curl command " curl -I http://localhost:6001 " as below 
+		
+				HTTP/1.1 200 OK
+				Date: Thu, 30 Mar 2023 04:18:12 GMT
+				Server: Apache/2.4.6 (CentOS)
+				X-Frame-Options: SAMEORIGIN
+				Last-Modified: Thu, 30 Mar 2023 04:08:32 GMT
+				ETag: "a8-5f8163ef6e232"
+				Accept-Ranges: bytes
+				Content-Length: 168
+				X-XSS-Protection: 1; mode=block
+				X-Content-Type-Options: nosniff
+				Content-Type: text/html; charset=UTF-8
+	
+		>> If you see above message means all the configurations are made Perfectly. 
