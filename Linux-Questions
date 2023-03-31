@@ -463,3 +463,47 @@ Ans) Log into the App Server 3 using the command " ssh username@IPaddress/Hostna
 				Content-Type: text/html; charset=UTF-8
 	
 		>> If you see above message means all the configurations are made Perfectly. 
+
+
+28) Linux Bash Scripts:
+
+The production support team of xFusionCorp Industries is working on developing some bash scripts to automate different day to day tasks. One is to create a bash script for taking websites backup. They have a static website running on App Server 1 in Stratos Datacenter, and they need to create a bash script named media_backup.sh which should accomplish the following tasks. (Also remember to place the script under /scripts directory on App Server 1)
+
+a. Create a zip archive named xfusioncorp_media.zip of /var/www/html/media directory.
+
+b. Save the archive in /backup/ on App Server 1. This is a temporary storage, as backups from this location will be clean on weekly basis. Therefore, we also need to save this backup archive on Nautilus Backup Server.
+
+c. Copy the created archive to Nautilus Backup Server server in /backup/ location.
+
+d. Please make sure script won't ask for password while copying the archive file. Additionally, the respective server user (for example, tony in case of App Server 1) must be able to run it.
+
+Ans) Log into the App server 1 using the command " ssh username@IPaddress/Hostname "
+
+		>> " Please make sure script won't ask for password while copying the archive file " means we need copy the ssh key to backup server 
+		>> Run this commands in App server 1 " ssh-keygen ".
+		>> Copy the key to the particular server using servername@ipaddress and password " ssh clint@stbkp01 " and enter the password.
+		>> Now you can able to log into the Backup Server without Password by running the command " ssh clint@stbkp01 ". 
+		>> Move to "/script" Directory and Create a file name "media_backup.sh".
+		>> Change the permissions to the file "media_backup.sh" by running the command " sudo chmod 777 media_backup.sh "
+		>> Open the file "media_backup.sh" in " vi mode " and Prepare the below script on the 
+
+
+				#!/bin/bash
+
+				#Defining the Variables
+
+				ZIP_FOLDER="/var/www/html/media"
+				ZIP_FILE="xfusioncorp_media.zip"
+				DESTINATION_DIR="/backup/"
+
+				#Creating the ZIP Archive
+
+				zip -r ${ZIP_FILE} ${ZIP_FOLDER} > ${DESTINATION_DIR}/${ZIP_FILE}
+
+				#Copying the files to the Backup Server
+
+				scp /scripts/${ZIP_FILE} clint@stbkp01:${DESTINATION_DIR}/${ZIP_FILE}
+
+				sudo chmod 777 ${ZIP_FILE}
+				
+		>> Run the "media_backup.sh" script by running the command ./media_backup.sh. 
