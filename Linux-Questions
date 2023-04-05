@@ -516,3 +516,17 @@ Therefore, install the git package on all app-servers.
 Ans) Log into app-servers by running the command " ssh username@IPaddress/hostname"
 		>> To Install git run the command " sudo yum install git -y " on all app servers.
 		>> Check the version of the git installed by running the command " git version "
+
+30) Linux Configure sudo
+
+We have some users on all app servers in Stratos Datacenter. Some of them have been assigned some new roles and responsibilities, therefore their users need to be upgraded with sudo access so that they can perform admin level tasks.
+
+a. Provide sudo access to user ravi on all app servers.
+
+b. Make sure you have set up password-less sudo for the user.
+
+Ans) Log in to all the app servers by running the command " ssh username@hostname/IPaddress "
+		>> Check if the user ravi is present or not by running the command " sudo cat /etc/passwd ". 
+		>> Once you confirm the " user ravi " is present. Run the command " sudo visudo " and add " ravi ALL=(ALL) NOPASSWD:ALL " and save the file.
+		>> To confirm whether the " user ravi " have the NOPASSWD authentication for sudo or not you can switch to " user ravi " by running the command " sudo su - ravi "
+		>> Once you switched to " user ravi " run the command " sudo ls -lart /root " if it is not asking password we are sucessfully created password-less sudo access.
