@@ -608,3 +608,238 @@ Now, you can install the "samba" package from the local yum repository.
 sudo yum install samba --enablerepo=local_yum
 
 This will install the "samba" package from the local yum repository named "local_yum" on Nautilus Backup Server.
+
+33) Linux Postfix Mail Server
+
+xFusionCorp Industries has planned to set up a common email server in Stork DC. After several meetings and recommendations they have decided to use postfix as their mail transfer agent and dovecot as an IMAP/POP3 server. We would like you to perform the following steps:
+
+Install and configure postfix on Stork DC mail server.
+
+Create an email account rose@stratos.xfusioncorp.com identified by GyQkFRVNr3.
+
+Set its mail directory to /home/rose/Maildir.
+
+Install and configure dovecot on the same server.
+
+Ans) home_mailbox = Maildir/
+
+Install and configure postfix on Stork DC mail server:
+
+sudo yum install postfix -y
+sudo systemctl enable postfix
+sudo systemctl start postfix
+sudo systemctl status postfix
+
+To configure postfix, edit the main configuration file /etc/postfix/main.cf and make the following changes:
+
+myhostname = mail.xfusioncorp.com
+mydomain = xfusioncorp.com
+myorigin = $mydomain
+inet_interfaces = all
+mydestination = $myhostname, localhost.$mydomain, localhost, $mydomain
+mynetworks = 127.0.0.0/8
+home_mailbox = Maildir/
+Save the changes and restart postfix:
+
+sudo systemctl restart postfix
+Create an email account rose@stratos.xfusioncorp.com identified by LQfKeWWxWD:
+
+sudo useradd -m -s /bin/bash rose
+sudo passwd rose
+Enter the password as "LQfKeWWxWD" when prompted.
+
+Set the mail directory for rose@stratos.xfusioncorp.com to /home/rose/Maildir:
+
+sudo mkdir -vp /home/rose/Maildir
+sudo chown -R rose:rose /home/rose/Maildir
+sudo chmod -R 700 /home/rose/Maildir
+
+Install and configure dovecot on the same server:
+
+sudo yum install dovecot -y
+sudo systemctl enable dovecot
+sudo systemctl start dovecot
+sudo systemctl status dovecot
+
+To configure dovecot, edit the main configuration file /etc/dovecot/dovecot.conf and make the following changes:
+
+protocols = imap pop3
+mail_location = maildir:/home/%u/Maildir
+
+Save the changes and restart dovecot:
+
+sudo systemctl restart dovecot
+
+That's it! You have now installed and configured postfix and dovecot on your CentOS server. You can now send and receive email using the configured email account rose@stratos.xfusioncorp
+
+==========================================================================================================================================================================================
+^^^^^^^^^^^^^^^^^^^^^
+Connection Checkings:
+=====================
+As smtp email will be accessed through Port 25 we can check whether it is acessing or not by running below command:
+
+telnet localhost 25 
+
+It will give the below output:
+
+Trying 127.0.0.1...
+Connected to localhost.
+Escape character is '^]'.
+220 mail.stratos.xfusioncorp.com ESMTP Postfix
+
+To escape we need to enter "quit"
+
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Additions Setps to check whether Ports and Testing email:
+=========================================================
+
+To check whether the required ports for email setup (POP3, IMAP, and email server ports) are enabled or not on your CentOS server, you can use the firewall-cmd command, which is the command-line tool for managing firewall rules using firewalld.
+
+Here are the steps to check the status of required ports:
+
+Check the status of POP3 (port 110) and IMAP (port 143) ports:
+
+sudo firewall-cmd --list-ports
+This will list all the ports that are currently enabled in the firewall. Look for ports 110 and 143 in the list. If they are present, it means that the POP3 and IMAP ports are enabled.
+
+Check the status of email server ports:
+The email server ports can vary depending on the specific email protocols and configurations you have set up. By default, the email server uses the following ports:
+
+SMTP (Simple Mail Transfer Protocol) - port 25
+SMTPS (SMTP over TLS/SSL) - port 465
+Submission (SMTP Submission) - port 587
+IMAPS (IMAP over TLS/SSL) - port 993
+POP3S (POP3 over TLS/SSL) - port 995
+You can check the status of these ports using the following command:
+
+sudo firewall-cmd --list-services
+
+This will list all the services that are currently enabled in the firewall. Look for services like "smtp", "smtps", "submission", "imaps", and "pop3s" in the list. If they are present, it means that the email server ports are enabled.
+
+If any of the required ports are not listed in the output of the above commands, you can enable them using the following command:
+
+sudo firewall-cmd --add-port=<port_number>/tcp --permanent
+
+Replace <port_number> with the actual port number that you want to enable. For example, to enable SMTP (port 25), you can run:
+
+
+sudo firewall-cmd --add-port=25/tcp --permanent
+
+After adding the ports, reload the firewall for the changes to take effect:
+
+sudo firewall-cmd --reload
+
+That's it! You have now checked and enabled the required ports for your email setup on CentOS.
+==============================================================================================================
+
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Testing Email Whether the Emails are Sending or Not:
+==================================================== 
+
+After setting up the email server using Postfix and Dovecot as per the configurations provided earlier, you can test the sending and receiving of emails to verify that the setup is working correctly. Here's how you can do it:
+
+Test sending an email:
+You can use the mail command in CentOS to send a test email from your server to an external email address. Here's an example command:
+
+echo "Test email body" | mail -s "Test email subject" rose@stratos.xfusioncorp.com
+This will send a test email with the subject "Test email subject" and the body "Test email body" to the email address "rose@stratos.xfusioncorp.com", which you had created earlier as per the configurations provided. You can replace the email address with any valid email address you want to send the test email to.
+
+Test receiving an email:
+You can use an email client such as Thunderbird, Outlook, or any other email client that supports POP3 or IMAP protocols to check if the test email you sent earlier has been received in the inbox of the email account "rose@stratos.xfusioncorp.com".
+Configure the email client with the following settings:
+
+Incoming mail server (IMAP): stratos.xfusioncorp.com
+Incoming mail server (POP3): stratos.xfusioncorp.com
+Port for IMAP: 993 (using SSL/TLS)
+Port for POP3: 995 (using SSL/TLS)
+Username: rose@stratos.xfusioncorp.com
+Password: LQfKeWWxWD (the password you set for the email account)
+Once the email client is configured, you should be able to see the test email in the inbox of the email account "rose@stratos.xfusioncorp.com" if the email server setup is working correctly.
+
+Check mail logs:
+You can also check the mail logs in CentOS to verify if any errors or issues are reported. The mail logs are usually stored in the following files:
+/var/log/maillog: Contains general mail server logs including incoming and outgoing email messages.
+/var/log/mail.err: Contains error logs related to the mail server.
+You can use a text editor or the tail command to view the contents of these log files and check for any errors or issues related to sending or receiving emails.
+
+By performing these steps, you can test whether the emails are being sent and received successfully using the email server setup you have configured on your CentOS server.
+==========================================================================================================================================================================================
+
+34) Install and Configure PostgreSQL
+
+The Nautilus application development team has shared that they are planning to deploy one newly developed application on Nautilus infra in Stratos DC. The application uses PostgreSQL database, so as a pre-requisite we need to set up PostgreSQL database server as per requirements shared below:
+
+a. Install and configure PostgreSQL database on Nautilus database server.
+
+b. Create a database user kodekloud_aim and set its password to dCV3szSGNA.
+
+c. Create a database kodekloud_db2 and grant full permissions to user kodekloud_aim on this database.
+
+d. Make appropriate settings to allow all local clients (local socket connections) to connect to the kodekloud_db2 database through kodekloud_aim user using md5 method (Please do not try to encrypt password with md5sum).
+
+Ans) Step 1: Install PostgreSQL
+
+Open a terminal window on the CentOS server.
+Run the following command to install PostgreSQL:
+
+sudo yum install postgresql-server
+
+Once the installation is complete, initialize the PostgreSQL database with the following command:
+
+sudo postgresql-setup initdb
+
+Start the PostgreSQL service with the following command:
+
+sudo systemctl start postgresql
+
+Enable the PostgreSQL service to start at boot with the following command:
+
+sudo systemctl enable postgresql
+
+Step 2: Configure PostgreSQL
+
+Open the PostgreSQL configuration file with the following command:
+
+sudo vi /var/lib/pgsql/data/pg_hba.conf
+
+In the "pg_hba.conf" file, locate the line that starts with "host" and has "127.0.0.1/32" and "::1/128" in the "CIDR-ADDRESS" field, and change the "METHOD" from "ident" to "md5". This allows local clients to connect using md5 method for password authentication.
+Save and exit the "pg_hba.conf" file. In the "pg_hba.conf" file, locate the line that starts with "local" and has "peer" in the "METHOD" field.
+Change "peer" to "md5" in the "METHOD" field for the "local" line to enable password authentication.
+Restart the PostgreSQL service with the following command to apply the changes:
+
+sudo systemctl restart postgresql
+
+Step 3: Create PostgreSQL User and Database
+
+Switch to the PostgreSQL prompt with the following command:
+
+sudo su - postgres -c "psql"
+
+Inside the PostgreSQL prompt, create a new user with the following command:
+
+CREATE USER kodekloud_aim WITH PASSWORD 'dCV3szSGNA';
+
+Create a new database with the following command:
+
+CREATE DATABASE kodekloud_db2;
+
+Grant full permissions on the database to the user with the following command:
+
+GRANT ALL PRIVILEGES ON DATABASE kodekloud_db2 TO kodekloud_aim;
+
+Exit the PostgreSQL prompt with the following command:
+
+\q
+
+Step 4: Test Database Connection
+
+Switch to the root or sudo user with the following command:
+
+sudo su -
+Connect to the "kodekloud_db2" database with the "kodekloud_aim" user using the following command:
+
+psql -U kodekloud_aim -d kodekloud_db2
+
+If you are able to connect to the database without any errors, it means the database connection is successful.
+That's it! You have successfully installed and configured PostgreSQL on CentOS, created a user, granted permissions to a database, and tested the database connection.
+======================================================================================================================================================================
