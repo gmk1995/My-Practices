@@ -963,3 +963,91 @@ sudo systemctl restart tomcat
 Now you should be able to access the webpage at http://<App Server 1 IP>:8089/ROOT without specifying any subdirectory.
 
 ====================================================================================================================================================================================
+
+38) Install And Configure SFTP
+
+Some of the developers from Nautilus project team have asked for SFTP access to at least one of the app server in Stratos DC. After going through the requirements, the system admins team has decided to configure the SFTP server on App Server 2 server in Stratos Datacenter. Please configure it as per the following instructions:
+
+a. Create an SFTP user ravi and set its password to LQfKeWWxWD.
+
+b. Password authentication should be enabled for this user.
+
+c. Set its ChrootDirectory to /var/www/opt.
+
+d. SFTP user should only be allowed to make SFTP connections. 
+
+Ans) Log into the using the command ssh " ssh username@HostName/IPaddress "
+
+To configure an SFTP server on App Server 2 server in Stratos Datacenter and perform the mentioned tasks, you can follow these steps:
+
+Log in to App Server 2 with the root user.
+Install the OpenSSH server package if it is not already installed:
+
+yum install openssh-server
+
+Edit the SSH server configuration file /etc/ssh/sshd_config and add the following lines at the end:
+
+Match User ravi
+PasswordAuthentication yes
+ChrootDirectory /var/www/opt
+ForceCommand internal-sftp
+X11Forwarding no
+AllowTcpForwarding no
+
+These lines will set the password authentication for the user ravi, set its ChrootDirectory to /var/www/opt, allow SFTP connections only, and disable X11 and TCP forwarding.
+Create the SFTP user ravi with the following command:
+
+useradd ravi -s /sbin/nologin -d /var/www/opt
+
+If /var/www/opt directory not available create it
+
+Create the /var/www/opt directory with the following command:
+
+mkdir -p /var/www/opt
+
+This command will create the /var/www/opt directory if it doesn't exist. The -p option ensures that any parent directories are created if they don't exist.
+Change the ownership of the /var/www/opt directory to root with the following command:
+
+chown root:root /var/www/opt
+
+Set the correct permissions on the directory with the following command:
+
+chmod 755 /var/www/opt
+
+This will create a new user ravi with the home directory set to /var/www/opt.
+
+Set the password for the user ravi with the following command:
+
+echo 'LQfKeWWxWD' | passwd --stdin ravi
+
+This will set the password for the user ravi to LQfKeWWxWD.
+
+Restart the SSH service to apply the changes:
+
+systemctl restart sshd
+
+After completing these steps, the SFTP server should be configured on App Server 2 server in Stratos Datacenter, and the user ravi should be able to connect to it using an SFTP client.
+
+TO Check Our Changes are working As Expected or not check the below points:
+=============================================================================
+ Once you have made the configuration changes to the SFTP server, you can test if the changes are working as expected by following these steps:
+
+1. From a remote machine, open an SFTP client application and try to connect to the SFTP server using the ravi user account and the password you set earlier (LQfKeWWxWD).
+
+2. Once you have successfully connected, try to upload or download a file to or from the SFTP server. If the upload or download is successful, then the SFTP server is working as expected.
+
+3. Try to access directories outside of the /var/www/opt directory, which is the chroot directory you set for the user ravi. If you are unable to access directories outside of /var/www/opt, then the ChrootDirectory setting is working as expected.
+
+4. Try to connect to the SSH server using the ravi user account and password using an SSH client. If the connection fails or if you are unable to execute any commands, then the ForceCommand setting is working as expected and only SFTP connections are allowed.
+
+If all of the above tests pass, then the SFTP server is configured correctly, and the user ravi is restricted to making only SFTP connections and accessing only the /var/www/opt directory.
+
+Example: Try to login with user ravi using ssh like below :
+
+ssh ravi@stapp02
+
+ravi@stapp02's password: 
+
+After Sucessfully entering the password if you see below message : This service allows sftp connections only. Connection to stapp02 closed. Means your have configurations are working as expected.
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
