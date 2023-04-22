@@ -1051,3 +1051,58 @@ ravi@stapp02's password:
 After Sucessfully entering the password if you see below message : This service allows sftp connections only. Connection to stapp02 closed. Means your have configurations are working as expected.
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+39) Linux LogRotate
+
+The Nautilus DevOps team is ready to launch a new application, which they will deploy on app servers in Stratos Datacenter. They are expecting significant traffic/usage of squid on app servers after that. This will generate massive logs, creating huge log files. To utilise the storage efficiently, they need to compress the log files and need to rotate old logs. Check the requirements shared below:
+
+a. In all app servers install squid package.
+
+b. Using logrotate configure squid logs rotation to monthly and keep only 3 rotated logs.
+
+(If by default log rotation is set, then please update configuration as needed)
+
+Ans) Log into the App servers using the ssh command " ssh username@IPaddress/Hostname "
+
+Install Squid package on all app servers using the following command:
+
+sudo yum install squid -y
+
+Once the installation is complete, navigate to the logrotate configuration directory using the following command:
+
+cd /etc/logrotate.d/
+Create a new logrotate configuration file for Squid using your preferred text editor. For example:
+
+sudo vi squid
+
+Add the following configuration settings to the file:
+
+
+/var/log/squid/*.log {
+    monthly
+    rotate 3
+    compress
+    delaycompress
+    notifempty
+    create 640 squid squid
+}
+This will configure log rotation for all the Squid logs in the /var/log/squid/ directory, rotating the logs monthly and keeping only 3 rotated logs. The compress option will compress the rotated logs, while delaycompress will delay compression until the next rotation to avoid compressing a partially written log. notifempty will skip rotation if the log file is empty, and create will create a new log file with the specified permissions.
+
+Save and exit the file.
+
+Test the configuration by running the following command:
+
+
+sudo logrotate -d /etc/logrotate.d/squid
+
+This will simulate the log rotation and show the output in the terminal.
+
+If the output looks correct, run the following command to force log rotation:
+
+
+sudo logrotate /etc/logrotate.d/squid
+
+This will rotate the logs according to the configuration settings.
+
+That's it! Squid logs will now be rotated monthly and only the latest 3 rotated logs will be kept to efficiently utilize storage space.
+===========================================================================================================================================================================================================================================================================================================================================================================================================================================================
