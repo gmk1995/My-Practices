@@ -1106,3 +1106,47 @@ This will rotate the logs according to the configuration settings.
 
 That's it! Squid logs will now be rotated monthly and only the latest 3 rotated logs will be kept to efficiently utilize storage space.
 ===========================================================================================================================================================================================================================================================================================================================================================================================================================================================
+40) Application Security
+
+We have a backup management application UI hosted on Nautilus's backup server in Stratos DC. That backup management application code is deployed under Apache on the backup server itself, and Nginx is running as a reverse proxy on the same server. Apache and Nginx ports are 3003 and 8096, respectively. We have iptables firewall installed on this server. Make the appropriate changes to fulfill the requirements mentioned below:
+
+We want to open all incoming connections to Nginx's port and block all incoming connections to Apache's port. Also make sure rules are permanent.
+
+Ans) To open all incoming connections to Nginx's port and block all incoming connections to Apache's port on a CentOS server with iptables firewall, you can follow these steps:
+
+Identify the firewall rules for the Apache and Nginx ports using the following command:
+
+
+iptables -S | grep -E '(^|-)d (3003|8096)(/|$)'
+
+This command will show the current firewall rules for the ports used by Apache and Nginx.
+
+Create a new rule to block incoming connections to Apache's port 3003 using the following command:
+
+
+iptables -A INPUT -p tcp --dport 3003 -j DROP
+
+This command adds a new rule to the INPUT chain that drops all incoming traffic to port 3003.
+
+Create a new rule to allow incoming connections to Nginx's port 8096 using the following command:
+
+
+iptables -A INPUT -p tcp --dport 8096 -j ACCEPT
+
+This command adds a new rule to the INPUT chain that allows all incoming traffic to port 8096.
+
+Save the iptables rules to make them permanent using the following command:
+
+
+iptables-save > /etc/sysconfig/iptables
+
+This command saves the current iptables rules to the /etc/sysconfig/iptables file, which is used to restore the firewall configuration during system boot.
+
+Restart the iptables service to apply the new rules using the following command:
+
+systemctl restart iptables
+
+This command restarts the iptables service and applies the new firewall rules.
+
+After following these steps, all incoming connections to Nginx's port 8096 will be allowed, while all incoming connections to Apache's port 3003 will be blocked. These firewall rules will also be saved and restored during system boot, ensuring that they are permanent.
+============================================================================================================================================================================================================================================================================
