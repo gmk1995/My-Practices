@@ -1150,3 +1150,50 @@ This command restarts the iptables service and applies the new firewall rules.
 
 After following these steps, all incoming connections to Nginx's port 8096 will be allowed, while all incoming connections to Apache's port 3003 will be blocked. These firewall rules will also be saved and restored during system boot, ensuring that they are permanent.
 ============================================================================================================================================================================================================================================================================
+
+41) IPtables Installation And Configuration
+We have one of our websites up and running on our Nautilus infrastructure in Stratos DC. Our security team has raised a concern that right now Apache’s port i.e 8082 is open for all since there is no firewall installed on these hosts. So we have decided to add some security layer for these hosts and after discussions and recommendations we have come up with the following requirements:
+
+Install iptables and all its dependencies on each app host.
+
+Block incoming port 8082 on all apps for everyone except for LBR host.
+
+Make sure the rules remain, even after system reboot.
+
+Ans)  Log in App servers by using ssh " ssh username@HostName/IPaddress "
+
+Install iptables and its dependencies by running the following command:
+
+
+sudo yum install iptables
+
+Create a new iptables rule to block incoming traffic on port 8082, except for the IP address of the LBR host. Run the following command:
+
+
+sudo iptables -A INPUT -p tcp --dport 8082 ! -s <LBR_IP_ADDRESS> -j DROP
+
+Replace <LBR_IP_ADDRESS> with the actual IP address of your load balancer.
+
+Save the current iptables rules to a file by running the following command:
+
+
+sudo iptables-save > /etc/sysconfig/iptables
+
+			[ or ]
+			
+sudo service iptables save
+
+Edit the iptables configuration file to make sure the rules are loaded after system reboot. Run the following command:
+
+
+sudo vi /etc/sysconfig/iptables-config
+Change the value of the IPTABLES_SAVE_ON_STOP variable to yes and the value of the IPTABLES_SAVE_ON_RESTART variable to yes.
+
+Restart the iptables service to apply the new rules:
+
+
+sudo systemctl restart iptables
+
+Now, incoming traffic on port 8082 will be blocked for everyone except for the IP address of the LBR host, and the iptables rules will be loaded automatically after system reboot.
+
+===================================================================================================================================================================================
