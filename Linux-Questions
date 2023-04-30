@@ -1254,4 +1254,65 @@ Ans) Ans) Log into the App Server 2 using the command " ssh username@hostname/Ip
 	  >> If selinux command is not installed run the command " yum install selinux-policy selinux-policy-targeted setools setools-console setroubleshoot -y "
 	  >> As it is told to disable it we need to run the command " sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config " 
 	  >> Run command " sestatus " check whether it is disabled or not.
-================================================================================================================================================================================================================================================================================================================================================================================================================================	    
+================================================================================================================================================================================================================================================================================================================================================================================================================================
+
+44) Web Server Security
+
+During a recent security audit, the application security team of xFusionCorp Industries found security issues with the Apache web server on Nautilus App Server 3 server in Stratos DC. They have listed several security issues that need to be fixed on this server. Please apply the security settings below:
+
+a. On Nautilus App Server 3 it was identified that the Apache web server is exposing the version number. Ensure this server has the appropriate settings to hide the version number of the Apache web server.
+
+b. There is a website hosted under /var/www/html/beta on App Server 3. It was detected that the directory /beta lists all of its contents while browsing the URL. Disable the directory browser listing in Apache config.
+
+c. Also make sure to restart the Apache service after making the changes.
+
+Ans) Log into the app server 3 via ssh " ssh username@IPaddress/HostName "
+
+To hide the Apache version number, you need to edit the Apache configuration file. Open the terminal and run the following command:
+
+sudo vi /etc/httpd/conf/httpd.conf
+
+Add the following lines at the end of the file:
+
+ServerSignature Off
+ServerTokens Prod
+
+To disable directory browsing, you need to edit the Apache configuration file again. Open the terminal and run the following command:
+
+sudo vi /etc/httpd/conf/httpd.conf
+
+Find the section for the directory /var/www/html/beta and add the following line:
+
+Options -Indexes
+
+Save the file and exit.
+
+c. To restart the Apache service, run the following command:
+
+sudo systemctl restart httpd
+
+If the /var/www/html/beta directory is not listed in the httpd.conf file, you can create a new configuration file specifically for the /var/www/html/beta directory. Here's how you can do it:
+
+Create a new configuration file for the /var/www/html/beta directory:
+
+sudo vi /etc/httpd/conf.d/beta.conf
+
+Add the following lines to the new configuration file to disable directory browsing:
+
+
+<Directory /var/www/html/beta>
+    Options -Indexes
+</Directory>
+Save the file and exit.
+
+Restart the Apache service to apply the changes:
+
+sudo systemctl restart httpd
+
+Now, the directory browsing for /var/www/html/beta should be disabled.
+
+This will apply the changes you made to the Apache configuration.
+
+That's it! Your Apache web server on Nautilus App Server 3 should now be more secure.
+
+===============================================================================================================================================================================================
