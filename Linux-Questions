@@ -1316,3 +1316,46 @@ This will apply the changes you made to the Apache configuration.
 That's it! Your Apache web server on Nautilus App Server 3 should now be more secure.
 
 ===============================================================================================================================================================================================
+
+45) MariaDB Troubleshooting
+
+There is a critical issue going on with the Nautilus application in Stratos DC. The production support team identified that the application is unable to connect to the database. After digging into the issue, the team found that mariadb service is down on the database server.
+
+Look into the issue and fix the same.
+
+Ans) Log into the DB server using "ssh username@ipaddress/hostname"
+
+>> Once Log in to check the status of the mariadb is running or not by running the command " sudo systemctl status mariadb"
+>> After Checking the status I found that mariadb is failing due to below reason :
+
+The error message indicates that MariaDB service failed to start due to the following reason:
+
+
+May 01 02:34:49 stdb01.stratos.xfusioncorp.com mariadb-prepare-db-dir[469]: Database MariaDB is not initialized, but the directory /var/lib/mysql is not empty, so initialization cannot be done.
+
+It seems that the MariaDB data directory (/var/lib/mysql) already contains some data, but the MariaDB server is not yet initialized. Hence, MariaDB cannot start.
+
+To fix this issue, you can follow these steps:
+
+Backup your existing MySQL data directory (/var/lib/mysql) to a safe location, as it contains important data.
+
+Remove the existing contents of the MySQL data directory (/var/lib/mysql). This can be done using the following command:
+
+
+sudo rm -rf /var/lib/mysql/*
+
+Initialize the MariaDB data directory using the following command:
+
+sudo mysql_install_db --user=mysql --basedir=/usr --datadir=/var/lib/mysql
+
+Once the data directory is initialized, start and enable the MariaDB service using the following command:
+
+sudo systemctl start mariadb && sudo systemctl enable mariadb 
+
+Finally, check the status of the MariaDB service using the following command:
+
+sudo systemctl status mariadb
+
+If everything is working correctly, you should see the status of the MariaDB service as "active (running)".
+=================================================================================================================================================================================================================
+
