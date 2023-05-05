@@ -1,0 +1,48 @@
+Create a YAML file named print-envars-greeting.yaml and open it in an editor:
+
+vi print-envars-greeting.yaml
+
+Add the following content to the file:
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: print-envars-greeting
+spec:
+  containers:
+  - name: print-env-container
+    image: bash
+    env:
+    - name: GREETING
+      value: "Welcome to"
+    - name: COMPANY
+      value: "DevOps"
+    - name: GROUP
+      value: "Industries"
+    command: ["/bin/bash"]
+    args: ["-c", "echo \"$GREETING $COMPANY $GROUP\""]
+
+Save and close the file.
+
+Apply the configuration using kubectl:
+
+
+kubectl apply -f print-envars-greeting.yaml
+
+Verify that the pod is running using:
+
+
+kubectl get pods
+
+Check the logs to verify that the environment variables are set and the message is printed:
+
+
+kubectl logs -f print-envars-greeting
+
+You should see output similar to the following:
+
+
+Welcome to DevOps Industries
+
+That's it! You have successfully created a pod with the required configurations and verified that it works correctly.
+
