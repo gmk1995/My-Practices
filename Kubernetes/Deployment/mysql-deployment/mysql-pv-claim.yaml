@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-pv-claim
+  namespace: testing-env
+spec:
+  resources:
+    requests:
+      storage: 250Mi
+  storageClassName: standard
+  accessModes:
+    - ReadWriteOnce
+  selector:
+    matchLabels:
+      name: mysql-pv
