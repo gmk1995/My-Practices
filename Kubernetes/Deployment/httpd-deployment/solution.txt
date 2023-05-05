@@ -1,0 +1,27 @@
+Create a namespace nautilus:
+-----------------------------
+
+Kubectl create namespace nautilus
+
+nautilus will be created with the above command.
+
+Write a Kubernetes Manifest File or httpd Deployment and Service
+--------------------------------------------------------------------
+
+Written httpd-deployment.yaml and httpd-service.yaml files and created by running the below command.
+
+kubectl create -f httpd-deployment.yaml
+
+kubectl create -f httpd-service.yaml
+
+After Sucessfully Deployment and Service are up we need to do Now upgrade the deployment to version httpd:2.4.43 using a rolling update:
+----------------------------------------------------------------------------------------------------------------------------------------
+kubectl set image deployment/httpd-deploy httpd-container=httpd:2.4.43               # Rolling update "httpd-container" containers of "httpd-deploy" deployment, updating the image
+
+Finally, once all pods are updated undo the recent update and roll back to the previous/original version:
+---------------------------------------------------------------------------------------------------------
+
+kubectl rollout history deployment/httpd-deploy                  # Check the history of deployments including the revision
+kubectl rollout undo deployment/httpd-deploy                     # Rollback to the previous deployment
+kubectl rollout undo deployment/httpd-deploy --to-revision=1     # Rollback to a specific revision
+kubectl rollout status -w deployment/httpd-deploy                # Watch rolling update status of "httpd-deploy" deployment until completion
