@@ -1,0 +1,13 @@
+10) As per details shared by the development team, the new application release has some dependencies on the back end. There are some packages/services that need to be installed on all app servers under Stratos Datacenter. As per requirements please perform the following steps:
+
+a. Install squid package on all the application servers.
+
+b. Once installed, make sure it is enabled to start during boot.
+
+Ans) Log into application servers using "ssh username@ipaddress/hostname"
+      >> check the which Linux Flavour is Installed by running the command " sudo cat /etc/os-release
+      >> Once you confirm the os version check the package is available or not by running " sudo yum search squid or apt search squid "
+      >> Once Package is available you can run the following commands to install the Squid Package by running the command " sudo yum install squid -y or sudo apt install squid -y "
+      >> Once the Package is installed sucessfully you need to enable the services by running the command " sudo systemctl enable squid "
+      >> Once you enable the squid service you need to restart the service to run in the background " sudo systemctl restart squid "
+      >> Check the status of the squid service by running the below command " sudo systemctl status squid "

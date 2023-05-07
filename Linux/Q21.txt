@@ -1,0 +1,9 @@
+21) The system admins team of xFusionCorp Industries has set up a new tool on all app servers, as they have a requirement to create a service user account that will be used by that tool. They are finished with all apps except for App Server 3 in Stratos Datacenter.
+
+Create a user named rose in App Server 3 without a home directory.
+
+Ans) Log into App Server 3 using the command " ssh user3@hostname/IPaddress "
+	  >> Run the command " sudo useradd -M rose "
+	  >> Check if the rose  service user account added or not by running the command " sudo /etc/passwd "
+	  >> Once you confirmed that check " /home " directory whether it have created any directory named " rose ".
+	  >> If there is no " rose" directory in the "/home" directory, you have successfully created the service user account "rose" without home directory.

@@ -1,0 +1,13 @@
+17) The Nautilus team doesn't want its data to be accessed by any of the other groups/teams due to security reasons and want their data to be strictly accessed by the sysops group of the team.
+
+Setup a collaborative directory /sysops/data on Nautilus App 2 server in Stratos Datacenter.
+
+The directory should be group owned by the group sysops and the group should own the files inside the directory. The directory should be read/write/execute to the group owners, and others should not have any access.
+
+Ans) Log into the App Server 2 by using the command " ssh username@hostname/ipaddress "
+      >> Create the directory by running the command " sudo mkdir -pv /sysops/data "
+      >> Change the Group to "sysops" by running the command " sudo chgrp -R sysops /sysops "
+      >> Chnage the Group permission by running the command "  sudo chmod -R 770 /sysops "
+      >> Set the default group ownership of any new files or directories created within the /sysops/data directory to sysops using the setgid bit
+           " sudo chmod g+s /sysops/data "
+      >> This sets the permission bits as follows: rwxrws---, where the setgid bit (s) has been added to the group permission bits (rws).

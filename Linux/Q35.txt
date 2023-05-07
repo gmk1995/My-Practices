@@ -1,0 +1,15 @@
+35) Linux Process Troubleshooting
+
+The production support team of xFusionCorp Industries has deployed some of the latest monitoring tools to keep an eye on every service, application, etc. running on the systems. One of the monitoring systems reported about Apache service unavailability on one of the app servers in Stratos DC.
+
+Identify the faulty app host and fix the issue. Make sure Apache service is up and running on all app hosts. They might not hosted any code yet on these servers so you need not to worry about if Apache isn't serving any pages or not, just make sure service is up and running. Also, make sure Apache is running on port 3000 on all app servers
+
+Ans) Log into the App Server using the command " ssh username@Hostname/IPaddress "
+>> Check the status of the httpd service by running the command " sudo systemctl status httpd "
+>> If you see any error message then you need to check the configurations by running in " sudo vi /etc/httpd/conf/httpd.conf " file
+>> After Making the necssary changes check the configurations you made on "/etc/httpd/conf/httpd.conf" is correct or not using the command " sudo apachectl configtest" If it tells "Syntax is Ok". Configurations are good.
+>> Check the ports which you have assigned to httpd server is using already by running the command " sudo lsof -i :3000 ". If you see output.
+>> Kill the process id by running the command " sudo kill -9 PID ".
+>> Restart the httpd service by running the command " sudo systemctl restart httpd"
+>> Check the status of the httpd service by running the command " sudo systemctl status httpd " . if the Services is running active, we can think that services will successfully run.
+======================================================================================================================================================================================================================================================================================================================================================

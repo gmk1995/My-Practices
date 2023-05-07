@@ -1,0 +1,46 @@
+25) Update the package index and upgrade any existing packages:
+
+Ans) Log into the app servers by running the command " ssh username@IPaddress/hostname "
+
+sudo yum update
+
+Install Tomcat package:
+
+sudo yum install tomcat
+
+This will install Tomcat and its dependencies on your system.
+
+To configure log rotation for Tomcat on CentOS, you can follow these steps:
+
+Install logrotate package:
+
+
+sudo yum install logrotate
+
+This will install the logrotate package on your system.
+
+Create a logrotate configuration file for Tomcat:
+
+
+sudo nano /etc/logrotate.d/tomcat
+Add the following contents to the file:
+
+
+/var/log/tomcat/*.log {
+    monthly
+    rotate 3
+    compress
+    delaycompress
+    missingok
+    notifempty
+    create 640 tomcat tomcat
+}
+This configuration will rotate Tomcat logs on a monthly basis, keep only 3 rotated logs, compress the rotated logs, and create new empty logs with correct file permissions.
+
+Save the file and exit the editor.
+
+Test the logrotate configuration:
+
+sudo logrotate -f /etc/logrotate.d/tomcat
+
+This will force logrotate to rotate logs based on the configuration file you just created.

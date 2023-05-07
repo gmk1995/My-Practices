@@ -1,0 +1,7 @@
+14) Some users of the monitoring app have reported issues with xFusionCorp Industries mail server. They have a mail server in Stork DC where they are using postfix mail transfer agent. Postfix service seems to fail. Try to identify the root cause and fix it.
+
+Ans) Log in to the mail server by using " ssh groot@stmail "
+      >> Check the postfix status by running the command " systemctl status postfix " and check the error. 
+      >> There is a error in this line on /etc/hosts ::1    localhost ip6-localhost ip6-loopback. I have uncommed this line #::1    localhost ip6-localhost ip6-loopback.
+      >> Did systemctl enable postfix,  systemctl restart postfix and systemctl status postfix.
+      >> postfix mail is working fie

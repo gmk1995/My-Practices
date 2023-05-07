@@ -1,0 +1,6 @@
+7)  create a user named ravi on the App Server 1. Set expiry date to 2021-04-15 in Stratos Datacenter. Make sure the user is created as per standard and is in lowercase.
+
+Ans) Log into application servers using "ssh username@ipaddress/hostname"
+      >> Once you log into the App Server 1 you need to run the below command " sudo useradd -m -e 2021-04-15 ravi "
+      >> -m = create the user's home directory
+      >> -e = expiration date of the new account

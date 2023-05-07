@@ -1,0 +1,3 @@
+2) Please give executable permissions to /tmp/xfusioncorp.sh script on App Server 1. Also make sure every user can execute it.
+
+Ans) sudo chmod -R 777 /tmp/xfusioncorp.sh

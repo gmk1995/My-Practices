@@ -1,0 +1,3 @@
+1) Create a user named ammar with a non-interactive shell on the App Server 3
+
+Ans) use -s for shell and set shell to /sbin/nologin useradd ammar -s /sbin/nologin

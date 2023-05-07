@@ -1,0 +1,5 @@
+11) Copy the file from Jump Server to App Server 1 
+
+Ans) Check the file is available or not in the Jump Server.
+      >> Use the following command to copy the file from Jump Server to App Server 1 " scp /tmp/file1 tony@stapp01:/home/app "
+      >> Log into App Server 1 to check whether you files is copied successfully or not.

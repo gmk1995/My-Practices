@@ -1,0 +1,39 @@
+32) Configure Local Yum repos
+
+The Nautilus production support team and security team had a meeting last month in which they decided to use local yum repositories for maintaing packages needed for their servers. For now they have decided to configure a local yum repo on Nautilus Backup Server. This is one of the pending items from last month, so please configure a local yum repository on Nautilus Backup Server as per details given below.
+
+a. We have some packages already present at location /packages/downloaded_rpms/ on Nautilus Backup Server.
+
+b. Create a yum repo named local_yum and make sure to set Repository ID to local_yum. Configure it to use package's location /packages/downloaded_rpms/.
+
+c. Install package samba from this newly created repo.
+
+Ans) Create a directory to store the repository metadata. In this case, we will create a directory named "local_yum" under the "/etc/yum.repos.d/" directory.
+
+sudo mkdir /etc/yum.repos.d/local_yum
+
+Create a new repository configuration file for the local yum repository. You can use any text editor to create this file. For example, you can use the "vi" editor.
+
+sudo vi /etc/yum.repos.d/local_yum/local_yum.repo
+
+In the editor, add the following lines to the repository configuration file:
+
+[local_yum]
+name=Local Yum Repository
+baseurl=file:///packages/downloaded_rpms/
+enabled=1
+gpgcheck=0
+
+Here, we have set the "baseurl" to the location of the downloaded RPMs on Nautilus Backup Server, which is "/packages/downloaded_rpms/". We have also enabled the repository by setting "enabled" to 1, and disabled GPG checking by setting "gpgcheck" to 0.
+
+Save and close the repository configuration file.
+
+Update the yum repository metadata to make the local yum repository available for package installation.
+
+sudo yum makecache --disablerepo=* --enablerepo=local_yum
+
+Now, you can install the "samba" package from the local yum repository.
+
+sudo yum install samba --enablerepo=local_yum
+
+This will install the "samba" package from the local yum repository named "local_yum" on Nautilus Backup Server.

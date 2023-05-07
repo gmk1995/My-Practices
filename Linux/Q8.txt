@@ -1,0 +1,11 @@
+8) On App Server 1 find all files (not directories) owned by user jim inside /home/usersdata directory and copy them all while keeping the folder structure (preserve the directories path) to /beta directory.
+
+Ans) Log into App Server1 using "ssh username@ipaddress/hostname"
+      >> Once you log into App Server 1 you need to check whether the files with jim user name are there or not by moving to the " /home/usersdata " directory.
+      >> Once you confirm back the user home directory by running the command " cd ~ " 
+      >> To copy jim user files inside /home/usersdata directory  and to keep the folder structure you need to run the below command " sudo find /home/usersdata -type f -user jim -exec cp --parents {} /beta \;
+      >> This command finds all files owned by user "jim" inside the /home/usersdata directory on App Server 1, using the find command with the following options:
+          ** -type f: Find only files, not directories.
+          ** -user jim: Find files owned by the user "jim".
+          ** -exec cp --parents {} /beta \;: Execute the cp command on each file found, copying the file to the /beta directory while preserving the directory structure.
+          ** The cp command with the --parents option is used to preserve the directory structure when copying files. Each file will be copied to the /beta directory with its original directory path preserved. You may need to run this command with sudo or as the root user.

@@ -1,0 +1,78 @@
+34) Install and Configure PostgreSQL
+
+The Nautilus application development team has shared that they are planning to deploy one newly developed application on Nautilus infra in Stratos DC. The application uses PostgreSQL database, so as a pre-requisite we need to set up PostgreSQL database server as per requirements shared below:
+
+a. Install and configure PostgreSQL database on Nautilus database server.
+
+b. Create a database user kodekloud_aim and set its password to dCV3szSGNA.
+
+c. Create a database kodekloud_db2 and grant full permissions to user kodekloud_aim on this database.
+
+d. Make appropriate settings to allow all local clients (local socket connections) to connect to the kodekloud_db2 database through kodekloud_aim user using md5 method (Please do not try to encrypt password with md5sum).
+
+Ans) Step 1: Install PostgreSQL
+
+Open a terminal window on the CentOS server.
+Run the following command to install PostgreSQL:
+
+sudo yum install postgresql-server
+
+Once the installation is complete, initialize the PostgreSQL database with the following command:
+
+sudo postgresql-setup initdb
+
+Start the PostgreSQL service with the following command:
+
+sudo systemctl start postgresql
+
+Enable the PostgreSQL service to start at boot with the following command:
+
+sudo systemctl enable postgresql
+
+Step 2: Configure PostgreSQL
+
+Open the PostgreSQL configuration file with the following command:
+
+sudo vi /var/lib/pgsql/data/pg_hba.conf
+
+In the "pg_hba.conf" file, locate the line that starts with "host" and has "127.0.0.1/32" and "::1/128" in the "CIDR-ADDRESS" field, and change the "METHOD" from "ident" to "md5". This allows local clients to connect using md5 method for password authentication.
+Save and exit the "pg_hba.conf" file. In the "pg_hba.conf" file, locate the line that starts with "local" and has "peer" in the "METHOD" field.
+Change "peer" to "md5" in the "METHOD" field for the "local" line to enable password authentication.
+Restart the PostgreSQL service with the following command to apply the changes:
+
+sudo systemctl restart postgresql
+
+Step 3: Create PostgreSQL User and Database
+
+Switch to the PostgreSQL prompt with the following command:
+
+sudo su - postgres -c "psql"
+
+Inside the PostgreSQL prompt, create a new user with the following command:
+
+CREATE USER kodekloud_aim WITH PASSWORD 'dCV3szSGNA';
+
+Create a new database with the following command:
+
+CREATE DATABASE kodekloud_db2;
+
+Grant full permissions on the database to the user with the following command:
+
+GRANT ALL PRIVILEGES ON DATABASE kodekloud_db2 TO kodekloud_aim;
+
+Exit the PostgreSQL prompt with the following command:
+
+\q
+
+Step 4: Test Database Connection
+
+Switch to the root or sudo user with the following command:
+
+sudo su -
+Connect to the "kodekloud_db2" database with the "kodekloud_aim" user using the following command:
+
+psql -U kodekloud_aim -d kodekloud_db2
+
+If you are able to connect to the database without any errors, it means the database connection is successful.
+That's it! You have successfully installed and configured PostgreSQL on CentOS, created a user, granted permissions to a database, and tested the database connection.
+======================================================================================================================================================================

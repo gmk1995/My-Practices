@@ -1,0 +1,55 @@
+37) Install and Configure Tomcat Server
+
+The Nautilus application development team recently finished the beta version of one of their Java-based applications, which they are planning to deploy on one of the app servers in Stratos DC. After an internal team meeting, they have decided to use the tomcat application server. Based on the requirements mentioned below complete the task:
+
+a. Install tomcat server on App Server 1 using yum.
+
+b. Configure it to run on port 8089.
+
+c. There is a ROOT.war file on Jump host at location /tmp. Deploy it on this tomcat server and make sure the webpage works directly on base URL i.e without specifying any sub-directory anything like this http://URL/ROOT .
+
+Ans 
+) Log into App Server one using the ssh command " ssh appuser1@IPaddress/HostName "
+
+To install Tomcat server on App Server 1, you can use the following command:
+
+
+sudo yum install tomcat -y
+
+This will install the latest version of Tomcat available in your system's repository.
+
+b. To configure Tomcat to run on port 8089, you need to edit the server.xml file located in the Tomcat installation directory. By default, it is located in /etc/tomcat/server.xml. Open this file in a text editor and locate the following line:
+
+
+<Connector port="8080" protocol="HTTP/1.1"
+
+Change the port number to 8089, so it looks like this:
+
+
+<Connector port="8089" protocol="HTTP/1.1"
+
+Save the file and exit the text editor.
+
+c. To deploy the ROOT.war file on the Tomcat server, first, copy the file from the Jump host to the App Server 1. You can use the following command to do this:
+
+Log into the Jump Server using ssh command " ssh username@IPAddress/HostName "
+
+scp /tmp/ROOT.war <username>@<App Server 1 IP>:/tmp
+
+Replace <username> with your username, <Jump Host IP> with the IP address of the Jump host, <App Server 1 IP> with the IP address of App Server 1. You will be prompted for your password.
+
+Once the file is copied to the App Server, you can deploy it to Tomcat by moving it to the webapps directory in Tomcat's installation directory. Use the following commands to do this:
+
+
+sudo mv /tmp/ROOT.war /var/lib/tomcat/webapps/
+sudo chown tomcat:tomcat /var/lib/tomcat/webapps/ROOT.war
+
+The first command moves the war file to the webapps directory, and the second command changes the ownership of the file to the tomcat user so that Tomcat can access it.
+
+Restart the Tomcat service to make sure the changes take effect:
+
+sudo systemctl restart tomcat
+
+Now you should be able to access the webpage at http://<App Server 1 IP>:8089/ROOT without specifying any subdirectory.
+
+====================================================================================================================================================================================

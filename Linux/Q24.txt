@@ -1,0 +1,14 @@
+
+24) We have confidential data that needs to be transferred to a remote location, so we need to encrypt that data.We also need to decrypt data we received from a remote location in order to understand its content.
+
+On storage server in Stratos Datacenter we have private and public keys stored /home/*_key.asc. Use those keys to perform the following actions.
+
+Encrypt /home/encrypt_me.txt to /home/encrypted_me.asc.
+
+Decrypt /home/decrypt_me.asc to /home/decrypted_me.txt. (Passphrase for decryption and encryption is kodekloud).
+
+Ans) Log into the Storage Server by running command " ssh username@Ipaddress/hostname "
+	>> Create "/home/encrypted_me.asc" "/home/decrypted_me.txt" files by running the command " sudo touch /home/encrypted_me.asc " and " sudo touch /home/decrypted_me.txt "
+	>> Provide the permissions to the both files "/home/encrypted_me.asc , "/home/decrypted_me.txt" by running the command " sudo chmod 777 /home/encrypted_me.asc" and " sudo chmod 777 /home/decrypted_me.txt"
+	>> To encrypt use this command " sudo gpg --symmetric --cipher-algo AES256 --output /home/encrypted_me.asc --passphrase kodekloud /home/encrypt_me.txt " It will ask password enter the password " kodekloud "
+	>> To decrypt use this command " sudo gpg --passphrase kodekloud -d /home/decrypt_me.asc > /home/decrypted_me.txt. It will ask password enter the password " kodekloud ".

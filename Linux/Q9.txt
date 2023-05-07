@@ -1,0 +1,6 @@
+9) Update the message of the day on all application and db servers for Nautilus. Make use of the approved template located at /home/thor/nautilus_banner on jump host.
+
+Ans) Check the motd file available or not in Jump Sever directory /home/thor/nautilus_banner
+       >> Once you confirm /home/thor/nautilus_banner file is available you need to copy the files to App Servers by running the command " scp /home/thor/nautilus_banner username@hostname:/tmp "
+       >> Log into application servers using "ssh username@ipaddress/hostname" and move the "nautilus_banner" file to "/etc/motd" file by running the command " mv /tmp/nautilus_banner /etc/motd"
+       >> Open the "etc/profile" by running the command " sudo vi etc/profile " and add the " cat /etc/motd "
