@@ -1,0 +1,31 @@
+- name: Setup webserver
+  hosts: stapp01, stapp02, stapp03
+  become: true
+
+  tasks:
+    - name: "httpd install"
+      yum:
+        name: httpd
+        state: latest
+
+    - name: Start httpd service
+      service:
+        name: httpd
+        state: started
+        enabled: true
+
+    - name: Creating index file
+      copy:
+        dest: "/var/www/html/index.html"
+        content: |
+          This is a Nautilus sample file, created using Ansible!
+
+    - name: Set line at top
+      lineinfile:
+        path: /var/www/html/index.html
+        insertbefore: BOF
+        line: Welcome to Nautilus Group!
+        state: present
+        owner: apache
+        group: apache
+        mode: "0644"

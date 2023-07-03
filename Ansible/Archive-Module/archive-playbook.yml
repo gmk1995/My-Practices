@@ -1,0 +1,13 @@
+- name: Archive and Copy Files
+  hosts: all
+  become: yes
+  tasks: 
+    - name: Create an archive of data and copy it to the app servers.
+      archive:
+      path: /usr/src/itadmin/
+      dest: /opt/itadmin/media.tar.gz
+      format: gz
+      force_archive: true
+      owner: "{{ ansible_user }}"
+      group: "{{ ansible_user }}"
+

@@ -1,0 +1,13 @@
+The Nautilus development team started with new project development. They have created different Git repositories to manage respective project's source code. One of the repo /opt/official.git was created recently. The team has given us a sample index.html file that is currently present on jump host under /tmp. The repository has been cloned at /usr/src/kodekloudrepos on storage server in Stratos DC.
+
+Copy sample index.html file from jump host to storage server under cloned repository at /usr/src/kodekloudrepos, add/commit the file and push to master branch.
+
+Ans)
+
+1. Add the host machine to the Jump Server or Log into host machine using ssh username@IPaddress 
+2. Command to Copy from Jump Server to Storage Server: " scp /tmp/index.html ststor01@natasha:/usr/src/kodekloudrepos " 
+3. Once file is copied you need to perform git commands.
+4. git status
+5. git add .
+6. git commit -m "Updated -> index.html"
+7. git push origin -uf "master"
