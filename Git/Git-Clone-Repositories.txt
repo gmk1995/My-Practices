@@ -1,0 +1,23 @@
+Git Clone Repositories
+Git Clone Repositories:
+DevOps team created a new Git repository last week; however, as of now no team is using it. The Nautilus application development team recently asked for a copy of that repo on Storage server in Stratos DC. Please clone the repo as per details shared below:
+
+
+The repo that needs to be cloned is /opt/ecommerce.git
+
+Clone this git repository under /usr/src/kodekloudrepos directory. Please do not try to make any changes in repo.
+
+Ans)
+Open a terminal or SSH into the server where the cloning needs to be done.
+
+Navigate to the /usr/src/kodekloudrepos directory using the following command:
+
+cd /usr/src/kodekloudrepos
+
+Clone the repository using the git clone command with the repository path:
+
+git clone /opt/ecommerce.git
+
+This command will create a new directory named ecommerce under /usr/src/kodekloudrepos and clone the repository into it.
+Wait for the cloning process to complete. Once finished, you will have a copy of the repository in the desired location.
+Remember, since you mentioned not to make any changes in the repository, please ensure that you don't modify any files within the cloned repository.
