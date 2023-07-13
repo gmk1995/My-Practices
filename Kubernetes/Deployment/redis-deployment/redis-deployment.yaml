@@ -35,5 +35,5 @@ spec:
           emptyDir: {}
         - name: redis-config
           configMap:
-            - name: my-redis-config
+            name: my-redis-config
               
