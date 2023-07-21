@@ -1,0 +1,9 @@
+move the all three yaml to a directory and run the command " kubectl apply -f path/to/the/directory "
+check the status of each object create by running the commands
+kubectl get svc # This will list the service which we have created
+kubectl get cm #This will list the configMap which we have created
+kubectl get pods #This will list the pods which we have created
+once the Pods are up and running we need to Copy /opt/index.php from jump host to the nginx document root inside nginx container.
+To complete the above task we need to run the command " kubectl cp /opt/index.php nginx-phpfpm:/var/www/html/index.php -c phpfpm-container
+You can login and check whether file is copied or not by running the command " kubectl exec -it nginx-phpfpm -c phpfpm-container -- /bin/bash
+Once it is confirmed you can use the localhost:30012 to connect to web application
