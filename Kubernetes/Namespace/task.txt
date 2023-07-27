@@ -1,0 +1,3 @@
+Create a namespace named dev and create a POD under it; name the pod dev-nginx-pod and use nginx image with latest tag only and remember to mention tag i.e nginx:latest.
+Ans) kubectl create ns dev
+     kubectl run dev-nginx-pod --image="nginx:latest" -n dev
