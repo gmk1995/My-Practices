@@ -1,0 +1,3 @@
+Create a deployment named nginx to deploy the application nginx using the image nginx:latest (remember to mention the tag as well)
+Ans)
+kubectl create deployment nginx --image=nginx --replicas=3 --lables="app=nginx"
