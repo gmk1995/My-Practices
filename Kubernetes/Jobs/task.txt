@@ -1,0 +1,4 @@
+Create a job countdown-xfusion.
+The spec template should be named as countdown-xfusion (under metadata), and the container should be named as container-countdown-xfusion
+Use image debian with latest tag only and remember to mention tag i.e debian:latest, and restart policy should be Never.
+Use command sleep 5
