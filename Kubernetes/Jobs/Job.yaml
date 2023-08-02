@@ -1,0 +1,14 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: countdown-xfusion
+spec:
+  template:
+    metadata:
+      name: countdown-xfusion
+    spec:
+      containers:
+      - name: container-countdown-xfusion
+        image: debian:latest
+        command: ["sleep",  "5"]
+      restartPolicy: Never
