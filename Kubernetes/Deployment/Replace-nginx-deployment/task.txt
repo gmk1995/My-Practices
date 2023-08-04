@@ -1,0 +1,43 @@
+There is an application deployed on Kubernetes cluster. Recently, the Nautilus application development team developed a new version of the application that needs to be deployed now. As per new updates some new changes need to be made in this existing setup. So update the deployment and service as per details mentioned below:
+
+
+We already have a deployment named nginx-deployment and service named nginx-service. Some changes need to be made in this deployment and service, make sure not to delete the deployment and service.
+
+1.) Change the service nodeport from 30008 to 32165
+
+2.) Change the replicas count from 1 to 5
+
+3.) Change the image from nginx:1.19 to nginx:latest
+
+Note: The kubectl utility on jump_host has been configured to work with the kubernetes cluster.
+
+Ans) 
+    ## Check the Deployment status
+    1. kubectl get deploy
+    
+    ## Check the Service Status
+    2. kubectl get svc
+
+    ## Edit the Service and Update the Port Number with 32165    
+    3.  kubectl edit svc nginx-service
+
+    ## Check the Service Status After Updating the Port Number
+    4.  kubectl get svc
+
+    ##Scaling the Replicas from 1 to 5    
+    5.  kubectl scale --current-replicas=1 --replicas=5 deployment/nginx-deployment 
+
+    ##Check the status of the Deployment After scaling the Replicas 
+    6.  kubectl get deploy
+
+    ##Check the Pod Status   
+    7.  kubectl get pods 
+
+    ##describe the Pod for container Name
+    8.  kubectl describe pod
+
+    ##For Change the image from nginx:1.19 to nginx:latest
+    9.  kubectl set image deployment/nginx-deployment nginx-container=nginx:latest
+
+    ## For Checking the Image is updated or not.
+    10.  kubectl describe pod  
