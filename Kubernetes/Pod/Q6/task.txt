@@ -1,0 +1,41 @@
+We deployed a Nginx and PHP-FPM based setup on Kubernetes cluster last week and it had been working fine so far. This morning one of the team members made a change somewhere which caused some issues, and it stopped working. Please look into the issue and fix it:
+
+The pod name is nginx-phpfpm and configmap name is nginx-config. Figure out the issue and fix the same.
+
+
+Once issue is fixed, copy /home/thor/index.php file from the jump host to the nginx-container under nginx document root and you should be able to access the website using Website button on top bar.
+
+
+Note: The kubectl utility on jump_host has been configured to work with the kubernetes cluster.
+
+Ans) 
+   ## Check the Pod Status
+   1.  kubectl get pods
+
+   ## Check the ConfigMap Status
+   2.  kubectl get cm
+
+   ## Describe Pod
+   3.  kubectl describe pod nginx-phpfpm
+   
+   ## Describe ConfigMap
+   4.  kubectl describe configmaps nginx-config
+   
+   ## Edit the Pod 
+   5.  kubectl edit pod nginx-phpfpm
+
+   ## While checking the Pod Configurations I found the nginx container volume mounts is not sharing the root path
+   ## Added root path(/var/www/html/) in the Pod Configuration file
+   ## Saved the file in the /tmp/kubectl-edit-2326372287.yaml
+
+   ## Saved kubectl-edit-2326372287.yaml file apply again to fix the issue
+   6. kubectl replace --force -f /tmp/kubectl-edit-2326372287.yaml
+
+   ## Check the pod status again
+   7.  kubectl get pods
+   
+   ## Copying /home/thor/index.php to nginx container from jump_host
+   8.  kubectl cp index.php nginx-phpfpm:/var/www/html/ -c nginx-container
+
+   ## Checking if you are able to access the PHP Website or not by Running the IPAddress&Port Number.
+   ## Website is accessing now. 
