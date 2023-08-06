@@ -1,0 +1,52 @@
+Last week the Nautilus DevOps team met with the application development team and decided to containerize several of their applications. The DevOps team wants to do some testing per the following:
+
+
+Install docker-ce and docker-compose packages on App Server 2.
+
+
+Start docker service.
+
+Ans)
+    ## Docker Instllation Steps
+    
+    ## Download Docker installation Script
+    1. curl -fsSL https://get.docker.com -o get-docker.sh
+
+    ## Execute the downloaded script 
+    2. sudo sh get-docker.sh
+
+    ##Example message when we are running the Script
+    Executing docker install script, commit: 7cae5f8b0decc17d6571f9f52eb840fbc13b2737
+    <...>
+
+    ## Post Installation steps
+
+    ## Adding Current User to docker group 
+    4. sudo usermod -aG docker $USER
+
+    ## Enable Docker Services
+    5. sudo systemctl enable docker 
+
+    ## Start the Docker Services
+    6. sudo systemctl start docker
+
+    ## Docker Status Checking
+    7. sudo systemctl status docker
+
+
+    ## Docker Compose installation Steps
+    
+    ## To download and install the Compose CLI plugin, run:
+    1. DOCKER_CONFIG=${DOCKER_CONFIG:-$HOME/.docker}
+       mkdir -p $DOCKER_CONFIG/cli-plugins
+       curl -SL https://github.com/docker/compose/releases/download/v2.20.2/docker-compose-linux-x86_64 -o $DOCKER_CONFIG/cli-plugins/docker-compose
+
+    ## Apply executable permissions to the binary:
+    2. chmod +x $DOCKER_CONFIG/cli-plugins/docker-compose
+
+    ## Test the installation.
+    3. docker compose version
+
+
+
+
