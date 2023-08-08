@@ -1,0 +1,23 @@
+Nautilus DevOps team is testing some applications deployment on some of the application servers. They need to deploy a nginx container on Application Server 3. Please complete the task as per details given below:
+
+
+On Application Server 3 create a container named nginx_3 using image nginx with alpine tag and make sure container is in running state.
+
+Ans) 
+  ## ssh into the terminal 
+  1.  ssh username@hostname 
+
+  ## Check the Docker Version
+  2. sudo docker version
+
+  ## Docker Status Checking
+  3. systemctl status docker
+
+  ## Container Creating
+  4. sudo docker run -d --name nginx_3 -p 80:80 nginx:alpine
+
+  ## Docker Images Checking
+  5.  sudo docker images
+
+  ## Docker Container Checking
+  6.  sudo docker ps
