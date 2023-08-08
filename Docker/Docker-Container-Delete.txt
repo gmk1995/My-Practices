@@ -1,0 +1,16 @@
+One of the Nautilus project developers created a container on App Server 1. This container was created for testing only and now we need to delete it. Accomplish this task as per details given below:
+
+Delete a container named kke-container, its running on App Server 1 in Stratos DC.
+
+Ans)
+  ## ssh into the App1 server
+  1. ssh username@hostname/IPaddress
+
+  ## check the docker version
+  2. sudo docker version
+
+  ## Check the Docker Status
+  3. sudo systemctl status docker
+
+  ## Docker Container Deleting
+  4. docker rm -f a6e80bf49f73
