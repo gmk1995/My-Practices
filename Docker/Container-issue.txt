@@ -1,0 +1,35 @@
+There is a static website running within a container named nautilus, this container is running on App Server 1. Suddenly, we started facing some issues with the static website on App Server 1. Look into the issue to fix the same, you can find more details below:
+
+
+
+Container's volume /usr/local/apache2/htdocs is mapped with the host's volume /var/www/html.
+
+The website should run on host port 8080 on App Server 1 i.e command curl http://localhost:8080/ should work on App Server 1.
+
+Ans) 
+
+      ## shh into the app server 1
+      1. ssh tony@stapp01
+
+      ## Checking the container Status
+      2. docker ps -a
+ 
+      ## Checking the docker logs
+      3. docker logs efd571e5333d
+
+      ## Checking the Mount Path file in
+      4. cd /var/www/html/
+
+      ## Found index/html file don't have write or execute Permissions for group and others
+      ## Added Write and execute Permissions to the group and others
+      5. sudo chmod 755 index.html
+ 
+      ## Restarted Container
+      6.  docker restart efd571e5333d
+
+      ## Docker Status
+      7. docker ps
+
+      ## After Restarting the container, Container is up and running
+      ## Check the website is up and running or not 
+      8.  curl http://localhost:8080/

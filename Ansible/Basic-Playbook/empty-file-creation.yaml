@@ -1,0 +1,9 @@
+---
+- name: Create a Empty File in App server1
+  hosts: stapp01
+  tasks:
+  - name: Create a Empty File in App server1
+    file:
+      path: /tmp/file.txt
+      state: touch
+      mode: u=rw,g=r,o=r
