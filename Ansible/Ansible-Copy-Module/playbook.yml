@@ -1,0 +1,9 @@
+---
+- name: Copying Files
+  hosts: all
+  become: yes
+  tasks:
+  - name: Copying File from Jump Server to the Application Servers
+    copy:
+      src: /usr/src/data/index.html
+      dest: /opt/data
