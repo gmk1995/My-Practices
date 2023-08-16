@@ -1,0 +1,83 @@
+The DevOps team of xFusionCorp Industries is planning to setup some CI/CD pipelines. After several meetings they have decided to use Jenkins server. So, we need to setup a Jenkins Server as soon as possible. Please complete the task as per requirements mentioned below:
+
+
+
+1. Install jenkins on jenkins server using yum utility only, and start its service. You might face timeout issue while starting the Jenkins service, please refer this link for help.
+
+
+2. Jenkin's admin user name should be theadmin, password should be Adm!n321, full name should be John and email should be john@jenkins.stratos.xfusioncorp.com.
+
+
+Note:
+
+
+1. For this task, ssh into the jenkins server using user root and password S3curePass from jump host.
+
+
+2. After installing the Jenkins server, please click on the Jenkins button on the top bar to access Jenkins UI and follow the on-screen instructions to create an admin user.
+
+Ans) 
+    ## Check the OS version
+    1. cat /etc/os-release
+
+    ## Install wget
+    2. yum install wget -y
+
+    ## update the yum package manager
+    3. yum update -y
+
+    ## upgrade the yum package manager
+    4. yum upgrade -y
+
+    ## Downloading Jenkins Repo and adding to Yum Repo
+    5. wget -O /etc/yum.repos.d/jenkins.repo \    https://pkg.jenkins.io/redhat-stable/jenkins.repo
+
+    ## import the jenkins key
+    6. rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io-2023.key
+
+    ## dnf upgrade
+    7. dnf upgrade
+
+    ## Java installation
+    8. dnf install java-17-openjdk -y
+
+    ## Checking Java location
+    9. which java
+
+    ## Checking Java version
+    10. java --version
+
+    ## installation jenkins using Yum package manager
+    11. yum install jenkins -y
+
+    ## Checking jenkins version
+    12. jenkins --version
+
+    ## reload the system daemon
+    13. systemctl daemon-reload
+
+    ## enable the Jenkins service to start at boot with the command
+    14. systemctl enable jenkins
+
+    ## start the Jenkins service with the command
+    15. systemctl start jenkins
+
+    ## check the status of the Jenkins service using the command
+    16. systemctl status jenkins
+
+    ## Jenkins URL Access with Port Number 8080
+    17. http://IPaddress:8080
+
+    ## initial Admin Password location
+    ## Copy the Password and Paste it on the Web Page
+    18. cat /var/lib/jenkins/secrets/initialAdminPassword
+
+    ## Setting initial Admin Username, Full Name Password, Email adreess    
+    19. username    : theadmin 
+        password    : Adm!n321 
+        full name   : John
+        email       : john@jenkins.stratos.xfusioncorp.com.
+
+    ## ReVerify the Jenkins Login Details
+    20. Log Out and Login with the New Username and password.
+
