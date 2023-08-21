@@ -1,0 +1,24 @@
+Nautilus developers are actively working on one of the project repositories, /usr/src/kodekloudrepos/blog. They were doing some testing and created few test branches, now they want to clean those test branches. Below are the requirements that have been shared with the DevOps team:
+
+
+
+On Storage server in Stratos DC delete a branch named xfusioncorp_blog from /usr/src/kodekloudrepos/blog git repo.
+
+Ans)
+    ## Log into the storage sever
+    1. ssh natasha@ststor01
+
+    ## Navigate to the /usr/src/kodekloudrepos/blog Directory
+    2.  cd /usr/src/kodekloudrepos/blog
+
+    ## Check the available Git Branches
+    3.  sudo git branch
+
+    ## Checkout to Master to Delete  xfusioncorp_blog branch
+    4.  sudo git checkout master
+
+    ## Delete  xfusioncorp_blog branch
+    5.  sudo git branch -D xfusioncorp_blog
+
+    ## Verify the Git Branchs again
+    6.  sudo git branch
