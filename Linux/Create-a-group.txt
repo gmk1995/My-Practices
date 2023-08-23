@@ -1,0 +1,32 @@
+There are specific access levels for users defined by the xFusionCorp Industries system admin team. Rather than providing access levels to every individual user, the team has decided to create groups with required access levels and add users to that groups as needed. See the following requirements:
+
+
+
+a. Create a group named nautilus_admin_users in all App servers in Stratos Datacenter.
+
+
+b. Add the user rajesh to nautilus_admin_users group in all App servers. (create the user if doesn't exist).
+
+Ans)
+    ## ssh into the Each App Server
+    1. ssh tony@stapp01
+
+    ## Create the group
+    2. sudo groupadd nautilus_admin_users
+
+    ## Check the Group Created or Not
+    3. sudo cat /etc/group or getent group nautilus_admin_users
+
+    ## Check the User exist or not 
+    4. sudo cat /etc/passwd or getent passwd
+
+    ## Add Rajesh User as it is not there
+    5. sudo useradd rajesh
+
+    ## Adding Rajesh user to the nautilus_admin_users group
+    6. sudo usermod -a -G nautilus_admin_users rajesh
+
+    ## Verify Rajsh User Added to the nautilus_admin_users group or not
+    7. sudo cat /etc/group or getent group nautilus_admin_users
+
+    ## Repeat the same steps in Remaining Two App Servers
