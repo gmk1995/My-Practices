@@ -1,0 +1,24 @@
+The Nautilus system admins team recently deployed a web UI application for their backup utility running on the Nautilus backup server in Stratos Datacenter. The application is running on port 8086. They have firewalld installed on that server. The requirements that have come up include the following:
+
+
+
+Open all incoming connection on 8086/tcp port. Zone should be public.
+
+Ans) 
+    ## Log into the backup server
+    1. ssh clint@stbkp01
+
+    ## List all the services
+    2. sudo firewall-cmd --list-services
+
+    ## Enable the 8086 port
+    3. sudo firewall-cmd --permanent --add-port 8086/tcp
+
+    ## Reload the firewall services
+    4. firewall-cmd --reload
+
+    ## Check the Ports Opened
+    5. sudo firewall-cmd --list-ports
+
+    ## Additional Steps to Identify the port Open
+    6. grep Listen /etc/httpd/conf/httpd.conf
