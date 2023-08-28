@@ -1,0 +1,27 @@
+Linux Services
+
+As per details shared by the development team, the new application release has some dependencies on the back end. There are some packages/services that need to be installed on all app servers under Stratos Datacenter. As per requirements please perform the following steps:
+
+a. Install httpd package on all the application servers.
+b. Once installed, make sure it is enabled to start during boot.
+
+Ans)
+    ## Log in to the App Server 1
+    1. ssh tony@stapp01
+
+    ## Check the httpd services are already present
+    2. sudo systemctl status httpd
+
+    ## Install the httpd services
+    3. sudo yum install httpd -y
+
+    ## Enable the httpd service
+    4. sudo systemctl enable httpd
+
+    ## Start the httpd service
+    5. sudo systemctl start httpd
+
+    ## httpd service status checking
+    6. sudo systemctl status httpd
+
+    ## Repeat the Same Steps in the Remaining two App Servers
