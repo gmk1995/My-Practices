@@ -1,0 +1,9 @@
+---
+- name: Installing Package on All App Servers
+  hosts: all
+  become: yes
+  tasks:
+    - name: Installing vin-enhanced on all App Server
+      ansible.builtin.yum:
+        name: vim-enhanced
+        state: latest
