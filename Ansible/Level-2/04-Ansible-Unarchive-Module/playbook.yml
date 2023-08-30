@@ -1,0 +1,13 @@
+---
+- name: Extracting the Zip File to All the App Servers
+  hosts: all
+  become: yes
+  become_method: sudo
+  tasks:
+  - name: Extract nautilus.zip into /opt/data/
+    ansible.builtin.unarchive:
+      src: /usr/src/data/nautilus.zip
+      dest: /opt/data/
+      owner: "{{ ansible_user }}"
+      group: "{{ ansible_user }}"
+      mode: '0655'
