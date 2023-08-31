@@ -1,0 +1,24 @@
+---
+- name: Installing httpd server and adding content in the file
+  hosts: all
+  become: yes
+  tasks:
+    - name: Install the latest version of Apache
+      ansible.builtin.yum:
+        name: httpd
+        state: latest
+    - name: Start service httpd, if not started
+      ansible.builtin.service:
+        name: httpd
+        state: started
+    - name: Insert/Update "Content" in the /var/www/html/index.html
+      ansible.builtin.blockinfile:
+        path: /var/www/html/index.html
+        create: yes
+        owner: apache
+        group: apache
+        mode: '0655'
+        block: |
+          Welcome to XfusionCorp!
+          This is Nautilus sample file, created using Ansible!
+          Please do not modify this file manually!
