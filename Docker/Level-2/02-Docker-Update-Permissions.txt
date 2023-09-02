@@ -1,0 +1,20 @@
+One of the Nautilus project developers need access to run docker commands on App Server 3. This user is already created on the server. Accomplish this task as per details given below:
+
+
+
+User jim is not able to run docker commands on App Server 3 in Stratos DC, make the required changes so that this user can run docker commands without sudo.
+
+Ans)
+    ## Log into the App Server 3
+    1. ssh banner@stapp03
+
+    ## Check the jim user and docker group details
+    2. cat /etc/passwd & cat /etc/group
+
+    ## Add the "jim" user to docker group
+    3. sudo usermod -aG docker jim
+
+    ## Verify whether user "jim" add to the docker group or not
+    4. cat /etc/group 
+    ## switch to the jim user and run the docker commands 
+       docker images, docker ps, docker ps -a .....e.t.c
