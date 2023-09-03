@@ -1,0 +1,17 @@
+One of the Nautilus developer was working to test new changes on a container. He wants to keep a backup of his changes to the container. A new request has been raised for the DevOps team to create a new image from this container. Below are more details about it:
+
+
+a. Create an image ecommerce:xfusion on Application Server 2 from a container ubuntu_latest that is running on same server.
+
+Ans)
+    ## Log into the App Server 2
+    1. ssh steve@stapp02
+
+    ## Check the docker containers and images
+    2. docker ps && docker images
+
+    # Create the image from the container ubuntu_latest
+    3. docker commit ubuntu_latest ecommerce:xfusion
+
+    ## Verify the image is created or not 
+    4. docker images
