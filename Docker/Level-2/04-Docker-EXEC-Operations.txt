@@ -23,7 +23,7 @@ Ans)
     4. apt install apache2 -y
 
     ## Configure the 8089 as a default port
-    5. vim /etc/ports.conf
+    5. vim /etc/apache2/ports.conf
        ## Add 8089 Port as a default port
 
     ## Start the apache2 services

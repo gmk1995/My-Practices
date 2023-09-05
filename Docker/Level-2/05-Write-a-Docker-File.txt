@@ -1,0 +1,39 @@
+As per recent requirements shared by the Nautilus application development team, they need custom images created for one of their projects. Several of the initial testing requirements are already been shared with DevOps team. Therefore, create a docker file /opt/docker/Dockerfile (please keep D capital of Dockerfile) on App server 2 in Stratos DC and configure to build an image with the following requirements:
+
+
+
+a. Use ubuntu as the base image.
+
+
+b. Install apache2 and configure it to work on 5003 port. (do not update any other Apache configuration settings like document root etc).
+
+Ans)
+    ## Log into the App Server 2
+    1. ssh steve@stapp02
+
+    ## Move to /opt/docker/ and write Dockerfile
+    2. cd /opt/docker/ && sudo vi Dockerfile
+
+    ## Dockerfile
+    3. FROM ubuntu
+       RUN apt-get update && \
+           apt-get install apache2 -y && \
+           echo "Listen 6000" >> /etc/apache2/ports.conf && \
+           sed -i 's/Listen 80/Listen 6000/g' /etc/apache2/sites-available/000-default.conf
+       EXPOSE 6000
+       CMD ["apachectl", "-D", "FOREGROUND"]
+
+    ## Build the Docker Image
+    4. docker build -t custom-apache-image .
+
+    ## Check docker images
+    5. docker images
+
+    ## container Creating 
+    6. docker run -d -p 6000:6000 custom-apache-image:latest
+
+    ## Check the container
+    7. docker ps
+
+    ## Check whether apache2 is running on the Port 6000 or not 
+    8. curl -I http://localhost:6000
