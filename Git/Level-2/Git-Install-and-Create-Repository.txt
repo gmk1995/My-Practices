@@ -1,0 +1,21 @@
+The Nautilus development team shared with the DevOps team requirements for new application development, setting up a Git repository for that project. Create a Git repository on Storage server in Stratos DC as per details given below:
+
+
+
+Install git package using yum on Storage server.
+
+
+After that, create/init a git repository named /opt/games.git (use the exact name as asked and make sure not to create a bare repository).
+
+Ans)
+    ## Log into the Storage server 
+    1. ssh natasha@ststor01
+
+    ## Install the git repository
+    2. sudo yum install git -y
+
+    ## create/init a git repository named /opt/games.git
+    3. sudo git init games.git
+
+    ## Verify the git status 
+    4. cd games.git && git status
