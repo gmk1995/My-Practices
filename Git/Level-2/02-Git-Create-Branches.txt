@@ -1,0 +1,27 @@
+Nautilus developers are actively working on one of the project repositories, /usr/src/kodekloudrepos/games. Recently, they decided to implement some new features in the application, and they want to maintain those new changes in a separate branch. Below are the requirements that have been shared with the DevOps team:
+
+
+
+1. On Storage server in Stratos DC create a new branch xfusioncorp_games from master branch in /usr/src/kodekloudrepos/games git repo.
+
+
+2. Please do not try to make any changes in the code.
+
+Ans)
+    ## Log into the Storage server
+    1. ssh natasha@ststor01
+
+    ## Move to the project repositories directory 
+    2. cd /usr/src/kodekloudrepos/games && ls -larth
+
+    ## Check the Existing Branches
+    3. sudo git branch
+
+    ## Checkout to master branch
+    4. sudo git checkout master
+
+    ## Create a New Branch From master branch
+    5. sudo git checkout -b "xfusioncorp_games"
+
+    ## Verif the new branch is created or not
+    6. sudo git branch
