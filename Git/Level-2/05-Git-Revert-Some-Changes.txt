@@ -1,0 +1,37 @@
+The Nautilus application development team was working on a git repository /usr/src/kodekloudrepos/official present on Storage server in Stratos DC. However, they reported an issue with the recent commits being pushed to this repo. They have asked the DevOps team to revert repo HEAD to last commit. Below are more details about the task:
+
+
+In /usr/src/kodekloudrepos/official git repository, revert the latest commit ( HEAD ) to the previous commit (JFYI the previous commit hash should be with initial commit message ).
+
+
+Use revert official message (please use all small letters for commit message) for the new revert commit.
+
+Ans)
+    ## Log into the Storage server
+    1. ssh natasha@ststor01
+
+    ## Move to the project repositories directory
+    2. cd /usr/src/kodekloudrepos/official && ls -larth
+
+    ## check the commits 
+    3. git log
+
+    ## revert the latest commit ( HEAD ) to the previous commit
+    4. git revert HEAD
+       ## A vi editor will open add previous commit hash should be with initial commit message
+          revert "revert official"
+          This reverts commit ee0c3036cd75e449998f0c2f692ed73792656770
+    
+    ## Check the git status after revert the commits
+    5. git status
+
+    ## Add the modified file to tracked Storage
+    6. git add .
+
+    ## Commit the changes to local 
+    7. git commit - "revert official"
+
+    ## Verify the git commits
+    8. git log
+
+
