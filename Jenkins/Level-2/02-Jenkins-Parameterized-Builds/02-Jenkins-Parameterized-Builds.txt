@@ -1,0 +1,58 @@
+A new DevOps Engineer has joined the team and he will be assigned some Jenkins related tasks. Before that, the team wanted to test a simple parameterized job to understand basic functionality of parameterized builds. He is given a simple parameterized job to build in Jenkins. Please find more details below:
+
+
+
+Click on the Jenkins button on the top bar to access the Jenkins UI. Login using username admin and password Adm!n321.
+
+
+1. Create a parameterized job which should be named as parameterized-job
+
+
+2. Add a string parameter named Stage; its default value should be Build.
+
+
+3. Add a choice parameter named env; its choices should be Development, Staging and Production.
+
+
+4. Configure job to execute a shell command, which should echo both parameter values (you are passing in the job).
+
+
+5. Build the Jenkins job at least once with choice parameter value Staging to make sure it passes.
+
+
+Note:
+
+1. You might need to install some plugins and restart Jenkins service. So, we recommend clicking on Restart Jenkins when installation is complete and no jobs are running on plugin installation/update page i.e update centre. Also, Jenkins UI sometimes gets stuck when Jenkins service restarts in the back end. In this case, please make sure to refresh the UI page.
+
+
+2. For these kind of scenarios requiring changes to be done in a web UI, please take screenshots so that you can share it with us for review in case your task is marked incomplete. You may also consider using a screen recording software such as loom.com to record and share your work.
+
+Ans)
+    ## ## Log into the Jenins UI
+    1. username admin and password Adm!n321
+
+    ## Create a New Jenkins Job
+    2. Click on "New Item" to create a new job -> Enter a name for your job, such as "parameterized-job." -> Select "Freestyle project" and click "OK."
+
+    ## Add a String Parameter Named "Stage"
+    3. Scroll down to the "Build Triggers" section -> Check the box that says "This project is parameterized." -> Click on the "Add Parameter" dropdown and select "String Parameter." -> In the "Name" field, enter "Stage." -> In the "Default Value" field, enter "Build."
+
+    ## Add a Choice Parameter Named "env"
+    4. Click on the "Add Parameter" dropdown again, and this time select "Choice Parameter." -> In the "Name" field, enter "env." -> In the "Choices" field, enter the following choices, one per line:
+                           Development
+                           Staging
+                           Production
+
+    ## Configure the Job to Execute a Shell Command
+    5. In the "Build" section, click on "Add build step" and select "Execute shell." -> In the "Command" text area, enter the following shell command to echo both parameter values
+                                                echo "Stage: ${Stage}"
+                                                echo "env: ${env}"
+
+    ## Save the Job Configuration
+    6. Scroll to the bottom of the page and click "Save."
+
+    ## Now, your Jenkins job "parameterized-job" is configured with two parameters ("Stage" and "env"). It will execute a shell command to echo the values of these parameters.
+    ## To test the job with the "Staging" parameter value, follow these steps:
+    7. Click on your job "parameterized-job" in the Jenkins dashboard -> Click on "Build with Parameters." -> In the "Stage" dropdown, select "Staging." -> In the "env" dropdown, select the desired environment (e.g., "Staging"). -> Click "Build."
+
+    ## The job will run, and we will see the echoed values of the parameters in the console output, which should include "Stage: Staging" and "env: Staging" if you selected "Staging" for both parameters.
