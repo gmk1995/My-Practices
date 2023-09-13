@@ -1,0 +1,89 @@
+03-Jenkins-Workspaces
+Some developers are working on a common repository where they are testing some features for an application. They are having three branches (excluding the master branch) in this repository where they are adding changes related to these different features. They want to test these changes on Stratos DC app servers so they need a Jenkins job using which they can deploy these different branches as per requirements. Configure a Jenkins job accordingly.
+
+
+
+Click on the Jenkins button on the top bar to access the Jenkins UI. Login using username admin and password Adm!n321.
+
+
+Similarly, click on Gitea button to access the Gitea page. Login to Gitea server using username sarah and password Sarah_pass123.
+
+
+There is a Git repository named web_app on Gitea where developers are pushing their changes. It has three branches version1, version2 and version3 (excluding the master branch). You need not to make any changes in the repository.
+
+
+1. Create a Jenkins job named app-job.
+
+2. Configure this job to have a choice parameter named Branch with choices as given below:
+
+version1
+
+version2
+
+version3
+
+
+3. Configure the job to fetch changes from above mentioned Git repository and make sure it should fetches the changes from the respective branch which you are passing as a choice in the choice parameter while building the job. For example if you choose version1 then it must fetch and deploy the changes from branch version1.
+
+4. Configure this job to use custom workspace rather than a default workspace and custom workspace directory should be created under /var/lib/jenkins (for example /var/lib/jenkins/version1) location rather than under any sub-directory etc. The job should use a workspace as per the value you will pass for Branch parameter while building the job. For example if you choose version1 while building the job then it should create a workspace directory called version1 and should fetch Git repository etc within that directory only.
+
+5. Configure the job to deploy code (fetched from Git repository) on storage server (in Stratos DC) under /var/www/html directory. Since its a shared volume.
+
+You can access the website by clicking on App button.
+
+Note:
+
+You might need to install some plugins and restart Jenkins service. So, we recommend clicking on Restart Jenkins when installation is complete and no jobs are running on plugin installation/update page i.e update centre. Also, Jenkins UI sometimes gets stuck when Jenkins service restarts in the back end. In this case please make sure to refresh the UI page.
+
+For these kind of scenarios requiring changes to be done in a web UI, please take screenshots so that you can share it with us for review in case your task is marked incomplete. You may also consider using a screen recording software such as loom.com to record and share your work.
+
+
+
+Ans)
+    ## Log into the Jenkins Server 
+    1. ssh jenkins@jenkins
+
+    ## Generate the ssh key
+    2. ssh-keygen
+
+    ## Copy the sshkey from Jenkins Servers to storage Sever to do Key less Authentication
+    3. ssh-copy-id natasha@ststor01
+
+    ## Log in to the Jenkins UI
+    4. username admin and password Adm!n321
+
+    ## Add Git and SSH plugin
+    5. Manage Jenkins -> Manage plugins -> Available plugins -> select Git, SSH -> install -> Restart Jenkins when installation is complete and no jobs are running on plugin installation/update
+
+    ## Create a New Jenkins Job
+    6. Click on "New Item" to create a new job -> Enter a name for your job, such as "app-job" -> Select "Freestyle project" and click "OK"
+
+    ## Add a Choice Parameter Named "env"
+    7. Click on the "Add Parameter" dropdown again, and this time select "Choice Parameter." -> In the "Name" field, enter "Branch." -> In the "Choices" field, enter the following choices, one per line:
+                                                                    version1
+                                                                    version2
+                                                                    version3
+    
+    ## Configure Source Code Management
+    8. In the "Source Code Management" section, select "Git." -> Enter the URL of your Git repository in the "Repository URL" field. -> Under "Branches to build," select "Branch Specifier (blank for 'any')." -> In the "Branch Specifier" field, enter ${Branch}. -> This will make it fetch the branch specified in the "Branch" parameter.
+
+    ## Custom Workspace
+    9. Check the "Use custom workspace" option -> In the "Directory" field, enter the following: /var/lib/jenkins/${Branch} "
+
+    ## Configure the Job to Execute a Shell Command
+    10. In the "Build" section, click on "Add build step" and select "Execute shell." -> In the "Command" text area, enter the following shell command to echo both parameter values: " scp -r * natasha@ststor01:/var/www/html
+
+    ## Save the Job Configuration
+    11. Scroll to the bottom of the page and click "Save."
+
+    ## Now, your Jenkins job "app-job" is configured with Choice parameters ("Branch"). It will execute a shell command with Branch parameters.
+    ## To test the job with the "Branch" parameter value, follow these steps:
+    12. Click on your job "parameterized-job" in the Jenkins dashboard -> Click on "Build with Parameters."-> In the "Branch" dropdown, select the desired environment (e.g., "version1"). -> Click "Build."
+
+    ## Access the App in the browser you can see
+    13. It was build with version1 branch data
+    ## Like we can test the remaning 2 branch( version2, version3) while building the job with choice parameters 
+
+    
+
+
