@@ -1,0 +1,80 @@
+There is a requirement to create a Jenkins job to automate the database backup. Below you can find more details to accomplish this task:
+
+
+
+Click on the Jenkins button on the top bar to access the Jenkins UI. Login using username admin and password Adm!n321.
+
+
+1. Create a Jenkins job named database-backup.
+
+
+2. Configure it to take a database dump of the kodekloud_db01 database present on the Database server in Stratos Datacenter, the database user is kodekloud_roy and password is asdfgdsd.
+
+
+3. The dump should be named in db_$(date +%F).sql format, where date +%F is the current date.
+
+4. Copy the db_$(date +%F).sql dump to the Backup Server under location /home/clint/db_backups.
+
+
+5. Further, schedule this job to run periodically at */10 * * * * (please use this exact schedule format).
+
+
+Note:
+
+
+1. You might need to install some plugins and restart Jenkins service. So, we recommend clicking on Restart Jenkins when installation is complete and no jobs are running on plugin installation/update page i.e update centre. Also, Jenkins UI sometimes gets stuck when Jenkins service restarts in the back end. In this case please make sure to refresh the UI page.
+
+
+2. Please make sure to define you cron expression like this */10 * * * * (this is just an example to run job every 10 minutes).
+
+
+3. For these kind of scenarios requiring changes to be done in a web UI, please take screenshots so that you can share it with us for review in case your task is marked incomplete. You may also consider using a screen recording software such as loom.com to record and share your work.
+
+Ans)
+    ## Log into the DB server
+    1. ssh peter@stdb01
+
+    ## Generate the sshkey
+    2. ssh-keygen
+
+    ## Copy the sshkey to the backup server
+    3. ssh-copy-id clint@stbkp01
+
+    ## Log in to the Jenkins UI
+    4. username admin and password Adm!n321
+
+    ## Add Git and SSH plugin
+    5. Manage Jenkins -> Manage plugins -> Available plugins -> select SSH, SSH Credentials, SSH Agent -> install -> Restart Jenkins when installation is complete and no jobs are running on plugin installation/update 
+
+    ## Add SSH Login Credentials in the Jenkins Global Credentials
+    6. Manage Jenkins -> Credentials -> System -> Global credentials (unrestricted) -> Add Credentials -> username: peter -> password: Sp!dy -> Name of the Credentials: db_cred -> save
+
+    ## Add SSH Agent Details in the Configure System
+    7. Dashboard -> Manage Jenkins -> Configure System -> SSH sites (SSH sites that projects will want to connect ) -> Hostname: stdb01 -> Port: 22 -> Credentials: peter (db_cred)
+
+    ## Create a New Jenkins Job
+    8. Click on "New Item" to create a new job -> Enter a name for your job, such as "database-backup" -> Select "Freestyle project" and click "OK"
+    
+    ## Configure the job
+    9. Build periodically: */10 * * * * -> In the "Build" section, click on "Add build step" and select "Execute In the Remote Server" -> Select the Remote Server username and password stored earlier in the Jenkins -> In the command add the below lines
+
+    #!/bin/bash
+
+    # Get the current date
+    date=$(date +%F)
+
+    # Create the database dump
+    mysqldump -u kodekloud_roy -pGasdfgdsd kodekloud_db01 > db_$date.sql
+
+    # Copy the database dump to the Backup Server
+    scp -o StrictHostKeyChecking=no db_$date.sql clint@stbkp01:/home/clint/db_backups
+
+    ## Save the Job Configuration
+    10. Scroll to the bottom of the page and click "Save."
+
+    ## Build the Job 
+    11. Click on the Build the Job -> Job will be successfully executed we can check that in the console output
+
+    ## Verify the DB Backup in the backup server
+    12. ssh clint@stbkp01 && cd db_backups && ls -larth & ##we can see db_14-09-2023.sql file && cat db_14-09-2023.sql
+     
