@@ -43,7 +43,7 @@ Ans)
     ## Log in to the Jenkins UI
     4. username admin and password Adm!n321
 
-    ## Add Git and SSH plugin
+    ## Add SSH plugin
     5. Manage Jenkins -> Manage plugins -> Available plugins -> select SSH, SSH Credentials, SSH Agent -> install -> Restart Jenkins when installation is complete and no jobs are running on plugin installation/update 
 
     ## Add SSH Login Credentials in the Jenkins Global Credentials
