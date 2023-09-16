@@ -1,0 +1,23 @@
+During the weekly meeting, the Nautilus DevOps team discussed about the automation and configuration management solutions that they want to implement. While considering several options, the team has decided to go with Ansible for now due to its simple setup and minimal pre-requisites. The team wanted to start testing using Ansible, so they have decided to use jump host as an Ansible controller to test different kind of tasks on rest of the servers.
+
+
+
+Install ansible version 4.10.0 on Jump host using pip3 only. Make sure Ansible binary is available globally on this system, i.e all users on this system are able to run Ansible commands.
+
+Ans)
+      ## Log into the Jump Server
+      1. ssh thor@jump_host
+
+      ## Update the Yum Package
+      2. sudo yum update -y
+
+      ## Install the Yum Package
+      3. sudo pip3 install ansible==4.10.0
+
+      ## To available Ansible binary globally on this system, i.e all users on this system are able to run Ansible commands
+      4. sudo ln -s /usr/local/bin/ansible /usr/bin/ansible
+
+      ## Check the ansible version
+      5. ansible --version
+
+      ## To verify if the ansible is accessing all the user or not you can switch to any user on the sever and run ansible --version command. 
