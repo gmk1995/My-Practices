@@ -1,0 +1,39 @@
+There is a static website running in Stratos Datacenter. They have already configured the app servers and code is already deployed there. To make it work properly, they need to configure LBR server. There are number of options for that, but team has decided to go with HAproxy. FYI, apache is running on port 5001 on all app servers. Complete this task as per below details.
+
+
+
+a. Install and configure HAproxy on LBR server using yum only and make sure all app servers are added to HAproxy load balancer. HAproxy must serve on default http port (Note: Please do not remove stats socket /var/lib/haproxy/stats entry from haproxy default config.).
+
+b. Once done, you can access the website using StaticApp button on the top bar.
+
+Ans)
+    ## Log into the LBR server
+    1. ssh loki@stlb01
+
+    ## install the haproxy server
+    2. sudo yum install haproxy -y
+
+    ## Edit the haproxy.cfg file to add all app server details
+    3. sudo vi /etc/haproxy/haproxy.cfg
+       in the frontend change the port number to 80
+       in the backend app add below details 
+       stapp01 172.16.238.10:5001 check
+       stapp02 172.16.238.11:5001 check
+       stapp03 172.16.238.12:5001 check
+    ## Checking the haproxy.cfg file configurations
+    4. haproxy -f /etc/haproxy/haproxy.cfg
+
+    ## Starting, Enabling and Checking Status of haproxy services
+    5. sudo systemctl start haproxy && sudo systemctl enable haproxy && sudo systemctl status haproxy
+
+    ## Checking the haproxy LB is working or not
+    6. curl http://localhost:80
+
+    ## to check the remaining needs exit from LBR server and check from Jump Server
+    7. curl http://172.16.238.14:80
+       curl http://172.16.238.10:5001
+       curl http://172.16.238.11:5001
+       curl http://172.16.238.12:5001
+
+       All the above curl command will print the result " Welcome to xFusionCorp Industries! "
+       
