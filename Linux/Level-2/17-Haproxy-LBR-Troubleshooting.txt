@@ -1,0 +1,28 @@
+xFusionCorp Industries has an application running on Nautlitus infrastructure in Stratos Datacenter. The monitoring tool recognised that there is an issue with the haproxy service on LBR server. That needs to fixed to make the application work properly.
+
+
+
+Troubleshoot and fix the issue, and make sure haproxy service is running on Nautilus LBR server. Once fixed, make sure you are able to access the website using StaticApp button on the top bar.
+
+Ans)
+    ## Log into the LBR server
+    1. ssh loki@stlb01
+
+    ## Check the haproxy status
+    2. sudo systemctl status haproxy
+
+    ## haproxy is in failed status and checking the haproxy.cfg file errors
+    3. haproxy -f /etc/haproxy/haproxy.cfg
+
+    ## As we have identified errors in haproxy.cfg file
+    4. vi /etc/haproxy/haproxy.cfg
+       in the "global section"
+       user haprox is not added correct, changed user haproxy
+
+    ## Restarting, Checking haproxy service
+    5. sudo systemctl restart haproxy && sudo systemctl status haproxy
+
+    ## Once you confirm haproxy is up and running you can access the webpage
+    6. curl http://localhost:80
+       you will receive a response like " Welcome to xFusionCorp Industries! "
+
