@@ -1,0 +1,78 @@
+We are working on an application that will be deployed on multiple containers within a pod on Kubernetes cluster. There is a requirement to share a volume among the containers to save some temporary data. The Nautilus DevOps team is developing a similar template to replicate the scenario. Below you can find more details about it.
+
+
+
+Create a pod named volume-share-xfusion.
+
+
+For the first container, use image centos with latest tag only and remember to mention the tag i.e centos:latest, container should be named as volume-container-xfusion-1, and run a sleep command for it so that it remains in running state. Volume volume-share should be mounted at path /tmp/blog.
+
+
+For the second container, use image centos with the latest tag only and remember to mention the tag i.e centos:latest, container should be named as volume-container-xfusion-2, and again run a sleep command for it so that it remains in running state. Volume volume-share should be mounted at path /tmp/cluster.
+
+
+Volume name should be volume-share of type emptyDir.
+
+
+After creating the pod, exec into the first container i.e volume-container-xfusion-1, and just for testing create a file blog.txt with any content under the mounted path of first container i.e /tmp/blog.
+
+
+The file blog.txt should be present under the mounted path /tmp/cluster on the second container volume-container-xfusion-2 as well, since they are using a shared volume.
+
+
+Note: The kubectl utility on jump_host has been configured to work with the kubernetes cluster.
+
+Ans)
+    ## Log into the jump_host 
+    1. ssh thor@jump_host
+
+    ## Write the volume-share-xfusion.yaml file for pod create
+
+     2.
+       apiVersion: v1
+       kind: Pod
+       metadata:
+         creationTimestamp: null
+         labels:
+           run: volume-share-xfusion
+         name: volume-share-xfusion
+       spec:
+         containers:
+         - command: ["/bin/bash", "-c", "sleep 2000000"]
+           image: centos:latest
+           name: volume-container-xfusion-1
+           volumeMounts:
+           - name: volume-share
+             mountPath: /tmp/blog
+           resources: {}
+         - command: ["/bin/bash", "-c", "sleep 2000000"]
+           image: centos:latest
+           name: volume-container-xfusion-2
+           volumeMounts:
+           - name: volume-share
+             mountPath: /tmp/cluster
+           resources: {}
+         dnsPolicy: ClusterFirst
+         restartPolicy: Never
+         volumes:
+           - name: volume-share
+             emptyDir: {}
+       status: {}
+
+    ## Run the File to create the pod
+    3. kubectl apply -f volume-share-xfusion.yaml
+
+    ## Check the Pods are up and running or not
+    4. kubectl get pods
+       once Pods are up and running needs to perform another task
+
+    ## Log into the container volume-container-xfusion-1 in pod volume-share-xfusion  and create a file blog.txt in /tmp/blog directory 
+    5. kubectl exec -it volume-share-xfusion -c volume-container-xfusion-1 -- bash
+       vi /tmp/blog/blog.txt 
+       echo "Hello World!"
+       exit
+
+    ## Log into the container volume-container-xfusion-2 in pod volume-share-xfusion and check the blog.tx file in /tmp/cluster directory
+    6. kubectl exec -it volume-share-xfusion -c volume-container-xfusion-2 -- bash
+       ls -larth /tmp/cluster/
+       blog.txt file will be there because as both the containers sharing the same volume
