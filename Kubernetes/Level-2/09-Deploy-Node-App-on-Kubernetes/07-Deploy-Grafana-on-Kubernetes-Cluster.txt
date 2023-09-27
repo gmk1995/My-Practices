@@ -1,0 +1,72 @@
+The Nautilus DevOps teams is planning to set up a Grafana tool to collect and analyze analytics from some applications. They are planning to deploy it on Kubernetes cluster. Below you can find more details.
+
+
+
+1.) Create a deployment named grafana-deployment-devops using any grafana image for Grafana app. Set other parameters as per your choice.
+
+
+2.) Create NodePort type service with nodePort 32000 to expose the app.
+
+
+You need not to make any configuration changes inside the Grafana app once deployed, just make sure you are able to access the Grafana login page.
+
+
+Note: The kubectl on jump_host has been configured to work with kubernetes cluster.
+
+Ans)
+    ## Log into the jump_host 
+    1. ssh thor@jump_host
+
+    ## Write a grafana-deployment-devops.yaml file for grafana-deployment
+    2. vi grafana-deployment-devops.yaml
+        apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          creationTimestamp: null
+          labels:
+            app: grafana-deployment-devops
+          name: grafana-deployment-devops
+        spec:
+          replicas: 2
+          selector:
+            matchLabels:
+              app: grafana-deployment-devops
+          strategy: {}
+          template:
+            metadata:
+              creationTimestamp: null
+              labels:
+                app: grafana-deployment-devops
+            spec:
+              containers:
+              - image: grafana/grafana:latest
+                name: grafana-container
+                ports:
+                - containerPort: 3000
+                resources: {}
+        status: {}
+
+    ## Apply the grafana-deployment-devops.yaml file for grafana-deployment create
+    3. kubectl apply -f grafana-deployment-devops.yaml
+       Once All Pods are up and running  create the service to access it
+
+    ## Create a grafana-service.yaml to create grafana service to expose the grafana application
+    4. vi grafana-service.yaml
+        apiVersion: v1
+        kind: Service
+        metadata:
+          name: grafana-service
+        spec:
+          type: NodePort
+          selector:
+            app: grafana-deployment-devops
+        ports:
+        - port: 80
+          targetPort: 3000
+          nodePort: 32000
+
+    ## Apply grafana-service.yaml to create grafana service to expose the grafana application
+    5. kubectl apply -f grafana-service.yaml
+       Once the service is created successfully. You can able to accees the application using NodeIP and NodePort 
+
+    
