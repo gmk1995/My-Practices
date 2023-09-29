@@ -1,0 +1,30 @@
+Last week, the Nautilus DevOps team deployed a redis app on Kubernetes cluster, which was working fine so far. This morning one of the team members was making some changes in this existing setup, but he made some mistakes and the app went down. We need to fix this as soon as possible. Please take a look.
+
+
+
+The deployment name is redis-deployment. The pods are not in running state right now, so please look into the issue and fix the same.
+
+
+Note: The kubectl utility on jump_host has been configured to work with the kubernetes cluster.
+
+Ans)
+    ## Log into the jump_host 
+    1. ssh thor@jump_host
+
+    ## Check the deployment, pods status
+    2. kubectl get all
+       Pods are not running need to describe to check the error
+
+    ## describe the pod
+    3. kubectl describe pod redis-pod-anjc12dcc2
+       Two issues I have found one is "image name tag is not correct and configMap name is also not correct"
+
+    ## Edit the Deployment to correct the image tag name and configMap name
+    4. kubectl edit deployment redis-deployment
+       Once image tag name and configMap name are correct close the file.
+    
+    ## Check the pod status
+    5. kubectl get pods
+       Now we can see pod will be in UP and Running State
+
+    
