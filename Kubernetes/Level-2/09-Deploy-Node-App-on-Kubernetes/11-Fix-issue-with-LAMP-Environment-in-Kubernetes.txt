@@ -1,0 +1,74 @@
+One of the DevOps team member was trying to install a WordPress website on a LAMP stack which is essentially deployed on Kubernetes cluster. It was working well and we could see the installation page a few hours ago. However something is messed up with the stack now due to a website went down. Please look into the issue and fix it:
+
+
+
+FYI, deployment name is lamp-wp and its using a service named lamp-service. The Apache is using http default port and nodeport is 30008. From the application logs it has been identified that application is facing some issues while connecting to the database in addition to other issues. Additionally, there are some environment variables associated with the pods like MYSQL_ROOT_PASSWORD, MYSQL_DATABASE, MYSQL_USER, MYSQL_PASSWORD, MYSQL_HOST.
+
+
+Also do not try to delete/modify any other existing components like deployment name, service name, types, labels etc.
+
+
+Note: The kubectl utility on jump_host has been configured to work with the kubernetes cluster.
+
+Ans)
+    ## Log into the jump_host 
+    1. ssh thor@jump_host
+
+    ## check the pod/ deployment, service status
+    2. kubectl get all
+       Pod is up and running. Apache service is exposed with different nodeport 30009. Needs to change it to 30008
+    
+    ## Apache service is exposed with different nodeport 30009. Needs to change it to 30008
+    3. kubectl edit svc httpd-service
+       Removed 30009 and added 30008 nodeport
+    
+    ## Check the logs of the apache container
+    4. kubectl logs -f lamp-pod-dxbgnf32fx6 -c httpd-php-container
+       There is a error in MYSQL_PASSWORD and MYSQL_HOST in the index.php. Needs to modify that
+    
+    ## Log into the httpd-php-container to modify the index.php
+    5. kubectl exec -it lamp-pod-dxbgnf32fx6 -c httpd-php-container -- bash
+       vi /app/index.php
+       <?php
+       $dbname = $_ENV['MYSQL_DATABASE'];
+       $dbuser = $_ENV['MYSQL_USER'];
+       $dbpass = $_ENV[''MYSQL_PASSWORD""];
+       $dbhost = $_ENV['MYSQL-HOST'];
+
+
+       $connect = mysqli_connect($dbhost, $dbuser, $dbpass) or die("Unable to Connect to '$dbhost'");
+
+       $test_query = "SHOW TABLES FROM $dbname";
+       $result = mysqli_query($test_query);
+
+       if ($result->connect_error) {
+          die("Connection failed: " . $conn->connect_error);
+       }
+         echo "Connected successfully";
+        
+        Found MYSQL_PASSWORD and MYSQL_HOST environment values are not given properly in the index.php
+
+        ## Modified index.php
+        <?php
+       $dbname = $_ENV['MYSQL_DATABASE'];
+       $dbuser = $_ENV['MYSQL_USER'];
+       $dbpass = $_ENV['MYSQL_PASSWORD'];
+       $dbhost = $_ENV['MYSQL_HOST'];
+
+
+       $connect = mysqli_connect($dbhost, $dbuser, $dbpass) or die("Unable to Connect to '$dbhost'");
+
+       $test_query = "SHOW TABLES FROM $dbname";
+       $result = mysqli_query($test_query);
+
+       if ($result->connect_error) {
+          die("Connection failed: " . $conn->connect_error);
+       }
+         echo "Connected successfully";
+
+        After modify exit from the container. and Take the Node IP and nodeport Number to access the application. 
+
+    ## Access the application
+    6. NodeIP:nodeport in any browser
+       Response: Connected successfully
+       With this App and DB is Connected successfully
