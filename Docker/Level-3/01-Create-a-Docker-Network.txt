@@ -1,0 +1,25 @@
+The Nautilus DevOps team needs to set up several docker environments for different applications. One of the team members has been assigned a ticket where he has been asked to create some docker networks to be used later. Complete the task based on the following ticket description:
+
+
+a. Create a docker network named as news on App Server 3 in Stratos DC.
+
+
+b. Configure it to use macvlan drivers.
+
+
+c. Set it to use subnet 192.168.0.0/24 and iprange 192.168.0.3/24.
+
+Ans)
+    ## Log into the App Server 3
+    1. ssh banner@stapp03
+
+    ## Create the docker network with macvlan driver with subnet and iprange
+    2. docker network create news -d macvlan --subnet=192.168.0.0/24 --ip-range=192.168.0.3/24
+
+    ## Check the network is created or not
+    3. docker network ls
+
+    ## Inspect the news network to see the Configurations which we have given
+    4. docker network Inspect news | head -15
+
+    
