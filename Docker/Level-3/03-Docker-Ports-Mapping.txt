@@ -1,0 +1,27 @@
+The Nautilus DevOps team is planning to host an application on a nginx-based container. There are number of tickets already been created for similar tasks. One of the tickets has been assigned to set up a nginx container on Application Server 3 in Stratos Datacenter. Please perform the task as per details mentioned below:
+
+
+a. Pull nginx:stable docker image on Application Server 3.
+
+
+b. Create a container named apps using the image you pulled.
+
+
+c. Map host port 5003 to container port 80. Please keep the container in running state.
+
+Ans)
+    ## Log into the App Server 3 
+    1. ssh banner@stapp03
+
+    ## Pull the nginx:stable image and create the apps container
+    2. docker run -d --name apps -p 5003:80 nginx:stable
+
+    ## Check whether image is created or not
+    3. docker images
+
+    ## Check whether the container is up and running or not
+    4. docker ps
+    
+    ## Check whether Host Port 5003 is Mapped with container 80 and listen or not  
+    5. curl -I http://localhost:5003
+       if we receive HTTP 200 response then host port 5003 is mapped with the container port 80
