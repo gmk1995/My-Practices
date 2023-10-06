@@ -1,0 +1,47 @@
+The Nautilus application development team shared static website content that needs to be hosted on the httpd web server using a containerised platform. The team has shared details with the DevOps team, and we need to set up an environment according to those guidelines. Below are the details:
+
+
+
+a. On App Server 1 in Stratos DC create a container named httpd using a docker compose file /opt/docker/docker-compose.yml (please use the exact name for file).
+
+
+b. Use httpd (preferably latest tag) image for container and make sure container is named as httpd; you can use any name for service.
+
+
+c. Map 80 number port of container with port 6100 of docker host.
+
+
+d. Map container's /usr/local/apache2/htdocs volume with /opt/security volume of docker host which is already there. (please do not modify any data within these locations).
+
+Ans)
+    ## Log into the App Server1
+    1. ssh tony@stapp01
+
+    ## Create the docker-compose.yml file
+    2. vi /opt/docker/docker-compose.yml
+       version: '3'
+       services:
+         httpd:
+           image: httpd:latest
+           container_name: httpd
+           volumes:
+             - /opt/security:/usr/local/apache2/htdocs
+           ports:
+             - 6100:80
+
+    ## Create the container with docker-compose.yml file
+    3. docker-compose up -d 
+
+    ## Check the image is created or not
+    4. docker images
+
+    ## Check is container is created or not 
+    5. docker ps
+
+    ## Check the container with docker-compose
+    6. docker-compose ps
+
+    ## Check the response of the httpd web server
+    7. curl -I localhost:6100
+       Response 200 OK will be considered as web server is up and running
+       
