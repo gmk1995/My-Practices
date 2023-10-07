@@ -1,0 +1,79 @@
+The Nautilus DevOps team has installed and configured new Jenkins server in Stratos DC which they will use for CI/CD and for some automation tasks. There is a requirement to add all app servers as slave nodes in Jenkins so that they can perform tasks on these servers using Jenkins. Find below more details and accomplish the task accordingly.
+
+
+
+Click on the Jenkins button on the top bar to access the Jenkins UI. Login using username admin and password Adm!n321.
+
+
+1. Add all app servers as SSH build agent/slave nodes in Jenkins. Slave node name for app server 1, app server 2 and app server 3 must be App_server_1, App_server_2, App_server_3 respectively.
+
+
+2. Add labels as below:
+
+
+App_server_1 : stapp01
+
+App_server_2 : stapp02
+
+App_server_3 : stapp03
+
+
+3. Remote root directory for App_server_1 must be /home/tony/jenkins, for App_server_2 must be /home/steve/jenkins and for App_server_3 must be /home/banner/jenkins.
+
+
+4. Make sure slave nodes are online and working properly.
+
+
+Note:
+
+1. You might need to install some plugins and restart Jenkins service. So, we recommend clicking on Restart Jenkins when installation is complete and no jobs are running on plugin installation/update page i.e update centre. Also, Jenkins UI sometimes gets stuck when Jenkins service restarts in the back end. In this case, please make sure to refresh the UI page.
+
+
+2. For these kind of scenarios requiring changes to be done in a web UI, please take screenshots so that you can share it with us for review in case your task is marked incomplete. You may also consider using a screen recording software such as loom.com to record and share your work.
+
+Ans)
+    ## Log Into the Jenkins Server
+    1. ssh jenkins@jenkins
+
+    ## Check Java version on the master node
+    2. java --version
+
+    ## Check the Java version in the Slave nodes
+    3. java --version
+       java is not installed we need to install it
+
+    ## Log into the App Server 1 App Server 2 App Server 3
+    4. ssh tony@stapp01 && ssh steve@stapp02 && ssh banner@stapp03
+    
+    ## Java installation on all the slave nodes
+    4. sudo yum install java-11-openjdk -y
+
+    ## Log into the Jenins UI
+    5. username admin and password Adm!n321
+
+    ## Add SSH Build plugin
+    6. Manage Jenkins -> Manage plugins -> Available plugins -> select SSH Build -> install -> Restart Jenkins when installation is complete and no jobs are running on plugin installation/update 
+
+    ## Add All App Servers Username and Password in the Jenkins Credentials
+    7. Manage Jenkins -> Credentials -> System -> Global credentials (unrestricted) -> Add New credentials -> Select kind Username and password -> username -> password -> id -> description -> save
+    Add All 3 App Sever username and password
+
+    ## Add Slave nodes
+    8. Manage Jenkins -> Manage nodes and clouds -> New Node -> Node Name  App_server_1 -> Type (Permanent Agent) -> description -> Number of executors 2 -> Remote root directory /home/tony/jenkins -> Labels App_server_1 : stapp01 -> Usage (Use this node as much as possible) -> Launch Method (Lauch agent via SSH) -> Host stapp01 -> Credentials (tony/*****(app_server1)) -> Host Key Verification Strategy (Non Verify Verification Strategy) -> Availability (Keep this agent online as much as possible) -> save
+
+    Wait till Agent will come online automatically if not use Relauch Agent.
+    Repeat Same Steps to add App_server_2 and App_server_3
+
+    ## Check jenkins Job build in the Slave Nodes
+    9. Click on "New Item" to create a new job -> Enter a name for your job, such as "Remote-test-job" -> Select "Freestyle project" and click "OK" -> Restrict where this project can be run -> Label Expression (stapp02) -> Build Steps -> Execute shell -> command -> echo "Job is Running on App Server 2 Slave Node 2"  -> save
+
+    Console output will be like below:
+    Started by user admin
+    Running as SYSTEM
+    Building remotely on App_server_2 (stapp02 :) in workspace /home/steve/jenkins/workspace/Remote-job-test
+    [Remote-job-test] $ /bin/sh -xe /tmp/jenkins1145695799115669552.sh
+    + echo 'Job is Running on App Server 2 Slave Node 2'
+    Job is Running on App Server 2 Slave Node 2
+    Finished: SUCCESS
+
+
