@@ -1,0 +1,69 @@
+One of the DevOps engineers was working on to create a Dockerfile for Nginx. We need to build an image using that Dockerfile. The deployment must be done using a Jenkins pipeline. Below you can find more details about the same.
+
+
+
+Click on the Jenkins button on the top bar to access the Jenkins UI. Login using username admin and password Adm!n321.
+
+
+Similarly, click on the Gitea button on the top bar to access the Gitea UI. Login using username sarah and password Sarah_pass123. There is a repository named sarah/web in Gitea.
+
+
+Create/configure a Jenkins pipeline job named nginx-container, configure it to run on server App Server 1.
+
+
+The pipeline can have just one stage named Build. (name is case sensitive)
+
+
+In the Build stage, build an image named stregi01.stratos.xfusioncorp.com:5000/nginx:latest using the Dockerfile present under the Git repository. stregi01.stratos.xfusioncorp.com:5000 is the image registry server. After building the image push the same to the image registry server.
+
+
+Note:
+
+
+You might need to install some plugins and restart Jenkins service. So, we recommend clicking on Restart Jenkins when installation is complete and no jobs are running on plugin installation/update page i.e update centre. Also, Jenkins UI sometimes gets stuck when Jenkins service restarts in the back end. In this case, please make sure to refresh the UI page.
+
+
+For these kind of scenarios requiring changes to be done in a web UI, please take screenshots so that you can share it with us for review in case your task is marked incomplete. You may also consider using a screen recording software such as loom.com to record and share your work.
+
+Ans)
+    ## Log into the Jenins UI
+    1. username admin and password Adm!n321
+
+    ## Add SSH Build plugin
+    2. Manage Jenkins -> Manage plugins -> Available plugins -> select "Pipeline, Pipeline: API, Pipeline: Basic Steps, Pipeline: Build Step, Pipeline: Declarative, Pipeline: Declarative Extension Points API, Pipeline: Groovy, Pipeline: Groovy Libraries, Pipeline: Input Step, Pipeline: Job, Pipeline: Milestone Step, Pipeline: Model API, Pipeline: Multibranch, Pipeline: Nodes and Processes, Pipeline: SCM Step, Pipeline: Stage Step, Pipeline: Stage Tags Metadata, Pipeline: Step API, Pipeline: Supporting APIs, SSH Agent Plugin, SSH Build Agents plugin, SSH Credentials Plugin, git, credentials " -> install -> Restart Jenkins when installation is complete and no jobs are running on plugin installation/update 
+
+    ## Add All App Servers Username and Password in the Jenkins Credentials
+    3. Manage Jenkins -> Credentials -> System -> Global credentials (unrestricted) -> Add New credentials -> Select kind Username and password -> username banner -> password -> id app_server_3 -> description -> save
+    
+    ## Check the java installation on App Server 3 if not install it.
+    4. java --version
+       ## java is not installed we need to installed
+       sudo yum install java-11-openjdk -y
+
+    ## Add Slave nodes
+    5. Manage Jenkins -> Manage nodes and clouds -> New Node -> Node Name  App_server_1 -> Type (Permanent Agent) -> description -> Number of executors 2 -> Remote root directory /home/tony/jenkins -> Labels App_server_1 : stapp01 -> Usage (Use this node as much as possible) -> Launch Method (Lauch agent via SSH) -> Host stapp01 -> Credentials (tony/*****(app_server1)) -> Host Key Verification Strategy (Non Verify Verification Strategy) -> Availability (Keep this agent online as much as possible) -> save
+
+    ## Create a New Jenkins Job
+    6. Click on "New Item" to create a new job -> Enter a name for your job name , such as "nginx-container" -> Select "Pipeline" and click "OK" -> Pipeline Script -> save 
+    pipeline {
+    agent { label 'stapp03' }
+
+    stages {
+        stage('Build') {
+            steps {
+                // Step 1: Git checkout
+                git branch: 'master', url: 'http://git.stratos.xfusioncorp.com/sarah/web.git'
+                
+                // Step 2: Docker build
+                sh "docker build -t stregi01.stratos.xfusioncorp.com:5000/nginx:latest ."
+                
+                // Step 3: Docker push
+                sh "docker push stregi01.stratos.xfusioncorp.com:5000/nginx:latest"
+            }
+        }
+    }
+}  
+ 
+ ## Check the docker images in the App Server 3
+ 7. docker images
+    if images are ther and pushed our pipelie is successfully.
