@@ -1,0 +1,81 @@
+The development team of xFusionCorp Industries is working on to develop a new static website and they are planning to deploy the same on Nautilus App Servers using Jenkins pipeline. They have shared their requirements with the DevOps team and accordingly we need to create a Jenkins pipeline job. Please find below more details about the task:
+
+
+
+Click on the Jenkins button on the top bar to access the Jenkins UI. Login using username admin and password Adm!n321.
+
+
+Similarly, click on the Gitea button on the top bar to access the Gitea UI. Login using username sarah and password Sarah_pass123. There under user sarah you will find a repository named web_app that is already cloned on Storage server under /var/www/html. sarah is a developer who is working on this repository.
+
+
+Add a slave node named Storage Server. It should be labeled as ststor01 and its remote root directory should be /var/www/html.
+
+
+We have already cloned repository on Storage Server under /var/www/html.
+
+
+Apache is already installed on all app Servers its running on port 8080.
+
+
+Create a Jenkins pipeline job named nautilus-webapp-job (it must not be a Multibranch pipeline) and configure it to:
+
+
+Deploy the code from web_app repository under /var/www/html on Storage Server, as this location is already mounted to the document root /var/www/html of app servers. The pipeline should have a single stage named Deploy ( which is case sensitive ) to accomplish the deployment.
+
+LB server is already configured. You should be able to see the latest changes you made by clicking on the App button. Please make sure the required content is loading on the main URL https://<LBR-URL> i.e there should not be a sub-directory like https://<LBR-URL>/web_app etc.
+
+
+Note:
+
+
+You might need to install some plugins and restart Jenkins service. So, we recommend clicking on Restart Jenkins when installation is complete and no jobs are running on plugin installation/update page i.e update centre. Also, Jenkins UI sometimes gets stuck when Jenkins service restarts in the back end. In this case, please make sure to refresh the UI page.
+
+
+For these kind of scenarios requiring changes to be done in a web UI, please take screenshots so that you can share it with us for review in case your task is marked incomplete. You may also consider using a screen recording software such as loom.com to record and share your work.
+
+
+Ans)
+        ## Log into the Jenins UI
+    1. username admin and password Adm!n321
+
+    ## Add SSH Build plugin
+    2. Manage Jenkins -> Manage plugins -> Available plugins -> select "Pipeline, Pipeline: API, Pipeline: Basic Steps, Pipeline: Build Step, Pipeline: Declarative, Pipeline: Declarative Extension Points API, Pipeline: Groovy, Pipeline: Groovy Libraries, Pipeline: Input Step, Pipeline: Job, Pipeline: Milestone Step, Pipeline: Model API, Pipeline: Multibranch, Pipeline: Nodes and Processes, Pipeline: SCM Step, Pipeline: Stage Step, Pipeline: Stage Tags Metadata, Pipeline: Step API, Pipeline: Supporting APIs, SSH Agent Plugin, SSH Build Agents plugin, SSH Credentials Plugin, git, credentials " -> install -> Restart Jenkins when installation is complete and no jobs are running on plugin installation/update 
+
+    ## Add All App Servers Username and Password in the Jenkins Credentials
+    3. Manage Jenkins -> Credentials -> System -> Global credentials (unrestricted) -> Add New credentials -> Select kind Username and password -> username banner -> password -> id app_server_3 -> description -> save
+    
+    ## Check the java installation on storage server if not install it.
+    4. ssh tony@stapp01 && 
+       java --version
+       ## java is not installed we need to installed
+       sudo yum install java-11-openjdk -y
+
+    ## Change the /var/www/html ownership 
+    5. chown -R /var/www/html
+
+    ## Add Slave nodes
+    6. Manage Jenkins -> Manage nodes and clouds -> New Node -> Node Name Storage Server  -> Type (Permanent Agent) -> description -> Number of executors 2 -> Remote root directory /var/www/html -> Labels ststor01 -> Usage (Use this node as much as possible) -> Launch Method (Lauch agent via SSH) -> Host stapp01 -> Credentials (tony/*****(app_server1)) -> Host Key Verification Strategy (Non Verify Verification Strategy) -> Availability (Keep this agent online as much as possible) -> save
+
+    ## Create a New Jenkins Job
+    7. Click on "New Item" to create a new job -> Enter a name for your job name , such as "nginx-container" -> Select "Pipeline" and click "OK" -> Pipeline Script -> save 
+        pipeline {
+    agent { label 'ststor01'}
+
+    stages {
+        stage('Deploy') {
+            steps {
+
+                // Step 1: Git checkout
+                git branch: 'master', url: 'http://git.stratos.xfusioncorp.com/sarah/web_app.git'
+                
+                //Copying Jenkins Job
+                sh "cp -r /var/www/html/workspace/nautilus-webapp-job/* /var/www/html"
+
+                
+            }
+        }
+    }
+} 
+  
+    ## Check the /var/www/html directory and see whether it have copied or not
+    8. cd /var/www/html/ && ls -larth
