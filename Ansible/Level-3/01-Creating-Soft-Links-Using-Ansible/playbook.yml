@@ -1,0 +1,36 @@
+- name: Creating new Files and Symbolic links on All App Servers
+  hosts: all
+  become: true
+  become_method: sudo
+  tasks:
+    - name: Creating a empty file, and adding  ownership, group and permissions on App server1
+      ansible.builtin.file:
+        path: /opt/data/blog.txt
+        state: touch
+        owner: tony
+        group: tony
+        mode: '0644'
+      when: inventory_hostname == "stapp01"
+    - name: Creating a empty file, and adding  ownership, group and permissions on App Server2
+      ansible.builtin.file:
+        path: /opt/data/story.txt
+        state: touch
+        owner: steve
+        group: steve
+        mode: '0644'
+      when: inventory_hostname == "stapp02"
+    - name: Creating a empty file, and adding  ownership, group and permissions on App Server3
+      ansible.builtin.file:
+        path: /opt/data/media.txt
+        state: touch
+        owner: banner
+        group: banner
+        mode: '0644'
+      when: inventory_hostname == "stapp03"
+    - name: Create a symbolic link
+      ansible.builtin.file:
+        src: /opt/data
+        dest: /var/www/html
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        state: link
