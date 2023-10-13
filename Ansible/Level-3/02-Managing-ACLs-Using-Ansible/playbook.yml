@@ -1,0 +1,53 @@
+- name: Creating new Files and Symbolic links on All App Servers
+  hosts: all
+  become: true
+  become_method: sudo
+  tasks:
+    - name: Creating a empty file on App server1
+      ansible.builtin.file:
+        path: /opt/finance/blog.txt
+        state: touch
+        owner: root
+        group: root
+        mode: '0644'
+      when: inventory_hostname == "stapp01"
+    - name: Creating a empty file on App Server2
+      ansible.builtin.file:
+        path: /opt/finance/story.txt
+        state: touch
+        owner: root
+        group: root
+        mode: '0644'
+      when: inventory_hostname == "stapp02"
+    - name: Creating a empty file on App Server3
+      ansible.builtin.file:
+        path: /opt/finance/media.txt
+        state: touch
+        owner: root
+        group: root
+        mode: '0644'
+      when: inventory_hostname == "stapp03"
+    - name: Grant group tony read access to a file
+      ansible.posix.acl:
+        path: /opt/finance/blog.txt
+        entity: tony
+        etype: group
+        permissions: r
+        state: present
+      when: inventory_hostname == "stapp01"
+    - name: Grant user steve read and write access to a file
+      ansible.posix.acl:
+        path: /opt/finance/story.txt
+        entity: steve
+        etype: user
+        permissions: rw
+        state: present
+      when: inventory_hostname == "stapp02"
+    - name: Grant group banner read and write access to a file
+      ansible.posix.acl:
+        path: /opt/finance/media.txt
+        entity: banner
+        etype: group
+        permissions: rw
+        state: present
+      when: inventory_hostname == "stapp03"
