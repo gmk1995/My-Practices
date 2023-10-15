@@ -1,0 +1,26 @@
+- name: install httpd on all app servers 
+  hosts: all
+  become: true
+  tasks:
+    - name: Install the latest version of httpd
+      ansible.builtin.yum:
+        name: httpd
+        state: latest
+    - name: start the httpd services
+      ansible.builtin.service:
+        name: httpd
+        state: started
+        enabled: yes 
+    - name: Create the index.html file on all app servers
+      copy:
+        content: |
+          This is a Nautilus sample file, created using Ansible!
+        dest: /var/www/html/index.html
+    - name: Adding more content on index.html
+      ansible.builtin.lineinfile:
+        path: /var/www/html/index.html
+        insertbefore: BOF
+        line: Welcome to xFusionCorp Industries!
+        owner: apache
+        group: apache
+        mode: '0655'

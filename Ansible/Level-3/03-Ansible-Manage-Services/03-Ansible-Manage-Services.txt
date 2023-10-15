@@ -27,7 +27,7 @@ Ans)
     3. ansible-playbook -i inventory playbook.yml
        ansible playbook is ran successfully.
 
-    ## Playbook is executed successfully, we need to verify files are created or not and as well as ACL in All App Server
+    ## Playbook is executed successfully, we need to verify the httpd status
     4. ansible -i inventory -m shell -ba "systemctl status httpd" all | grep -i "status"
        httpd is up and running
 

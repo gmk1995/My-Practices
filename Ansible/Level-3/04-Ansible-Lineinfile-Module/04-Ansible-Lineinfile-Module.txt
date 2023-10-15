@@ -1,0 +1,119 @@
+The Nautilus DevOps team want to install and set up a simple httpd web server on all app servers in Stratos DC. They also want to deploy a sample web page using Ansible. Therefore, write the required playbook to complete this task as per details mentioned below.
+
+
+We already have an inventory file under /home/thor/ansible directory on jump host. Write a playbook playbook.yml under /home/thor/ansible directory on jump host itself. Using the playbook perform below given tasks:
+
+
+Install httpd web server on all app servers, and make sure its service is up and running.
+
+
+Create a file /var/www/html/index.html with content:
+
+
+This is a Nautilus sample file, created using Ansible!
+
+
+Using lineinfile Ansible module add some more content in /var/www/html/index.html file. Below is the content:
+
+Welcome to xFusionCorp Industries!
+
+
+Also make sure this new line is added at the top of the file.
+
+
+The /var/www/html/index.html file's user and group owner should be apache on all app servers.
+
+
+The /var/www/html/index.html file's permissions should be 0755 on all app servers.
+
+
+Note: Validation will try to run the playbook using command ansible-playbook -i inventory playbook.yml so please make sure the playbook works this way without passing any extra arguments.
+
+Ans)
+    ## Check the all app servers are in online or not 
+    1. ansible -i inventory -m ping all
+
+    ## Create the ansible playbook
+    2. vi playbook.yml
+
+    ## Run the Playbook
+    3. ansible-playbook -i inventory playbook.yml
+       ansible playbook is ran successfully.
+
+    ## Playbook is executed successfully, verify the index.html
+    4. ansible -i inventory -m shell -ba "cat /var/www/html/index.html" all
+       Response:
+
+       stapp01 | CHANGED | rc=0 >>
+       Welcome to xFusionCorp Industries!
+       This is a Nautilus sample file, created using Ansible!
+       stapp03 | CHANGED | rc=0 >>
+       Welcome to xFusionCorp Industries!
+       This is a Nautilus sample file, created using Ansible!
+       stapp02 | CHANGED | rc=0 >>
+       Welcome to xFusionCorp Industries!
+       This is a Nautilus sample file, created using Ansible!
+
+    ## Check the index.html file permissions
+    5. ansible -i inventory -m shell -ba "ls -larth /var/www/html/" all
+       stapp01 | CHANGED | rc=0 >>
+       total 12K
+       drwxr-xr-x 4 root   root   4.0K Oct 15 02:48 ..
+       -rwxr-xr-x 1 apache apache   90 Oct 15 02:49 index.html
+       drwxr-xr-x 2 root   root   4.0K Oct 15 02:49 .
+       stapp02 | CHANGED | rc=0 >>
+       total 12K
+       drwxr-xr-x 4 root   root   4.0K Oct 15 02:48 ..
+       -rwxr-xr-x 1 apache apache   90 Oct 15 02:49 index.html
+       drwxr-xr-x 2 root   root   4.0K Oct 15 02:49 .
+       stapp03 | CHANGED | rc=0 >>
+       total 12K
+       drwxr-xr-x 4 root   root   4.0K Oct 15 02:48 ..
+       -rwxr-xr-x 1 apache apache   90 Oct 15 02:49 index.html
+       drwxr-xr-x 2 root   root   4.0K Oct 15 02:49 
+
+    ## Check the webserver is up and running or not 
+    6. ansible -i inventory -m shell -ba "curl -i localhost" all
+
+       stapp03 | CHANGED | rc=0 >>
+       HTTP/1.1 200 OK
+       Date: Sun, 15 Oct 2023 03:56:12 GMT
+       Server: Apache/2.4.37 (CentOS Stream)
+       Last-Modified: Sun, 15 Oct 2023 03:55:31 GMT
+       ETag: "52-607b942cd3225"
+       Accept-Ranges: bytes
+       Content-Length: 82
+       Content-Type: text/html; charset=UTF-8
+       
+       Welcome to Nautilus Group!
+       This is a Nautilus sample file, created using Ansible!  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                        Dload  Upload   Total   Spent    Left  Speed
+       100    82  100    82    0     0  82000      0 --:--:-- --:--:-- --:--:-- 82000
+       stapp02 | CHANGED | rc=0 >>
+       HTTP/1.1 200 OK
+       Date: Sun, 15 Oct 2023 03:56:12 GMT
+       Server: Apache/2.4.37 (CentOS Stream)
+       Last-Modified: Sun, 15 Oct 2023 03:55:31 GMT
+       ETag: "52-607b942cd3225"
+       Accept-Ranges: bytes
+       Content-Length: 82
+       Content-Type: text/html; charset=UTF-8
+       
+       Welcome to Nautilus Group!
+       This is a Nautilus sample file, created using Ansible!  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                        Dload  Upload   Total   Spent    Left  Speed
+       100    82  100    82    0     0  82000      0 --:--:-- --:--:-- --:--:-- 82000
+       stapp01 | CHANGED | rc=0 >>
+       HTTP/1.1 200 OK
+       Date: Sun, 15 Oct 2023 03:56:12 GMT
+       Server: Apache/2.4.37 (CentOS Stream)
+       Last-Modified: Sun, 15 Oct 2023 03:55:31 GMT
+       ETag: "52-607b942ca24d6"
+       Accept-Ranges: bytes
+       Content-Length: 82
+       Content-Type: text/html; charset=UTF-8
+       
+       Welcome to Nautilus Group!
+       This is a Nautilus sample file, created using Ansible!  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                        Dload  Upload   Total   Spent    Left  Speed
+       100    82  100    82    0     0   1673      0 --:--:-- --:--:-- --:--:--  1673
