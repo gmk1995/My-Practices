@@ -1,0 +1,14 @@
+- name: install httpd on all app servers 
+  hosts: all
+  become_method: sudo
+  become: yes
+  tasks:
+    - name: Install the latest version of httpd
+      ansible.builtin.yum:
+        name: httpd
+        state: latest
+    - name: Install the latest version of httpd
+      ansible.builtin.service:
+        name: httpd
+        state: started
+        enabled: yes
