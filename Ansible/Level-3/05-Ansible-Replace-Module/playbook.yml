@@ -1,0 +1,25 @@
+- name: Replacing Strings using Replace Module
+  hosts: all
+  become: true
+  become_method: sudo
+  tasks:
+    - name: Replace xFusionCrop String with Nautilus in /opt/finance/blog.txt file on App Server 1
+      ansible.builtin.replace:
+        path: /opt/finance/blog.txt
+        regexp: 'xFusionCorp'
+        replace: 'Nautilus'
+      when: inventory_hostname == "stapp01"
+
+    - name: Replace Nautilus String with KodeKloud in /opt/finance/story.txt file on App Server 2
+      ansible.builtin.replace:
+        path: /opt/finance/story.txt
+        regexp: 'Nautilus'
+        replace: 'KodeKloud'
+      when: inventory_hostname == "stapp02"
+
+    - name: Replace KodeKloud String with xFusionCorp Industries in /opt/finance/media.txt file on App Server 3
+      ansible.builtin.replace:
+        path: /opt/finance/media.txt
+        regexp: 'KodeKloud'
+        replace: 'xFusionCorp Industries'
+      when: inventory_hostname == "stapp03"

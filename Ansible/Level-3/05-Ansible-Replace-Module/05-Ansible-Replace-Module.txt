@@ -1,0 +1,49 @@
+There is some data on all app servers in Stratos DC. The Nautilus development team shared some requirement with the DevOps team to alter some of the data as per recent changes they made. The DevOps team is working to prepare an Ansible playbook to accomplish the same. Below you can find more details about the task.
+
+
+Write a playbook.yml under /home/thor/ansible on jump host, an inventory is already present under /home/thor/ansible directory on Jump host itself. Perform below given tasks using this playbook:
+
+
+We have a file /opt/finance/blog.txt on app server 1. Using Ansible replace module replace string xFusionCorp to Nautilus in that file.
+
+
+We have a file /opt/finance/story.txt on app server 2. Using Ansiblereplace module replace the string Nautilus to KodeKloud in that file.
+
+
+We have a file /opt/finance/media.txt on app server 3. Using Ansible replace module replace string KodeKloud to xFusionCorp Industries in that file.
+
+
+Note: Validation will try to run the playbook using command ansible-playbook -i inventory playbook.yml so please make sure the playbook works this way without passing any extra arguments.
+
+Ans)
+     ## Check the all app servers are in online or not 
+    1. ansible -i inventory -m ping all
+
+    ## Create the ansible playbook
+    2. vi playbook.yml
+
+    ## Verify all the blog.txt, story.txt, and media.txt on all App servers
+    3. ansible -i inventory -m shell -ba "cat /opt/finance/blog.txt" stapp01
+       stapp01 | CHANGED | rc=0 >>
+       Welcome to xFusionCorp Industries !
+       thor@jump_host ~/ansible$ ansible -i inventory -m shell -ba "cat /opt/finance/story.txt" stapp02
+       stapp02 | CHANGED | rc=0 >>
+       Welcome to Nautilus Group !
+       thor@jump_host ~/ansible$ ansible -i inventory -m shell -ba "cat /opt/finance/media.txt" stapp03
+       stapp03 | CHANGED | rc=0 >>
+       Welcome to KodeKloud !
+
+    ## Run the Playbook
+    4. ansible-playbook -i inventory playbook.yml
+       ansible playbook is ran successfully.
+
+    ## Now verify wether the Strings are replaced or not by using Adhoc Commands
+    5. ansible -i inventory -m shell -ba "cat /opt/finance/blog.txt" stapp01
+       stapp01 | CHANGED | rc=0 >>
+       Welcome to Nautilus Industries !
+       thor@jump_host ~/ansible$ ansible -i inventory -m shell -ba "cat /opt/finance/story.txt" stapp02
+       stapp02 | CHANGED | rc=0 >>
+       Welcome to KodeKloud Group !
+       thor@jump_host ~/ansible$ ansible -i inventory -m shell -ba "cat /opt/finance/media.txt" stapp03
+       stapp03 | CHANGED | rc=0 >>
+       Welcome to xFusionCorp Industries !
