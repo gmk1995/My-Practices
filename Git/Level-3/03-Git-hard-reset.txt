@@ -1,0 +1,29 @@
+The Nautilus application development team was working on a git repository /usr/src/kodekloudrepos/blog present on Storage server in Stratos DC. This was just a test repository and one of the developers just pushed a couple of changes for testing, but now they want to clean this repository along with the commit history/work tree, so they want to point back the HEAD and the branch itself to a commit with message add data.txt file. Find below more details:
+
+
+
+In /usr/src/kodekloudrepos/blog git repository, reset the git commit history so that there are only two commits in the commit history i.e initial commit and add data.txt file.
+
+
+Also make sure to push your changes.
+
+Ans)
+    ## Log into the Storage server
+    1. ssh natasha@ststor01
+
+    ## Move to the directory
+    2. cd /usr/src/kodekloudrepos/blog
+
+    ## Check the git commit 
+    3. git log --oneline
+       There are 12 commits we need to Reset to Commit hash 49e22905b652b1d616c8ca70ca515575645e146d
+
+    ## Git Reset 
+    4. git reset --hard 49e22905b652b1d616c8ca70ca515575645e146d
+
+    ## Check the git log again 
+    5. git log --oneline
+       now the working directory and Head is pointing to git commit hash 49e22905b652b1d616c8ca70ca515575645e146d
+
+    ## Push the changes to origin
+    6. git push origin -uf "master"
