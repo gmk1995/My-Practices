@@ -1,0 +1,26 @@
+The Nautilus application development team was working on a git repository /usr/src/kodekloudrepos/demo present on Storage server in Stratos DC. One of the developers mistakenly created a couple of files under this repository, but now they want to clean this repository without adding/pushing any new files. Find below more details:
+
+
+
+Clean the /usr/src/kodekloudrepos/demo git repository without adding/pushing any new files, make sure git status is clean.
+
+Ans)
+    ## Log into the Storage Server
+    1. ssh natasha@ststor01
+
+    ## Navigate to the /usr/src/kodekloudrepos/demo directory
+    2. cd /usr/src/kodekloudrepos/demo
+
+    ## Run the git status and check the untracked files
+    3. git status
+       there are 1890 untracked file are there we need to remove all of them using git command.
+
+    ## Dry run for checking untracked files removal
+    4. git clean -n
+
+    ## Remove the Untracked files
+    5. git clean -f
+
+    ## Check the git status again
+    6. git status
+    
