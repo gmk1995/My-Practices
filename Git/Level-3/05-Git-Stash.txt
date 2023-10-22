@@ -1,0 +1,28 @@
+The Nautilus application development team was working on a git repository /usr/src/kodekloudrepos/news present on Storage server in Stratos DC. One of the developers stashed some in-progress changes in this repository, but now they want to restore some of the stashed changes. Find below more details to accomplish this task:
+
+
+
+Look for the stashed changes under /usr/src/kodekloudrepos/news git repository, and restore the stash with stash@{1} identifier. Further, commit and push your changes to the origin.
+
+Ans)
+    ## Log into the Storage Server
+    1. ssh natasha@ststor01
+
+    ## Move to git repository cloned directory
+    2. cd /usr/src/kodekloudrepos/news
+
+    ## Check the git status
+    3. git status
+       Here it is show work directory is clean
+
+    ## Check Git Stash list
+    4. git stash list 
+
+    ## Apply the stash@{1} to working repository
+    5. git stash pop stash@{1}
+
+    ## Commit the restore file
+    6. git commit -m "welcome.txt file added"
+
+    ## Push the changes to the origin
+    7. git push 
