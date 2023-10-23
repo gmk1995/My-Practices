@@ -1,0 +1,60 @@
+Our monitoring tool has reported an issue in Stratos Datacenter. One of our app servers has an issue, as its Apache service is not reachable on port 3004 (which is the Apache port). The service itself could be down, the firewall could be at fault, or something else could be causing the issue.
+
+
+
+Use tools like telnet, netstat, etc. to find and fix the issue. Also make sure Apache is reachable from the jump host without compromising any security settings.
+
+Once fixed, you can test the same using command curl http://stapp01:3004 command from jump host.
+
+Ans)
+    ## Check in which httpd server is not reachable
+    1. curl http://stapp01:3004
+       found in App server 1 httpd server is not working 
+
+    ## Log into App Server 1
+    2. ssh tony@stapp01
+
+    ## Check the status of the httpd
+    3. systemctl status httpd
+       After checking the status the port number 3004 is already using sendmail
+
+    ## Stop the sendmail services and change the port number
+    4. systemctl stop sendmail 
+
+    ## Configure sendmail to listen on a different port
+    5. cd /etc/mail/sendmail.mc
+       change >> DAEMON_OPTIONS(`Port=3025,Addr=127.0.0.1, Name=MTA')dnl
+
+    ## After making this change, regenerate the sendmail.cf configuration file by running
+    6. m4 /etc/mail/sendmail.mc > /etc/mail/sendmail.cf
+
+    ## Restart the sendmail service
+    7. sudo systemctl restart sendmail
+
+    ## Start the httpd services
+    8. systemctl start httpd
+
+    ## Check the status of httpd service 
+    9. systemctl status httpd
+       service is running but it is not accessiable from the jump server
+    
+    ## Checking 3004 port is listen or not 
+    10. netstat -tunlp | grep -i "3004"
+        Port 3004 is Listening 
+
+    ## Allow the firewall using IPTables
+    11. iptables -L
+		iptables -L INPUT -nv
+		iptables -I	INPUT -p tcp --destination-port 5003 -j ACCEPT
+		service iptables save 
+
+    ## Enable, Start and Check status of IPTables
+    12. systemctl enable iptables
+		systemctl start iptables
+		systemctl status iptables
+
+    ## From jump server, try to telnet onto the App Server 1.	Also try to curl.
+
+	13.	telnet stapp01 5003
+		telnet 172.16.238.10 5003
+		curl stapp01:5003
