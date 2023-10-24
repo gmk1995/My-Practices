@@ -1,0 +1,104 @@
+Nautilus system admin's team is planning to deploy a front end application for their backup utility on Nautilus Backup Server, so that they can manage the backups of different websites from a graphical user interface. They have shared requirements to set up the same; please accomplish the tasks as per detail given below:
+
+
+
+a. Install Apache Server on Nautilus Backup Server and configure it to use 6400 port (do not bind it to 127.0.0.1 only, keep it default i.e let Apache listen on server's IP, hostname, localhost, 127.0.0.1 etc).
+
+
+b. Install Nginx webserver on Nautilus Backup Server and configure it to use 8099.
+
+
+c. Configure Nginx as a reverse proxy server for Apache.
+
+
+d. There is a sample index file /home/thor/index.html on Jump Host, copy that file to Apache's document root.
+
+
+e. Make sure to start Apache and Nginx services.
+
+
+f. You can test final changes using curl command, e.g curl http://<backup server IP or Hostname>:8099.
+
+Ans)
+    ## Log into the Backup Server
+    1. ssh clint@stbkp01
+
+    ## Install the nginx and Apache Web Servers
+    2. sudo yum install nginx httpd -y
+
+    ## Add Port 6400 to Listen httpd Service
+    3. sudo vi /etc/httpd/conf/httpd.conf
+       Listen 6400 and close the file
+
+    ## Open the Nginx configure file to add the port number and reverse proxy details
+    4. sudo vi /etc/nginx/nginx.conf
+       			# now the nginx.conf if a very logn list of configurations, but there are some lines
+				# that needs to be changed.
+
+				# 1ST - Change 'user nginx' to 'user apache'
+				user apache
+				
+				# 2ND - The server section mut look something like this.
+				# Note that the 8099 is the required listening port of the nginx.
+				server { 
+					listen 8099 default_server;
+					listen [::]:8099;
+					server_name 172.16.238.16;
+
+				# 3RD - the location section must have the root
+				# the root shoudl be set to '/var/www/html'
+				# note that the 5001 is the required listening port of the apache.
+				location
+				root	/var/www/html;
+				proxy_pass http://127.0.0.1:6400/;
+				# 6400 is apache port
+				proxy_redirect off;
+				proxy_set_header Host $http_host;
+				proxy_set_header X-Real-IP $remote_addr;
+				}
+
+    ## an additional requirement was to create a proxy.conf
+    5. sudo vi /etc/nginx/conf.d/proxy.conf
+       proxy_redirect off;
+       proxy_set_header Host $host;
+       proxy_set_header X-Real-IP $remote_addr;
+       proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+       client_max_body_size 10m;
+       client_body_buffer_size 128k;
+       proxy_connect_timeout 90;
+       proxy_send_timeout 90;
+       proxy_buffer_size 4k;
+       proxy_buffers 4 32k;
+       proxy_busy_buffers_size 64k;
+       proxy_temp_file_write_size 64k;
+
+    ## Check the nginx configurations by running command
+    6. sudo nginx -t
+       Syntax should be get as okay
+   
+    ## Copy the index.html from jump server to backup server
+    7. ## Log into jump server
+       ssh thor@jump_host 
+       scp index.html clint@stbkp01:/tmp
+
+       ## Login to Backup Server and move the index.html from /tmp to /var/www/html directory
+       ssh clint@stbkp01
+       mv /tmp/index.html /var/www/html
+
+    ## Enable, Start, and status Checking on both httpd and Nginx Service
+    8. ## httpd Service
+       sudo systemctl enable httpd
+       sudo systemctl start httpd
+       sudo systemctl status httpd
+
+       ## nginx Service
+       sudo systemctl enable nginx
+       sudo systemctl start nginx
+       sudo systemctl status nginx
+
+    ## After Both nginx and httpd is up and running check the Connections From Backup Server and Jump Server
+    9. curl -I http://stbkp01:6400
+       curl -I http://stbkp01:8099
+       If Response shows then we can conclude that nginx reverse proxy is working
+       
+
