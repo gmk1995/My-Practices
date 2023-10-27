@@ -1,0 +1,71 @@
+xFusionCorp Industries has hosted several static websites on Nautilus Application Servers in Stratos DC. There are some confidential directories in the document root that need to be password protected. Since they are using Apache for hosting the websites, the production support team has decided to use .htaccess with basic auth. There is a website that needs to be uploaded to /var/www/html/sysops on Nautilus App Server 1. However, we need to set up the authentication before that.
+
+
+
+1. Create /var/www/html/sysops direcotry if doesn't exist.
+
+
+2. Add a user mariyam in htpasswd and set its password to LQfKeWWxWD.
+
+
+3. There is a file /tmp/index.html present on Jump Server. Copy the same to the directory you created, please make sure default document root should remain /var/www/html. Also website should work on URL http://<app-server-hostname>:8080/sysops/
+
+Ans)
+    ## Log into the App Server 1
+    1. ssh tony@stapp01
+
+    ## Create the direcotry /var/www/html/sysops
+    2. mkdir -p /var/www/html/sysops
+
+    ## Add a user mariyam in htpasswd and set its password to LQfKeWWxWD.
+    3. htpasswd -c /etc/httpd/.htpasswd mariyam
+       It will prompt for a password enter password: LQfKeWWxWD
+
+    ## Create the .htpasswd
+    4. touch /etc/httpd/.htpasswd
+       Change Ownership
+       chown apache:apache /etc/httpd/.htpasswd
+
+    ## Create the security/.htaccess direcotry and .htaccess file 
+    5. mkdir -p /var/www/html/security
+       # Create a .htaccess file 
+       touch .htaccess
+       and add below content
+       AuthType Basic
+	   AuthName "Restricted Access"
+	   AuthUserFile /etc/httpd/.htpasswd
+	   Require user mariyam
+
+    ## Add the Configuration in httpd.conf
+    6. vi /etc/httpd/conf/httpd.conf
+       # Find the <VirtualHost> section for your site, and within that section, add or modify the following lines:
+
+       <Directory /var/www/html/sysops>
+        AuthType Basic
+        AuthName "Authentication Required"
+        AuthUserFile /etc/httpd/.htpasswd
+        Require valid-user
+       </Directory>
+    
+    ## Copy the /tmp/index.html from Jump Server to App Server 1
+    7. scp /tmp/index.html tony@stapp01:/tmp
+       and Login Back to App Server 1 and move it to /var/www/html/sysops
+       mv /tmp/index/ /var/www/html/sysops
+
+    ## Restart the Httpd Server
+    8. systemctl restart httpd
+
+    ## Access the httpd web server
+    9. curl -u mariyam -I http://stapp01:8080/sysops/
+       It will ask for the password, needs to enter it
+       Enter host password for user 'mariyam':
+       HTTP/1.1 200 OK
+       Date: Fri, 27 Oct 2023 05:49:37 GMT
+       Server: Apache/2.4.37 (centos)
+       Last-Modified: Fri, 27 Oct 2023 05:15:10 GMT
+       ETag: "34-608abc5bcf827"
+       Accept-Ranges: bytes
+       Content-Length: 52
+       Content-Type: text/html; charset=UTF-8
+
+       
