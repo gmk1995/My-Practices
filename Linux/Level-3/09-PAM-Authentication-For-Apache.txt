@@ -1,0 +1,37 @@
+We have a requirement where we want to password protect a directory in the Apache web server document root. We want to password protect http://<website-url>:<apache_port>/protected URL as per the following requirements (you can use any website-url for it like localhost since there are no such specific requirements as of now). Setup the same on App server 2 as per below mentioned requirements:
+
+
+
+a. We want to use basic authentication.
+
+
+b. We do not want to use htpasswd file based authentication. Instead, we want to use PAM authentication, i.e Basic Auth + PAM so that we can authenticate with a Linux user.
+
+
+c. We already have a user ravi with password dCV3szSGNA which you need to provide access to.
+
+
+d. You can test the same using a curl command from jump host curl http://<website-url>:<apache_port>/protected.
+
+Ans)
+    ## Log into the App Server 2
+    1. ssh steve@stapp02
+
+    ## Install and enable the required packages for Basic + PAM authentication
+    2. yum --enablerepo=epel -y install mod_authnz_external pwauth
+
+    ## Modify the /etc/httpd/conf/httpd.conf file to add the directory and attributes.
+    ## Add the following configuration inside the <VirtualHost> block for your protected directory:
+    3. <Directory /var/www/html/protected> 
+					AuthType Basic
+					AuthName "PAM Authentication"
+					AuthBasicProvider external
+					AuthExternal pwauth
+					require valid-user
+				</Directory>
+
+    ## Enable, restart, and verify the status of appache (httpd) afterwards.
+    4. systemctl enable httpd && systemctl start httpd && systemctl status httpd
+
+    ## Access the Website
+    5. curl -u ravi:dCV3szSGNA http://stapp02:8080/protected/index.html
