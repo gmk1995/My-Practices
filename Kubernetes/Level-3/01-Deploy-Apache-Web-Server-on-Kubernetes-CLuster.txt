@@ -1,0 +1,95 @@
+There is an application that needs to be deployed on Kubernetes cluster under Apache web server. The Nautilus application development team has asked the DevOps team to deploy it. We need to develop a template as per requirements mentioned below:
+
+
+Create a namespace named as httpd-namespace-datacenter.
+
+Create a deployment named as httpd-deployment-datacenter under newly created namespace. For the deployment use httpd image with latest tag only and remember to mention the tag i.e httpd:latest, and make sure replica counts are 2.
+
+Create a service named as httpd-service-datacenter under same namespace to expose the deployment, nodePort should be 30004.
+
+Note: The kubectl utility on jump_host has been configured to work with the kubernetes cluster.
+
+Ans)
+    ## Log into the jump_host 
+    1. ssh thor@jump_host
+
+    ## Create the namespace named as httpd-namespace-datacenter
+    2. kubectl create ns httpd-namespace-datacenter
+       namespace/httpd-namespace-datacenter created
+
+    ## Write a httpd-deployment-datacenter.yaml file to create the deployment
+    3. vi httpd-deployment-datacenter.yaml
+       
+       apiVersion: apps/v1
+       kind: Deployment
+       metadata:
+         creationTimestamp: null
+         labels:
+           app: httpd-deployment-datacenter
+         name: httpd-deployment-datacenter
+         namespace: httpd-namespace-datacenter
+       spec:
+         replicas: 2
+         selector:
+           matchLabels:
+             app: httpd-deployment-datacenter
+         strategy: {}
+         template:
+           metadata:
+             creationTimestamp: null
+             labels:
+               app: httpd-deployment-datacenter
+           spec:
+             containers:
+             - image: httpd:latest
+               name: httpd
+               ports:
+                 - containerPort: 80
+               resources: {}
+       status: {}
+
+    ## Apply the httpd-deployment-datacenter.yaml file to create the deployment
+    4. kubectl apply -f httpd-deployment-datacenter.yaml
+
+    ## Write a httpd-service-datacenter.yaml file to create the service
+    5. vi httpd-service-datacenter.yaml
+       apiVersion: v1
+       kind: Service
+       metadata:
+         creationTimestamp: null
+         labels:
+           app: httpd-deployment-datacenter
+         name: httpd-service-datacenter
+         namespace: httpd-namespace-datacenter
+       spec:
+         ports:
+         - port: 80
+           protocol: TCP
+           targetPort: 80
+           nodePort: 30004
+         selector:
+           app: httpd-deployment-datacenter
+         type: NodePort
+       status:
+         loadBalancer: {}
+
+    ## Apply the httpd-service-datacenter.yaml file to create the service
+    6. kubectl apply -f httpd-service-datacenter.yaml
+
+    ## Check the Deployment, Service, Pods and replicasets
+    7.  kubectl get all -n httpd-namespace-datacenter 
+        NAME                                              READY   STATUS    RESTARTS   AGE
+        pod/httpd-deployment-datacenter-7db7b4d7c-7mjmj   1/1     Running   0          13s
+        pod/httpd-deployment-datacenter-7db7b4d7c-sg2jj   1/1     Running   0          16s
+
+        NAME                               TYPE       CLUSTER-IP      EXTERNAL-IP   PORT(S)        AGE
+        service/httpd-service-datacenter   NodePort   10.96.167.128   <none>        80:30004/TCP   2m35s
+
+        NAME                                          READY   UP-TO-DATE   AVAILABLE   AGE
+        deployment.apps/httpd-deployment-datacenter   2/2     2            2           9m47s
+
+        NAME                                                     DESIRED   CURRENT   READY   AGE
+        replicaset.apps/httpd-deployment-datacenter-7db7b4d7c    2         2         2       16s
+
+    ## Access the Pod by taking the Node IP and NodePort
+    
