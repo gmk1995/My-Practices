@@ -1,0 +1,76 @@
+One of the DevOps engineers was trying to deploy a python app on Kubernetes cluster. Unfortunately, due to some mis-configuration, the application is not coming up. Please take a look into it and fix the issues. Application should be accessible on the specified nodePort.
+
+
+
+The deployment name is python-deployment-devops, its using poroko/flask-demo-appimage. The deployment and service of this app is already deployed.
+
+nodePort should be 32345 and targetPort should be python flask app's default port.
+
+
+Note: The kubectl on jump_host has been configured to work with the kubernetes cluster.
+
+Ans)
+kubectl get all
+NAME                                           READY   STATUS         RESTARTS   AGE
+pod/python-deployment-devops-678b746b7-78th5   0/1     ErrImagePull   0          106s
+
+NAME                            TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)          AGE
+service/kubernetes              ClusterIP   10.96.0.1       <none>        443/TCP          20m
+service/python-service-devops   NodePort    10.96.145.173   <none>        8080:32345/TCP   106s
+
+NAME                                       READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/python-deployment-devops   0/1     1            0           106s
+
+NAME                                                 DESIRED   CURRENT   READY   AGE
+replicaset.apps/python-deployment-devops-678b746b7   1         1         0       106s
+
+thor@jump_host ~$ kubectl edit deployment.apps/python-deployment-devops
+deployment.apps/python-deployment-devops edited
+
+Image is not given correctly. I have updated it. 
+
+thor@jump_host ~$ kubectl get all
+NAME                                            READY   STATUS              RESTARTS   AGE
+pod/python-deployment-devops-678b746b7-78th5    0/1     ImagePullBackOff    0          3m20s
+pod/python-deployment-devops-7859694dcf-xgcr9   0/1     ContainerCreating   0          12s
+
+NAME                            TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)          AGE
+service/kubernetes              ClusterIP   10.96.0.1       <none>        443/TCP          22m
+service/python-service-devops   NodePort    10.96.145.173   <none>        8080:32345/TCP   3m20s
+
+NAME                                       READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/python-deployment-devops   0/1     1            0           3m20s
+
+NAME                                                  DESIRED   CURRENT   READY   AGE
+replicaset.apps/python-deployment-devops-678b746b7    1         1         0       3m20s
+replicaset.apps/python-deployment-devops-7859694dcf   1         1         0       12s
+thor@jump_host ~$ kubectl get all
+NAME                                            READY   STATUS    RESTARTS   AGE
+pod/python-deployment-devops-7859694dcf-xgcr9   1/1     Running   0          25s
+
+NAME                            TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)          AGE
+service/kubernetes              ClusterIP   10.96.0.1       <none>        443/TCP          22m
+service/python-service-devops   NodePort    10.96.145.173   <none>        8080:32345/TCP   3m33s
+
+NAME                                       READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/python-deployment-devops   1/1     1            1           3m33s
+
+NAME                                                  DESIRED   CURRENT   READY   AGE
+replicaset.apps/python-deployment-devops-678b746b7    0         0         0       3m33s
+replicaset.apps/python-deployment-devops-7859694dcf   1         1         1       25s
+thor@jump_host ~$ kubectl logs -f python-deployment-devops-7859694dcf-xgcr9
+ * Serving Flask app "app.py"
+ * Environment: production
+   WARNING: Do not use the development server in a production environment.
+   Use a production WSGI server instead.
+ * Debug mode: off
+ * Running on http://0.0.0.0:5000/ (Press CTRL+C to quit)
+^C
+thor@jump_host ~$ kubectl edit deployment.apps/python-deployment-devops
+Edit cancelled, no changes made.
+thor@jump_host ~$ kubectl edit service/python-service-devops
+service/python-service-devops edited
+
+Default Flask Container Port is not given in Service Added 5000 port to the targetPort.
+
+To Access the Application, taken nodePort and nodePort ip address. The web app is running and showing the webpage content: Hello World Pyvo 1!
