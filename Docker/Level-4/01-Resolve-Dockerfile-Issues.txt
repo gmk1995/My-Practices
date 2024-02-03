@@ -1,0 +1,174 @@
+The Nautilus DevOps team is working to create new images per requirements shared by the development team. One of the team members is working to create a Dockerfile on App Server 2 in Stratos DC. While working on it she ran into issues in which the docker build is failing and displaying errors. Look into the issue and fix it to build an image as per details mentioned below:
+
+
+a. The Dockerfile is placed on App Server 2 under /opt/docker directory.
+
+
+b. Fix the issues with this file and make sure it is able to build the image.
+
+
+c. Do not change base image, any other valid configuration within Dockerfile, or any of the data been used — for example, index.html.
+
+
+Note: Please note that once you click on FINISH button all existing images, the containers will be destroyed and new image will be built from your Dockerfile.
+
+Ans)
+
+    ## Log into the App Server 2 using SSH
+    1. thor@jump_host ~$ ssh steve@stapp02
+       The authenticity of host 'stapp02 (172.16.238.11)' can't be established.
+       ECDSA key fingerprint is SHA256:7vUTl6RKXvFpucSDT8U2MtXmm6WxVr9lhwoAlIvmxhw.
+       Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
+       Warning: Permanently added 'stapp02,172.16.238.11' (ECDSA) to the list of known hosts.
+       steve@stapp02's password: 
+       [steve@stapp02 ~]$ 
+
+    ## Check the Dockerfile Path
+    2. [steve@stapp02 ~]$ cd /opt/docker/
+       [steve@stapp02 docker]$ ls -larth
+       total 20K
+       drwxr-xr-x 2 root root 4.0K Feb  3 02:54 html
+       drwxr-xr-x 2 root root 4.0K Feb  3 02:54 certs
+       -rw-r--r-- 1 root root  518 Feb  3 03:40 Dockerfile
+       drwxr-xr-x 1 root root 4.0K Feb  3 03:41 ..
+       drwxrwxrwx 4 root root 4.0K Feb  3 03:41 .
+
+    ## Check Dockerfile to find the errors in the Dockerfile
+    3. [steve@stapp02 ~]$ sudo cat Dockerfile
+       IMAGE httpd:2.4.43
+       
+       ADD sed -i "s/Listen 80/Listen 8080/g" /usr/local/apache2/conf/httpd.conf
+       
+       ADD sed -i '/LoadModule\ ssl_module modules\/mod_ssl.so/s/^#//g' conf/httpd.conf
+       
+       ADD sed -i '/LoadModule\ socache_shmcb_module modules\/mod_socache_shmcb.so/s/^#//g' conf/httpd.conf
+       
+       ADD sed -i '/Include\ conf\/extra\/httpd-ssl.conf/s/^#//g' conf/httpd.conf
+       
+       COPY certs/server.crt /usr/local/apache2/conf/server.crt
+       
+       COPY certs/server.key /usr/local/apache2/conf/server.key
+       
+       COPY html/index.html /usr/local/apache2/htdocs/
+
+       After checking the Dockerfile I found the issue is ADD and IMAGE in the Dockerfile. 
+       IMAGE httpd:2.4.43 Should be replaced with FROM httpd:2.4.43
+       Syntax of ADD Command:
+       The ADD command is used to copy files, directories, or remote file URLs into the Docker image. However, the syntax you've used with ADD is incorrect. You should use RUN command to execute shell commands within the Dockerfile.
+       EXPOSE and CMD also needs to add to build the Dockerfile
+
+    ## Updating the Dockerfile
+    4. [steve@stapp02 ~]$ sudo sed -i 's/ADD/RUN/g' /opt/docker/Dockerfile
+       [steve@stapp02 ~]$ sudo cat /opt/docker/Dockerfile
+       IMAGE httpd:2.4.43
+       
+       RUN sed -i "s/Listen 80/Listen 8080/g" /usr/local/apache2/conf/httpd.conf
+       
+       RUN sed -i '/LoadModule\ ssl_module modules\/mod_ssl.so/s/^#//g' conf/httpd.conf
+       
+       RUN sed -i '/LoadModule\ socache_shmcb_module modules\/mod_socache_shmcb.so/s/^#//g' conf/httpd.conf
+       
+       RUN sed -i '/Include\ conf\/extra\/httpd-ssl.conf/s/^#//g' conf/httpd.conf
+       
+       COPY certs/server.crt /usr/local/apache2/conf/server.crt
+       
+       COPY certs/server.key /usr/local/apache2/conf/server.key
+       
+       COPY html/index.html /usr/local/apache2/htdocs/
+
+       [steve@stapp02 ~]$ sudo sed -i 's/IMAGE/FROM/g' /opt/docker/Dockerfile
+       [steve@stapp02 ~]$ sudo cat /opt/docker/Dockerfile
+       FROM httpd:2.4.43
+       
+       RUN sed -i "s/Listen 80/Listen 8080/g" /usr/local/apache2/conf/httpd.conf
+       
+       RUN sed -i '/LoadModule\ ssl_module modules\/mod_ssl.so/s/^#//g' conf/httpd.conf
+       
+       RUN sed -i '/LoadModule\ socache_shmcb_module modules\/mod_socache_shmcb.so/s/^#//g' conf/httpd.conf
+       
+       RUN sed -i '/Include\ conf\/extra\/httpd-ssl.conf/s/^#//g' conf/httpd.conf
+       
+       COPY certs/server.crt /usr/local/apache2/conf/server.crt
+       
+       COPY certs/server.key /usr/local/apache2/conf/server.key
+       
+       COPY html/index.html /usr/local/apache2/htdocs/
+       
+       [steve@stapp02 ~]$ sudo vi /opt/docker/Dockerfile
+       FROM httpd:2.4.43
+       
+       RUN sed -i "s/Listen 80/Listen 8080/g" /usr/local/apache2/conf/httpd.conf
+       
+       RUN sed -i '/LoadModule\ ssl_module modules\/mod_ssl.so/s/^#//g' conf/httpd.conf
+       
+       RUN sed -i '/LoadModule\ socache_shmcb_module modules\/mod_socache_shmcb.so/s/^#//g' conf/httpd.conf
+       
+       RUN sed -i '/Include\ conf\/extra\/httpd-ssl.conf/s/^#//g' conf/httpd.conf
+       
+       COPY certs/server.crt /usr/local/apache2/conf/server.crt
+       
+       COPY certs/server.key /usr/local/apache2/conf/server.key
+       
+       COPY html/index.html /usr/local/apache2/htdocs/
+       
+       EXPOSE 80
+       CMD ["httpd-foreground"]
+
+    ## Build the Dockerfile
+    5. [steve@stapp02 ~]$ sudo docker build -t httpd-image:1.0 /opt/docker/
+       Sending build context to Docker daemon  9.216kB
+       Step 1/10 : FROM httpd:2.4.43
+        ---> f1455599cc2e
+       Step 2/10 : RUN sed -i "s/Listen 80/Listen 8080/g" /usr/local/apache2/conf/httpd.conf
+        ---> Running in a336b9c4f27a
+       Removing intermediate container a336b9c4f27a
+        ---> dd6e59f85f17
+       Step 3/10 : RUN sed -i '/LoadModule\ ssl_module modules\/mod_ssl.so/s/^#//g' conf/httpd.conf
+        ---> Running in 20f00395d8b4
+       Removing intermediate container 20f00395d8b4
+        ---> af83a0b3a1ca
+       Step 4/10 : RUN sed -i '/LoadModule\ socache_shmcb_module modules\/mod_socache_shmcb.so/s/^#//g' conf/httpd.conf
+        ---> Running in 6518696950f2
+       Removing intermediate container 6518696950f2
+        ---> 8a45de658c86
+       Step 5/10 : RUN sed -i '/Include\ conf\/extra\/httpd-ssl.conf/s/^#//g' conf/httpd.conf
+        ---> Running in f760153435f0
+       Removing intermediate container f760153435f0
+        ---> 887ce0bc76bd
+       Step 6/10 : COPY certs/server.crt /usr/local/apache2/conf/server.crt
+        ---> 03e40403c1ed
+       Step 7/10 : COPY certs/server.key /usr/local/apache2/conf/server.key
+        ---> 07a9f71ed1f9
+       Step 8/10 : COPY html/index.html /usr/local/apache2/htdocs/
+        ---> f7250632727b
+       Step 9/10 : EXPOSE 80
+        ---> Running in 796b0a50f28c
+       Removing intermediate container 796b0a50f28c
+        ---> 241b58150460
+       Step 10/10 : CMD ["httpd-foreground"]
+        ---> Running in d46699eb2cae
+       Removing intermediate container d46699eb2cae
+        ---> 4e05dd6c9f9f
+       Successfully built 4e05dd6c9f9f
+
+    ## Check the Docker images
+    6. [steve@stapp02 ~]$ docker images
+       REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+       httpd-image         1.0                 4e05dd6c9f9f        8 seconds ago       166MB
+       httpd               2.4.43              f1455599cc2e        3 years ago         166MB
+
+    ## Build the container from the previously created docker image
+    7. [steve@stapp02 ~]$ sudo docker run -d --name httpd-webserver -p 80:80 httpd-image:1.0
+       07d60e16953175e71b9ebcef95de3fd9fd2ddfb3e31070838f3d642ef964d689
+       [steve@stapp02 ~]$ docker ps
+       CONTAINER ID        IMAGE               COMMAND              CREATED             STATUS              PORTS                NAMES
+       07d60e169531        httpd-image:1.0     "httpd-foreground"   8 seconds ago       Up 3 seconds        0.0.0.0:80->80/tcp   httpd-webserver
+    
+    ## Check the container logs
+    8. [steve@stapp02 ~]$ docker logs -f httpd-webserver
+       AH00558: httpd: Could not reliably determine the server's fully qualified domain name, using 172.18.0.2. Set the 'ServerName' directive globally to suppress this message
+       [Sat Feb 03 04:07:19.209925 2024] [ssl:warn] [pid 1:tid 140347562054784] AH01909: www.example.com:443:0 server certificate does NOT include an ID which matches the server name
+       AH00558: httpd: Could not reliably determine the server's fully qualified domain name, using 172.18.0.2. Set the 'ServerName' directive globally to suppress this message
+       [Sat Feb 03 04:07:19.213579 2024] [ssl:warn] [pid 1:tid 140347562054784] AH01909: www.example.com:443:0 server certificate does NOT include an ID which matches the server name
+       [Sat Feb 03 04:07:19.215038 2024] [mpm_event:notice] [pid 1:tid 140347562054784] AH00489: Apache/2.4.43 (Unix) OpenSSL/1.1.1d configured -- resuming normal operations
+       [Sat Feb 03 04:07:19.215072 2024] [core:notice] [pid 1:tid 140347562054784] AH00094: Command line: 'httpd -D FOREGROUND'
