@@ -1,0 +1,126 @@
+The Nautilus DevOps team is working to deploy one of the applications on App Server 3 in Stratos DC. Due to a misconfiguration in the docker compose file, the deployment is failing. We would like you to take a look into it to identify and fix the issues. More details can be found below:
+
+
+a. docker-compose.yml file is present on App Server 3 under /opt/docker directory.
+
+
+b. Try to run the same and make sure it works fine.
+
+
+c. Please do not change the container names being used. Also, do not update or alter any other valid config settings in the compose file or any other relevant data that can cause app failure.
+
+
+Note: Please note that once you click on FINISH button all existing running/stopped containers will be destroyed, and your compose will be run.
+
+Ans)
+
+    # Log into the App Server 3
+    1. thor@jump_host ~$ ssh banner@stapp03
+       The authenticity of host 'stapp03 (172.16.238.12)' can't be established.
+       ECDSA key fingerprint is SHA256:WoCmA0le+XbtucrVDd7DthlUXdF+GMDLOTW7jR90AYE.
+       Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
+       Warning: Permanently added 'stapp03,172.16.238.12' (ECDSA) to the list of known hosts.
+       banner@stapp03's password: 
+       [banner@stapp03 ~]$
+    
+    # Check the docker-compose.yml in the /opt/docker directory
+    2. [banner@stapp03 ~]$ cd /opt/docker/
+       [banner@stapp03 docker]$ ls -larth
+       total 16K
+       -rw-r--r-- 1 root root  265 Feb  4 05:09 docker-compose.yml
+       drwxrwxrwx 3 root root 4.0K Feb  4 05:11 .
+       drwxr-xr-x 1 root root 4.0K Feb  4 05:11 ..
+       drwxrwxrwx 2 root root 4.0K Feb  4 05:11 app
+
+    # View the docker-compose.yml file to find errors
+    3. [banner@stapp03 docker]$ cat docker-compose.yml
+       version: '1'
+       services:
+           web:
+               build: ./app
+               container_name: python
+               ports:
+                   - "5000:5000"
+               volume:
+                   - ./app:/code
+               depends:
+                   - redis
+           redis:
+               build: redis
+               container_name: redis
+      
+      **After checking the docker-compose.yml found version number, volume name, depends name, redis image name and ports are not updated
+
+    # Updating the docker-compose.yml file
+    4. [banner@stapp03 docker]$ vi docker-compose.yml
+       version: '3.3'
+       services:
+           web:
+               build: ./app
+               container_name: python
+               ports:
+                   - "5000:5000"
+               volumes:
+                   - ./app:/code
+               depends_on:
+                   - redis
+           redis:
+               image: redis
+               container_name: redis
+               ports:
+                   - "6379:6379"
+
+    # Run the docker-compose.yml file to build the Dockerfile inside the /app directory and create the Python, and redis containers
+    5. [banner@stapp03 docker]$ sudo docker-compose up -d
+       Starting redis ... done
+       Starting python ... done
+
+    # Check the containers are up and running or not 
+    6. [banner@stapp03 docker]$ sudo docker-compose ps
+        Name               Command               State           Ports         
+       ------------------------------------------------------------------------
+       python   /bin/sh -c python app.py         Up      0.0.0.0:5000->5000/tcp
+       redis    docker-entrypoint.sh redis ...   Up      0.0.0.0:6379->6379/tcp
+    
+    # Check whether the container are access or not using Curl command
+    7. [banner@stapp03 docker]$ curl -I http://localhost:5000
+       HTTP/1.0 200 OK
+       Content-Type: text/html; charset=utf-8
+       Content-Length: 50
+       Server: Werkzeug/1.0.1 Python/2.7.18
+       Date: Sun, 04 Feb 2024 05:48:47 GMT
+
+    # Check the python web app container content using curl command
+    8. [banner@stapp03 app]$ curl -k http://localhost:5000
+       This Compose/Flask demo has been viewed 2 time(s).
+
+    # Check the python container logs
+    9. [banner@stapp03 docker]$ sudo docker logs python
+       * Serving Flask app "app" (lazy loading)
+       * Environment: production
+         WARNING: This is a development server. Do not use it in a production deployment.
+         Use a production WSGI server instead.
+       * Debug mode: on
+       * Running on http://0.0.0.0:5000/ (Press CTRL+C to quit)
+       * Restarting with stat
+       * Debugger is active!
+       * Debugger PIN: 326-085-764
+       * Serving Flask app "app" (lazy loading)
+       * Environment: production
+         WARNING: This is a development server. Do not use it in a production deployment.
+         Use a production WSGI server instead.
+       * Debug mode: on
+       * Running on http://0.0.0.0:5000/ (Press CTRL+C to quit)
+       * Restarting with stat
+       * Debugger is active!
+       * Debugger PIN: 326-085-764
+       * Serving Flask app "app" (lazy loading)
+       * Environment: production
+         WARNING: This is a development server. Do not use it in a production deployment.
+         Use a production WSGI server instead.
+       * Debug mode: on
+       * Running on http://0.0.0.0:5000/ (Press CTRL+C to quit)
+       * Restarting with stat
+       * Debugger is active!
+       * Debugger PIN: 326-085-764
+      172.18.0.1 - - [04/Feb/2024 05:48:47] "HEAD / HTTP/1.1" 200 -
