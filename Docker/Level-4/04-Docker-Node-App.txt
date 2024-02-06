@@ -1,0 +1,173 @@
+There is a requirement to Dockerize a Node app and to deploy the same on App Server 2. Under /node_app directory on App Server 2, we have already placed a package.json file that describes the app dependencies and server.js file that defines a web app framework.
+
+
+
+Create a Dockerfile (name is case sensitive) under /node_app directory:
+
+Use any node image as the base image.
+Install the dependencies using package.json file.
+Use server.js in the CMD.
+Expose port 3002.
+
+The build image should be named as nautilus/node-web-app.
+
+
+Now run a container named nodeapp_nautilus using this image.
+
+Map the container port 3002 with the host port 8091.
+
+. Once deployed, you can test the app using a curl command on App Server 2:
+
+
+
+curl http://localhost:8091
+
+Ans)
+    # Log into the App server 2 with ssh
+    1. thor@jump_host ~$ ssh steve@stapp02
+       The authenticity of host 'stapp02 (172.16.238.11)' can't be established.
+       ECDSA key fingerprint is SHA256:7eAGwiIIwAjXd78Tc0je3Ruzo8oyK0nLnHqeAciyKf8.
+       Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
+       Warning: Permanently added 'stapp02,172.16.238.11' (ECDSA) to the list of known hosts.
+       steve@stapp02's password: 
+       [steve@stapp02 ~]$
+
+    # check the server.js, package.json files in the /node_app directory or not
+    2. [steve@stapp02 ~]$ cd /node_app/
+       [steve@stapp02 node_app]$ ls -larth
+       total 16K
+       -rw-r--r-- 1 root root  296 Feb  6 01:28 server.js
+       -rw-r--r-- 1 root root  332 Feb  6 01:28 package.json
+       drwxr-xr-x 1 root root 4.0K Feb  6 01:28 ..
+       drwxr-xr-x 2 root root 4.0K Feb  6 01:28 .
+
+    # Check the content on server.js, package.json files
+    3. [steve@stapp02 node_app]$ cat server.js
+       'use strict';
+       
+       const express = require('express');
+       
+       // Constants
+       const PORT = 3002;
+       const HOST = '0.0.0.0';
+       
+       // App
+       const app = express();
+       app.get('/', (req, res) => {
+         res.send('Welcome to xFusionCorp Industries!');
+       });
+       
+       app.listen(PORT, HOST);
+       console.log(`Running on http://${HOST}:${PORT}`);
+
+       [steve@stapp02 node_app]$ cat server.js
+       'use strict';
+       
+       const express = require('express');
+       
+       // Constants
+       const PORT = 3002;
+       const HOST = '0.0.0.0';
+       
+       // App
+       const app = express();
+       app.get('/', (req, res) => {
+         res.send('Welcome to xFusionCorp Industries!');
+       });
+       
+       app.listen(PORT, HOST);
+       console.log(`Running on http://${HOST}:${PORT}`);
+
+    # Write the Dockerfile to build the image
+    4. [steve@stapp02 node_app]$ sudo vi Dockerfile
+
+       We trust you have received the usual lecture from the local System
+       Administrator. It usually boils down to these three things:
+       
+           #1) Respect the privacy of others.
+           #2) Think before you type.
+           #3) With great power comes great responsibility.
+       
+       [sudo] password for steve: 
+       
+       FROM node:current-alpine3.19
+       WORKDIR /app
+       COPY . /app
+       RUN npm install
+       EXPOSE 3002
+       CMD ["node", "server.js"]
+
+    # Build the Dockerfile to create image
+    5. [steve@stapp02 node_app]$ sudo docker build -t nautilus/node-web-app .
+       Sending build context to Docker daemon  4.096kB
+       Step 1/6 : FROM node:current-alpine3.19
+       current-alpine3.19: Pulling from library/node
+       4abcf2066143: Pull complete 
+       f16884bf7ba3: Pull complete 
+       12fe8815c466: Pull complete 
+       9b5c6033110b: Pull complete 
+       Digest: sha256:4cc2d9f365691fc6f8fe227321d32d9a2691216a71f51c21c7f02224515dea48
+       Status: Downloaded newer image for node:current-alpine3.19
+        ---> a4953861f11d
+       Step 2/6 : WORKDIR /app
+        ---> Running in 9ac7ebd1dffd
+       Removing intermediate container 9ac7ebd1dffd
+        ---> ff3870d76d90
+       Step 3/6 : COPY . /app
+        ---> 7fc3c3e1c0d2
+       Step 4/6 : RUN npm install
+        ---> Running in 4c790e231579
+       
+       added 63 packages, and audited 64 packages in 3s
+       
+       11 packages are looking for funding
+         run `npm fund` for details
+       
+       found 0 vulnerabilities
+       npm notice 
+       npm notice New minor version of npm available! 10.2.4 -> 10.4.0
+       npm notice Changelog: <https://github.com/npm/cli/releases/tag/v10.4.0>
+       npm notice Run `npm install -g npm@10.4.0` to update!
+       npm notice 
+       Removing intermediate container 4c790e231579
+        ---> 8007220d8f51
+       Step 5/6 : EXPOSE 3002
+        ---> Running in 9fc403b8044a
+       Removing intermediate container 9fc403b8044a
+        ---> 938f308f2a70
+       Step 6/6 : CMD ["node", "server.js"]
+        ---> Running in 821d499b35aa
+       Removing intermediate container 821d499b35aa
+        ---> 352272b9f2c0
+       Successfully built 352272b9f2c0
+       Successfully tagged nautilus/node-web-app:latest
+
+    # Check the Docker images
+    6. [steve@stapp02 node_app]$ sudo docker images
+       REPOSITORY              TAG                  IMAGE ID            CREATED             SIZE
+       nautilus/node-web-app   latest               352272b9f2c0        32 seconds ago      148MB
+       node                    current-alpine3.19   a4953861f11d        6 days ago          141MB
+    
+    # Build the container with Docker image built
+    7. [steve@stapp02 node_app]$ sudo docker run -d --name nodeapp_nautilus -p 8091:3002 nautilus/node-web-app:latest
+       ac97d41b89b7c900bf0ebc55e92607e974afa54d78ef1f8b42e832ea36e8e791
+
+    # Check the container is up and running or not 
+    8. [steve@stapp02 node_app]$ sudo docker ps
+       CONTAINER ID        IMAGE                          COMMAND                  CREATED             STATUS              PORTS                    NAMES
+       ac97d41b89b7        nautilus/node-web-app:latest   "docker-entrypoint.s…"   22 seconds ago      Up 20 seconds       0.0.0.0:8091->3002/tcp   nodeapp_nautilus
+
+    # Check the Container Access using the curl command
+    9. [steve@stapp02 node_app]$ curl -I http://localhost:8091
+       HTTP/1.1 200 OK
+       X-Powered-By: Express
+       Content-Type: text/html; charset=utf-8
+       Content-Length: 34
+       ETag: W/"22-pI8HvFlmb5SQs7ghRnPnLOTQh7k"
+       Date: Tue, 06 Feb 2024 01:44:30 GMT
+       Connection: keep-alive
+       Keep-Alive: timeout=5
+       
+       
+       [steve@stapp02 node_app]$ curl http://localhost:8091
+       Welcome to xFusionCorp Industries!
