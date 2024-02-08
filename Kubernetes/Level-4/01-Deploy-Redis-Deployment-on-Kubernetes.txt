@@ -1,0 +1,134 @@
+The Nautilus application development team observed some performance issues with one of the application that is deployed in Kubernetes cluster. After looking into number of factors, the team has suggested to use some in-memory caching utility for DB service. After number of discussions, they have decided to use Redis. Initially they would like to deploy Redis on kubernetes cluster for testing and later they will move it to production. Please find below more details about the task:
+
+
+Create a redis deployment with following parameters:
+
+Create a config map called my-redis-config having maxmemory 2mb in redis-config.
+
+Name of the deployment should be redis-deployment, it should use
+redis:alpine image and container name should be redis-container. Also make sure it has only 1 replica.
+
+The container should request for 1 CPU.
+
+Mount 2 volumes:
+
+a. An Empty directory volume called data at path /redis-master-data.
+
+b. A configmap volume called redis-config at path /redis-master.
+
+c. The container should expose the port 6379.
+
+Finally, redis-deployment should be in an up and running state.
+Note: The kubectl utility on jump_host has been configured to work with the kubernetes cluster.
+
+Ans) 
+   ## check the number of nodes up and running
+   1. thor@jump_host ~$ kubectl get nodes
+      NAME                      STATUS   ROLES           AGE   VERSION
+      kodekloud-control-plane   Ready    control-plane   38m   v1.27.3-44+b5c876a05b7bbd
+
+   ## Created my-redis-config.yaml configmap file to create a ConfigMap
+   2. thor@jump_host ~$ vi my-redis-config.yaml
+
+       apiVersion: v1
+       kind: ConfigMap
+       metadata:
+         name: my-redis-config
+       data:
+         redis-config: |
+           maxmemory: 2mb
+
+    ## Apply the my-redis-config.yaml configmap file to create a ConfigMap
+    3. thor@jump_host ~$ kubectl apply -f my-redis-config.yaml
+       configmap/my-redis-config created
+
+    ## Check the ConfigMap Status
+    4. thor@jump_host ~$ kubectl get cm my-redis-config
+       NAME              DATA   AGE
+       my-redis-config   1      68s
+
+    ## Create the redis-deployment.yaml deployment file to create the redis-deployment
+    5. thor@jump_host ~$ vi redis-deployment.yaml
+
+       apiVersion: apps/v1
+       kind: Deployment
+       metadata:
+         name: redis-deployment
+       spec:
+         replicas: 1
+         selector:
+           matchLabels:
+             app: redis-app
+         template:
+           metadata:
+             labels:
+               app: redis-app
+           spec:
+             containers:
+             - name: redis-container
+               image: redis:alpine
+               resources:
+                 requests:
+                   cpu: "1"
+               ports:
+               - containerPort: 6379
+               volumeMounts:
+                 - name: data
+                   mountPath: /redis-master-data
+                 - name: redis-config
+                   mountPath: /redis-master
+             volumes:
+               - name: data
+                 emptyDir: {}
+               - name: redis-config
+                 configMap:
+                   name: my-redis-config
+
+    ## Apply the redis-deployment.yaml deployment file to create the redis-deployment
+    6. thor@jump_host ~$ kubectl apply -f redis-deployment.yaml
+       deployment.apps/redis-deployment created
+
+    ## Check the redis-deployment and pod status
+    7. thor@jump_host ~$ kubectl get deployment
+       NAME               READY   UP-TO-DATE   AVAILABLE   AGE
+       redis-deployment   1/1     1            1           36s
+       
+       thor@jump_host ~$ kubectl get pods
+       NAME                                READY   STATUS    RESTARTS   AGE
+       redis-deployment-6cd4f56849-ws4ll   1/1     Running   0          59s
+
+    ## Created the redis-service.yaml file to create the redis-service Service
+    8. thor@jump_host ~$ vi redis-service.yaml
+
+       apiVersion: v1
+       kind: Service
+       metadata:
+         name: redis-service
+       spec:
+         type: ClusterIP
+         selector:
+           app: redis-app
+         ports:
+         - port: 80
+           targetPort: 6379
+
+    ## Apply the redis-service.yaml file to create the redis-service Service
+    9. thor@jump_host ~$ kubectl apply -f redis-service.yaml
+       service/redis-service created
+
+    ## Check the redis-service Service
+    10. thor@jump_host ~$ kubectl get svc redis-service
+        NAME            TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)   AGE
+        redis-service   ClusterIP   10.96.87.214   <none>        80/TCP    38s
+
+    ## Check the logs of the redis-deployment pod status
+    11. thor@jump_host ~$ kubectl logs -f redis-deployment-6cd4f56849-ws4ll
+        1:C 08 Feb 2024 01:57:07.776 * oO0OoO0OoO0Oo Redis is starting oO0OoO0OoO0Oo
+        1:C 08 Feb 2024 01:57:07.776 * Redis version=7.2.4, bits=64, commit=00000000, modified=0, pid=1, just started
+        1:C 08 Feb 2024 01:57:07.776 # Warning: no config file specified, using the default config. In order to specify a config file use redis-server /path/to/redis.conf
+        1:M 08 Feb 2024 01:57:07.776 * monotonic clock: POSIX clock_gettime
+        1:M 08 Feb 2024 01:57:07.777 * Running mode=standalone, port=6379.
+        1:M 08 Feb 2024 01:57:07.779 * Server initialized
+        1:M 08 Feb 2024 01:57:07.779 * Ready to accept connections tcp
+
+       
