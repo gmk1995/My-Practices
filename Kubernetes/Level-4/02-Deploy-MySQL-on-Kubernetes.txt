@@ -1,0 +1,287 @@
+A new MySQL server needs to be deployed on Kubernetes cluster. The Nautilus DevOps team was working on to gather the requirements. Recently they were able to finalize the requirements and shared them with the team members to start working on it. Below you can find the details:
+
+
+
+1.) Create a PersistentVolume mysql-pv, its capacity should be 250Mi, set other parameters as per your preference.
+
+
+2.) Create a PersistentVolumeClaim to request this PersistentVolume storage. Name it as mysql-pv-claim and request a 250Mi of storage. Set other parameters as per your preference.
+
+
+3.) Create a deployment named mysql-deployment, use any mysql image as per your preference. Mount the PersistentVolume at mount path /var/lib/mysql.
+
+
+4.) Create a NodePort type service named mysql and set nodePort to 30007.
+
+
+5.) Create a secret named mysql-root-pass having a key pair value, where key is password and its value is YUIidhb667, create another secret named mysql-user-pass having some key pair values, where frist key is username and its value is kodekloud_gem, second key is password and value is dCV3szSGNA, create one more secret named mysql-db-url, key name is database and value is kodekloud_db9
+
+
+6.) Define some Environment variables within the container:
+
+
+a) name: MYSQL_ROOT_PASSWORD, should pick value from secretKeyRef name: mysql-root-pass and key: password
+
+
+b) name: MYSQL_DATABASE, should pick value from secretKeyRef name: mysql-db-url and key: database
+
+
+c) name: MYSQL_USER, should pick value from secretKeyRef name: mysql-user-pass key key: username
+
+
+d) name: MYSQL_PASSWORD, should pick value from secretKeyRef name: mysql-user-pass and key: password
+
+
+Note: The kubectl utility on jump_host has been configured to work with the kubernetes cluster.
+
+Ans)
+   ## Check Number of node running
+   1. thor@jump_host ~$ kubectl get nodes
+      NAME                      STATUS   ROLES           AGE    VERSION
+      kodekloud-control-plane   Ready    control-plane   103m   v1.27.3-44+b5c876a05b7bbd
+      
+   ## Check the storage class
+   2. thor@jump_host ~$ kubectl get sc
+      NAME                 PROVISIONER             RECLAIMPOLICY   VOLUMEBINDINGMODE      ALLOWVOLUMEEXPANSION   AGE
+      standard (default)   rancher.io/local-path   Delete          WaitForFirstConsumer   false                  103m 
+
+   ## Write the mysql-pv.yaml file to create mysql-pv
+   3. thor@jump_host ~$ vi mysql-pv.yaml
+
+      apiVersion: v1
+      kind: PersistentVolume
+      metadata:
+        name: mysql-pv
+      spec: 
+        capacity:
+          storage: 250Mi
+        accessModes:
+          - ReadWriteOnce
+        hostPath:
+          path: "/var/lib/mysql"
+
+    ## Apply the mysql-pv.yaml file to create mysql-pv
+    4. thor@jump_host ~$ kubectl apply -f mysql-pv.yaml
+       persistentvolume/mysql-pv created
+
+    ## Check the pv created
+    5. thor@jump_host ~$ kubectl get pv
+       NAME       CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS      CLAIM   STORAGECLASS   REASON   AGE
+       mysql-pv   250Mi      RWO            Retain           Available           standard                47s
+
+    ## Write mysql-pv-claim.yaml file to create a mysql-pv-claim pvc
+    6. thor@jump_host ~$ vi mysql-pv-claim.yaml
+
+       apiVersion: v1
+       kind: PersistentVolumeClaim
+       metadata:
+         name: mysql-pv-claim
+       spec:
+         resources:
+           requests:
+             storage: 250Mi
+         accessModes:
+           - ReadWriteOnce
+
+    ## Apply the mysql-pv-claim.yaml file to create a mysql-pv-claim pvc
+    7. thor@jump_host ~$ kubectl apply -f mysql-pv-claim.yaml
+       persistentvolumeclaim/mysql-pv-claim created
+
+    ## Check the pvc created
+    8. thor@jump_host ~$ kubectl get pvc
+       NAME             STATUS    VOLUME   CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+       mysql-pv-claim   Pending                                      standard       50s
+
+    ## Create the mysql-root-pass, mysql-user-pass, and mysql-db-url secrets
+    9. thor@jump_host ~$ kubectl create secret generic mysql-root-pass --from-literal=password=YUIidhb667
+       secret/mysql-root-pass created
+
+       thor@jump_host ~$ kubectl create secret generic mysql-user-pass --from-literal=username=kodekloud_gem --from-literal=password=dCV3szSGNA
+       secret/mysql-user-pass created
+
+       thor@jump_host ~$ kubectl create secret generic mysql-db-url --from-literal=database=kodekloud_db9
+       secret/mysql-db-url created
+
+    ## Check the secrets created
+    10. thor@jump_host ~$ kubectl get secrets 
+        NAME              TYPE     DATA   AGE
+        mysql-db-url      Opaque   1      6s
+        mysql-root-pass   Opaque   1      4m41s
+        mysql-user-pass   Opaque   2      101s
+
+    ## Write mysql-deployment.yaml file to create the mysql-deployment deployment
+    11. thor@jump_host ~$ vi mysql-deployment.yaml
+
+        apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          name: mysql-deployment
+        spec:
+          selector:
+            matchLabels:
+              app: mysql-app
+          template:
+            metadata:
+              labels:
+                app: mysql-app
+            spec:
+              containers:
+              - name: mysql-container
+                image: mysql:latest
+                resources:
+                  requests:
+                    memory: "256Mi"
+                    cpu: "500m"
+                  limits:
+                    memory: "512Mi"
+                    cpu: "500m"
+                ports:
+                - containerPort: 3306
+                env:
+                  - name: MYSQL_ROOT_PASSWORD
+                    valueFrom:
+                      secretKeyRef:
+                        name: mysql-root-pass
+                        key: password
+                  - name: MYSQL_DATABASE
+                    valueFrom:
+                      secretKeyRef:
+                        name: mysql-db-url
+                        key: database
+                  - name: MYSQL_USER
+                    valueFrom:
+                      secretKeyRef:
+                        name: mysql-user-pass
+                        key: username
+                  - name: MYSQL_PASSWORD
+                    valueFrom:
+                      secretKeyRef:
+                        name: mysql-user-pass
+                        key: password
+                volumeMounts:
+                  - name: mysql-pv
+                    mountPath: /var/lib/mysql
+              volumes:
+                - name: mysql-pv
+                  persistentVolumeClaim:
+                    claimName: mysql-pv-claim
+
+    ## Apply the mysql-deployment.yaml file to create the mysql-deployment deployment
+    12. thor@jump_host ~$ kubectl apply -f mysql-deployment.yaml
+        deployment.apps/mysql-deployment created
+
+    ## Check Deployment and Pod are running or not 
+    13. thor@jump_host ~$ kubectl get deploy 
+        NAME               READY   UP-TO-DATE   AVAILABLE   AGE
+        mysql-deployment   1/1     1            1           5m44s
+        thor@jump_host ~$ kubectl get pods
+        NAME                                READY   STATUS    RESTARTS   AGE
+        mysql-deployment-5dff6ffcbb-r4qcj   1/1     Running   0          5m52s
+    
+    ## Write the mysql.yml file to create mysql nodePort service
+    13. thor@jump_host ~$ vi mysql.yml
+
+        apiVersion: v1
+        kind: Service
+        metadata:
+          name: mysql
+        spec:
+          selector:
+            app: mysql-app
+          type: NodePort
+          ports:
+          - port: 3306
+            targetPort: 3306
+            nodePort: 30007
+
+    ## Apply the mysql.yml file to create mysql nodePort service
+    14. thor@jump_host ~$ kubectl apply -f mysql.yml
+        service/mysql created
+
+    ## Check the mysql service
+    15. thor@jump_host ~$ kubectl get svc
+        NAME         TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)          AGE
+        kubernetes   ClusterIP   10.96.0.1       <none>        443/TCP          153m
+        mysql        NodePort    10.96.161.240   <none>        3306:30007/TCP   25s
+
+    ## Check the PVC status
+    16. thor@jump_host ~$ kubectl get pvc
+        NAME             STATUS   VOLUME     CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+        mysql-pv-claim   Bound    mysql-pv   250Mi      RWO            standard       3m1s
+
+    ## Print the Environment variables we have set in the Pod
+    17. thor@jump_host ~$ kubectl exec -it mysql-deployment-5dff6ffcbb-r4qcj -- printenv
+        PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+        HOSTNAME=mysql-deployment-5dff6ffcbb-r4qcj
+        GOSU_VERSION=1.16
+        MYSQL_MAJOR=innovation
+        MYSQL_VERSION=8.3.0-1.el8
+        MYSQL_SHELL_VERSION=8.3.0-1.el8
+        MYSQL_ROOT_PASSWORD=YUIidhb667
+        MYSQL_DATABASE=kodekloud_db9
+        MYSQL_USER=kodekloud_gem
+        MYSQL_PASSWORD=dCV3szSGNA
+        KUBERNETES_SERVICE_PORT=443
+        KUBERNETES_SERVICE_PORT_HTTPS=443
+        KUBERNETES_PORT=tcp://10.96.0.1:443
+        KUBERNETES_PORT_443_TCP=tcp://10.96.0.1:443
+        KUBERNETES_PORT_443_TCP_PROTO=tcp
+        KUBERNETES_PORT_443_TCP_PORT=443
+        KUBERNETES_PORT_443_TCP_ADDR=10.96.0.1
+        KUBERNETES_SERVICE_HOST=10.96.0.1
+        TERM=xterm
+        HOME=/root
+
+    ## Check the logs of the mysql-deployment-5dff6ffcbb-r4qcj pod
+    18. thor@jump_host ~$ kubectl logs -f mysql-deployment-5dff6ffcbb-r4qcj
+        2024-02-10 03:38:35+00:00 [Note] [Entrypoint]: Entrypoint script for MySQL Server 8.3.0-1.el8 started.
+        2024-02-10 03:38:35+00:00 [Note] [Entrypoint]: Switching to dedicated user 'mysql'
+        2024-02-10 03:38:35+00:00 [Note] [Entrypoint]: Entrypoint script for MySQL Server 8.3.0-1.el8 started.
+        2024-02-10 03:38:35+00:00 [Note] [Entrypoint]: Initializing database files
+        2024-02-10T03:38:35.739294Z 0 [System] [MY-015017] [Server] MySQL Server Initialization - start.
+        2024-02-10T03:38:35.740849Z 0 [System] [MY-013169] [Server] /usr/sbin/mysqld (mysqld 8.3.0) initializing of server in progress as process 229
+        2024-02-10T03:38:35.754474Z 1 [System] [MY-013576] [InnoDB] InnoDB initialization has started.
+        2024-02-10T03:38:36.169303Z 1 [System] [MY-013577] [InnoDB] InnoDB initialization has ended.
+        2024-02-10T03:38:37.490798Z 6 [Warning] [MY-010453] [Server] root@localhost is created with an empty password ! Please consider switching off the --initialize-insecure option.
+        2024-02-10T03:38:40.361992Z 0 [System] [MY-015018] [Server] MySQL Server Initialization - end.
+        2024-02-10 03:38:40+00:00 [Note] [Entrypoint]: Database files initialized
+        2024-02-10 03:38:40+00:00 [Note] [Entrypoint]: Starting temporary server
+        2024-02-10T03:38:40.456242Z 0 [System] [MY-015015] [Server] MySQL Server - start.
+        2024-02-10T03:38:40.725942Z 0 [System] [MY-010116] [Server] /usr/sbin/mysqld (mysqld 8.3.0) starting as process 279
+        2024-02-10T03:38:40.780824Z 1 [System] [MY-013576] [InnoDB] InnoDB initialization has started.
+        2024-02-10T03:38:40.990308Z 1 [System] [MY-013577] [InnoDB] InnoDB initialization has ended.
+        2024-02-10T03:38:41.274622Z 0 [Warning] [MY-010068] [Server] CA certificate ca.pem is self signed.
+        2024-02-10T03:38:41.274659Z 0 [System] [MY-013602] [Server] Channel mysql_main configured to support TLS. Encrypted connections are now supported for this channel.
+        2024-02-10T03:38:41.276389Z 0 [Warning] [MY-011810] [Server] Insecure configuration for --pid-file: Location '/var/run/mysqld' in the path is accessible to all OS users. Consider choosing a different directory.
+        2024-02-10T03:38:41.291940Z 0 [System] [MY-011323] [Server] X Plugin ready for connections. Socket: /var/run/mysqld/mysqlx.sock
+        2024-02-10T03:38:41.292067Z 0 [System] [MY-010931] [Server] /usr/sbin/mysqld: ready for connections. Version: '8.3.0'  socket: '/var/run/mysqld/mysqld.sock'  port: 0  MySQL Community Server - GPL.
+        2024-02-10 03:38:41+00:00 [Note] [Entrypoint]: Temporary server started.
+        '/var/lib/mysql/mysql.sock' -> '/var/run/mysqld/mysqld.sock'
+        Warning: Unable to load '/usr/share/zoneinfo/iso3166.tab' as time zone. Skipping it.
+        Warning: Unable to load '/usr/share/zoneinfo/leap-seconds.list' as time zone. Skipping it.
+        Warning: Unable to load '/usr/share/zoneinfo/leapseconds' as time zone. Skipping it.
+        Warning: Unable to load '/usr/share/zoneinfo/tzdata.zi' as time zone. Skipping it.
+        Warning: Unable to load '/usr/share/zoneinfo/zone.tab' as time zone. Skipping it.
+        Warning: Unable to load '/usr/share/zoneinfo/zone1970.tab' as time zone. Skipping it.
+        2024-02-10 03:38:44+00:00 [Note] [Entrypoint]: Creating database kodekloud_db9
+        2024-02-10 03:38:44+00:00 [Note] [Entrypoint]: Creating user kodekloud_gem
+        2024-02-10 03:38:44+00:00 [Note] [Entrypoint]: Giving user kodekloud_gem access to schema kodekloud_db9
+        
+        2024-02-10 03:38:44+00:00 [Note] [Entrypoint]: Stopping temporary server
+        2024-02-10T03:38:44.260738Z 13 [System] [MY-013172] [Server] Received SHUTDOWN from user root. Shutting down mysqld (Version: 8.3.0).
+        2024-02-10T03:38:45.898311Z 0 [System] [MY-010910] [Server] /usr/sbin/mysqld: Shutdown complete (mysqld 8.3.0)  MySQL Community Server - GPL.
+        2024-02-10T03:38:45.898339Z 0 [System] [MY-015016] [Server] MySQL Server - end.
+        2024-02-10 03:38:46+00:00 [Note] [Entrypoint]: Temporary server stopped
+        
+        2024-02-10 03:38:46+00:00 [Note] [Entrypoint]: MySQL init process done. Ready for start up.
+        
+        2024-02-10T03:38:46.282449Z 0 [System] [MY-015015] [Server] MySQL Server - start.
+        2024-02-10T03:38:46.580685Z 0 [System] [MY-010116] [Server] /usr/sbin/mysqld (mysqld 8.3.0) starting as process 1
+        2024-02-10T03:38:46.586488Z 1 [System] [MY-013576] [InnoDB] InnoDB initialization has started.
+        2024-02-10T03:38:46.724418Z 1 [System] [MY-013577] [InnoDB] InnoDB initialization has ended.
+        2024-02-10T03:38:46.976662Z 0 [Warning] [MY-010068] [Server] CA certificate ca.pem is self signed.
+        2024-02-10T03:38:46.976700Z 0 [System] [MY-013602] [Server] Channel mysql_main configured to support TLS. Encrypted connections are now supported for this channel.
+        2024-02-10T03:38:46.978510Z 0 [Warning] [MY-011810] [Server] Insecure configuration for --pid-file: Location '/var/run/mysqld' in the path is accessible to all OS users. Consider choosing a different directory.
+        2024-02-10T03:38:46.994907Z 0 [System] [MY-011323] [Server] X Plugin ready for connections. Bind-address: '::' port: 33060, socket: /var/run/mysqld/mysqlx.sock
+        2024-02-10T03:38:46.994993Z 0 [System] [MY-010931] [Server] /usr/sbin/mysqld: ready for connections. Version: '8.3.0'  socket: '/var/run/mysqld/mysqld.sock'  port: 3306  MySQL Community Server - GPL.
+
