@@ -1,0 +1,338 @@
+We need to deploy a Drupal application on Kubernetes cluster. The Nautilus application development team want to setup a fresh Drupal as they will do the installation on their own. Below you can find the requirements, they have shared with us.
+
+
+
+1) Configure a persistent volume drupal-mysql-pv with hostPath = /drupal-mysql-data (/drupal-mysql-data directory already exists on the worker Node i.e jump host), 5Gi of storage and ReadWriteOnce access mode.
+
+
+2) Configure one PersistentVolumeClaim named drupal-mysql-pvc with storage request of 3Gi and ReadWriteOnce access mode.
+
+
+3) Create a deployment drupal-mysql with 1 replica, use mysql:5.7 image. Mount the claimed PVC at /var/lib/mysql.
+
+
+4) Create a deployment drupal with 1 replica and use drupal:8.6 image.
+
+
+4) Create a NodePort type service which should be named as drupal-service and nodePort should be 30095.
+
+
+5) Create a service drupal-mysql-service to expose mysql deployment on port 3306.
+
+
+6) Set rest of the configration for deployments, services, secrets etc as per your preferences. At the end you should be able to access the Drupal installation page by clicking on App button.
+
+
+Note: The kubectl on jump_host has been configured to work with the kubernetes cluster.
+
+Ans)
+   ## Check how many nodes are up and running 
+   1. thor@jump_host ~$ kubectl get nodes
+      NAME                      STATUS   ROLES           AGE   VERSION
+      kodekloud-control-plane   Ready    control-plane   28m   v1.27.3-44+b5c876a05b7bbd
+
+   ## Check the storage calss
+   2. thor@jump_host ~$ kubectl get sc
+      NAME                 PROVISIONER             RECLAIMPOLICY   VOLUMEBINDINGMODE      ALLOWVOLUMEEXPANSION   AGE
+      standard (default)   rancher.io/local-path   Delete          WaitForFirstConsumer   false                  29m
+
+   ## Write a drupal-mysql-pv.yaml file to create the drupal-mysql-pv persistent volume
+   3. thor@jump_host ~$ vi drupal-mysql-pv.yaml
+
+      apiVersion: v1
+      kind: PersistentVolume
+      metadata:
+        name: drupal-mysql-pv
+      spec: 
+        capacity:
+          storage: 5Gi
+        accessModes:
+          - ReadWriteOnce
+        hostPath:
+          path: "/drupal-mysql-data"
+    
+    ## Apply the drupal-mysql-pv.yaml file to create the drupal-mysql-pv persistent volume
+    4. thor@jump_host ~$ kubectl apply -f drupal-mysql-pv.yaml
+       persistentvolume/drupal-mysql-pv created
+
+    ## Check the persistent volume created
+    5. thor@jump_host ~$ kubectl get pv
+       NAME              CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS      CLAIM   STORAGECLASS   REASON   AGE
+       drupal-mysql-pv   5Gi        RWO            Retain           Available                                   2m28s
+
+    ## Write drupal-mysql-pvc.yaml file to create drupal-mysql-pvc PersistentVolumeClaim
+    6. thor@jump_host ~$ vi drupal-mysql-pvc.yaml
+
+       apiVersion: v1
+       kind: PersistentVolumeClaim
+       metadata:
+         name: drupal-mysql-pvc
+       spec:
+         resources:
+           requests:
+             storage: 3Gi
+         accessModes:
+           - ReadWriteOnce
+
+    ## Apply the drupal-mysql-pvc.yaml file to create drupal-mysql-pvc PersistentVolumeClaim
+    7. thor@jump_host ~$ kubectl apply -f drupal-mysql-pvc.yaml
+       persistentvolumeclaim/drupal-mysql-pvc created
+
+    ## Check the PersistentVolumeClaim created
+    8. thor@jump_host ~$ kubectl get pvc
+       NAME               STATUS    VOLUME   CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+       drupal-mysql-pvc   Pending                                      standard       39s
+
+    ## Create the mysql dburl, username, password and root password as a secrets
+    9. thor@jump_host ~$ kubectl create secret generic mysql-root-pass --from-literal=password=YUIidhb667
+       secret/mysql-root-pass created
+       thor@jump_host ~$ kubectl create secret generic mysql-user-pass --from-literal=username=kodekloud_gem --from-literal=password=dCV3szSGNA
+       secret/mysql-user-pass created
+       thor@jump_host ~$ kubectl create secret generic mysql-db-url --from-literal=database=kodekloud_db9
+       secret/mysql-db-url created
+    
+    ## Check the secrets created
+    10. thor@jump_host ~$ kubectl get secrets
+        NAME              TYPE     DATA   AGE
+        mysql-db-url      Opaque   1      11m
+        mysql-root-pass   Opaque   1      12m
+        mysql-user-pass   Opaque   2      11m
+
+    ## Write drupal-mysql.yaml file to create drupal-mysql deployment
+    11. thor@jump_host ~$ vi drupal-mysql.yaml
+
+        apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          name: drupal-mysql
+        spec:
+          replicas: 1
+          selector:
+            matchLabels:
+              app: drupal-mysql
+          template:
+            metadata:
+              labels:
+                app: drupal-mysql
+            spec:
+              containers:
+                - name: mysql
+                  image: mysql:5.7
+        		  ports:
+        		    - containerPort: 3306
+        		  env:
+                    - name: MYSQL_ROOT_PASSWORD
+                      valueFrom:
+                        secretKeyRef:
+                          name: mysql-root-pass
+                          key: password
+                    - name: MYSQL_DATABASE
+                      valueFrom:
+                        secretKeyRef:
+                          name: mysql-db-url
+                          key: database
+                    - name: MYSQL_USER
+                      valueFrom:
+                        secretKeyRef:
+                          name: mysql-user-pass
+                          key: username
+                    - name: MYSQL_PASSWORD
+                      valueFrom:
+                        secretKeyRef:
+                          name: mysql-user-pass
+                          key: password
+                  volumeMounts:
+                    - name: drupal-mysql-storage
+                      mountPath: /var/lib/mysql
+              volumes:
+                - name: drupal-mysql-storage
+                  persistentVolumeClaim:
+                    claimName: drupal-mysql-pvc
+
+    ## Apply the drupal-mysql.yaml file to create drupal-mysql deployment
+    12. thor@jump_host ~$ kubectl apply -f drupal-mysql.yaml
+        deployment.apps/drupal-mysql created
+
+    ## Check the deployment and pods created in the deployment
+    13. thor@jump_host ~$ kubectl get deploy
+        NAME           READY   UP-TO-DATE   AVAILABLE   AGE
+        drupal-mysql   1/1     1            1           6s
+        
+        thor@jump_host ~$ kubectl get pods
+        NAME                            READY   STATUS    RESTARTS   AGE
+        drupal-mysql-866b87d45f-xpz9s   1/1     Running   0          32s
+
+    ## Write drupal.yaml file to create the drupal deployment
+    14. thor@jump_host ~$ vi drupal.yaml
+
+        apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          name: drupal
+        spec:
+          replicas: 1
+          selector:
+            matchLabels:
+              app: drupal
+          template:
+            metadata:
+              labels:
+                app: drupal
+            spec:
+              containers:
+                - name: drupal
+                  image: drupal:8.6
+        		  ports:
+        		    - containerPort: 80
+        		  env:
+                    - name: MYSQL_ROOT_PASSWORD
+                      valueFrom:
+                        secretKeyRef:
+                          name: mysql-root-pass
+                          key: password
+                    - name: MYSQL_DATABASE
+                      valueFrom:
+                        secretKeyRef:
+                          name: mysql-db-url
+                          key: database
+                    - name: MYSQL_USER
+                      valueFrom:
+                        secretKeyRef:
+                          name: mysql-user-pass
+                          key: username
+                    - name: MYSQL_PASSWORD
+                      valueFrom:
+                        secretKeyRef:
+                          name: mysql-user-pass
+                          key: password
+
+    ## Apply the drupal.yaml file to create the drupal deployment
+    15. thor@jump_host ~$ kubectl apply -f drupal.yaml
+        deployment.apps/drupal created
+
+    ## Check the pods status
+    16. thor@jump_host ~$ kubectl get pods 
+        NAME                            READY   STATUS    RESTARTS   AGE
+        drupal-5595b58849-dmmvw         1/1     Running   0          50s
+        drupal-mysql-866b87d45f-xpz9s   1/1     Running   0          6m34s
+
+    ## Check the persistentVolumeClaim status 
+    17. thor@jump_host ~$ kubectl get pvc
+        NAME               STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+        drupal-mysql-pvc   Bound    pvc-f2f16997-b8b7-4d06-96a6-f637cdb4c5ec   3Gi        RWO            standard       29m
+
+    ## Write the drupal-service.yaml file to create drupal-service NodePort Service to Expose the application
+    18. thor@jump_host ~$ vi drupal-service.yaml
+
+        apiVersion: v1
+        kind: Service
+        metadata:
+          name: drupal-service
+        spec:
+          type: NodePort
+          selector:
+            app: drupal
+          ports:
+            - protocol: TCP
+              port: 80
+              targetPort: 80
+              nodePort: 30095
+
+    ## Apply the drupal-service.yaml file to create drupal-service NodePort Service to Expose the application
+    19. thor@jump_host ~$ kubectl apply -f drupal-service.yaml
+        service/drupal-service created
+
+    ## Check the Service Created
+    20. thor@jump_host ~$ kubectl get svc
+        NAME             TYPE        CLUSTER-IP    EXTERNAL-IP   PORT(S)        AGE
+        drupal-service   NodePort    10.96.3.131   <none>        80:30095/TCP   14s
+        kubernetes       ClusterIP   10.96.0.1     <none>        443/TCP        58m
+
+    ## Write drupal-mysql-service.yaml file to create the drupal-mysql-service ClusterIP Service to Expose the application internally
+    21. thor@jump_host ~$ vi drupal-mysql-service.yaml
+
+        apiVersion: v1
+        kind: Service
+        metadata:
+          name: drupal-mysql-service
+        spec:
+          selector:
+            app: drupal-mysql
+          ports:
+            - protocol: TCP
+              port: 3306
+              targetPort: 3306
+
+    ## Apply the drupal-mysql-service.yaml file to create the drupal-mysql-service ClusterIP Service to Expose the application internally
+    22. thor@jump_host ~$ kubectl apply -f drupal-mysql-service.yaml
+        service/drupal-mysql-service created
+
+    ## Check the Service Created
+    23. thor@jump_host ~$ kubectl get svc
+        NAME                   TYPE        CLUSTER-IP    EXTERNAL-IP   PORT(S)        AGE
+        drupal-mysql-service   ClusterIP   10.96.96.52   <none>        3306/TCP       10s
+        drupal-service         NodePort    10.96.3.131   <none>        80:30095/TCP   2m23s
+        kubernetes             ClusterIP   10.96.0.1     <none>        443/TCP        60m
+
+    ## Check the Environment Variables we have set for each pod
+    24. thor@jump_host ~$ kubectl exec -it drupal-5595b58849-dmmvw -- printenv
+        PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+        HOSTNAME=drupal-5595b58849-dmmvw
+        PHPIZE_DEPS=autoconf            dpkg-dev                file            g++             gcc              libc-dev                make            pkg-config              re2c
+        PHP_INI_DIR=/usr/local/etc/php
+        APACHE_CONFDIR=/etc/apache2
+        APACHE_ENVVARS=/etc/apache2/envvars
+        PHP_EXTRA_BUILD_DEPS=apache2-dev
+        PHP_EXTRA_CONFIGURE_ARGS=--with-apxs2 --disable-cgi
+        PHP_CFLAGS=-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
+        PHP_CPPFLAGS=-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
+        PHP_LDFLAGS=-Wl,-O1 -Wl,--hash-style=both -pie
+        GPG_KEYS=CBAF69F173A0FEA4B537F470D66C9593118BCCB6 F38252826ACD957EF380D39F2F7956BC5DA04B5D
+        PHP_VERSION=7.3.12
+        PHP_URL=https://www.php.net/get/php-7.3.12.tar.xz/from/this/mirror
+        PHP_ASC_URL=https://www.php.net/get/php-7.3.12.tar.xz.asc/from/this/mirror
+        PHP_SHA256=aafe5e9861ad828860c6af8c88cdc1488314785962328eb1783607c1fdd855df
+        PHP_MD5=
+        DRUPAL_VERSION=8.6.18
+        DRUPAL_MD5=6bef7039de8b5cdd28e7971529138e30
+        MYSQL_USER=kodekloud_gem
+        MYSQL_PASSWORD=dCV3szSGNA
+        MYSQL_ROOT_PASSWORD=YUIidhb667
+        MYSQL_DATABASE=kodekloud_db9
+        KUBERNETES_SERVICE_PORT=443
+        KUBERNETES_SERVICE_PORT_HTTPS=443
+        KUBERNETES_PORT=tcp://10.96.0.1:443
+        KUBERNETES_PORT_443_TCP=tcp://10.96.0.1:443
+        KUBERNETES_PORT_443_TCP_PROTO=tcp
+        KUBERNETES_PORT_443_TCP_PORT=443
+        KUBERNETES_PORT_443_TCP_ADDR=10.96.0.1
+        KUBERNETES_SERVICE_HOST=10.96.0.1
+        TERM=xterm
+        HOME=/root
+        
+        thor@jump_host ~$ kubectl exec -it drupal-mysql-866b87d45f-xpz9s -- printenv
+        PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+        HOSTNAME=drupal-mysql-866b87d45f-xpz9s
+        GOSU_VERSION=1.16
+        MYSQL_MAJOR=5.7
+        MYSQL_VERSION=5.7.44-1.el7
+        MYSQL_SHELL_VERSION=8.0.35-1.el7
+        MYSQL_ROOT_PASSWORD=YUIidhb667
+        MYSQL_DATABASE=kodekloud_db9
+        MYSQL_USER=kodekloud_gem
+        MYSQL_PASSWORD=dCV3szSGNA
+        KUBERNETES_SERVICE_HOST=10.96.0.1
+        KUBERNETES_SERVICE_PORT=443
+        KUBERNETES_SERVICE_PORT_HTTPS=443
+        KUBERNETES_PORT=tcp://10.96.0.1:443
+        KUBERNETES_PORT_443_TCP=tcp://10.96.0.1:443
+        KUBERNETES_PORT_443_TCP_PROTO=tcp
+        KUBERNETES_PORT_443_TCP_PORT=443
+        KUBERNETES_PORT_443_TCP_ADDR=10.96.0.1
+        TERM=xterm
+        HOME=/root
+    
+    ## Access the Application using Curl command
+    25. curl -k http://localhost:30095
+
+        
