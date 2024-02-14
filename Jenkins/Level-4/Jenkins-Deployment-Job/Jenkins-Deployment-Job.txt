@@ -1,0 +1,112 @@
+The Nautilus development team had a meeting with the DevOps team where they discussed automating the deployment of one of their apps using Jenkins (the one in Stratos Datacenter). They want to auto deploy the new changes in case any developer pushes to the repository. As per the requirements mentioned below configure the required Jenkins job.
+
+
+
+Click on the Jenkins button on the top bar to access the Jenkins UI. Login using username admin and Adm!n321 password.
+
+
+Similarly, you can access the Gitea UI using Gitea button, username and password for Git is sarah and Sarah_pass123 respectively. Under user sarah you will find a repository named web that is already cloned on the Storage server under sarah's home. sarah is a developer who is working on this repository.
+
+
+1. Install httpd (whatever version is available in the yum repo by default) and configure it to serve on port 8080 on All app servers. You can make it part of your Jenkins job or you can do this step manually on all app servers.
+
+
+2. Create a Jenkins job named nautilus-app-deployment and configure it in a way so that if anyone pushes any new change to the origin repository in master branch, the job should auto build and deploy the latest code on the Storage server under /var/www/html directory. Since /var/www/html on Storage server is shared among all apps.
+
+
+3. SSH into Storage Server using sarah user credentials mentioned above. Under sarah user's home you will find a cloned Git repository named web. Under this repository there is an index.html file, update its content to Welcome to the xFusionCorp Industries, then push the changes to the origin into master branch. This push must trigger your Jenkins job and the latest changes must be deployed on the servers, also make sure it deploys the entire repository content not only index.html file.
+
+
+Click on the App button on the top bar to access the app, you should be able to see the latest changes you deployed. Please make sure the required content is loading on the main URL https://<LBR-URL> i.e there should not be any sub-directory like https://<LBR-URL>/web etc.
+
+
+Note:
+1. You might need to install some plugins and restart Jenkins service. So, we recommend clicking on Restart Jenkins when installation is complete and no jobs are running on plugin installation/update page i.e update centre. Also some times Jenkins UI gets stuck when Jenkins service restarts in the back end so in such case please make sure to refresh the UI page.
+
+
+2. Make sure Jenkins job passes even on repetitive runs as validation may try to build the job multiple times.
+
+
+3. Deployment related tasks should be done by sudo user on the destination server to avoid any permission issues so make sure to configure your Jenkins job accordingly.
+
+
+4. For these kind of scenarios requiring changes to be done in a web UI, please take screenshots so that you can share it with us for review in case your task is marked incomplete. You may also consider using a screen recording software such as loom.com to record and share your work.
+
+Ans)
+    ## Log into all app server1 and install the httpd server
+    1. ssh tony@stapp01
+
+    ## Install the httpd server
+    2. sudo yum install httpd -y 
+
+    ## Open httpd.conf file and update the default port number to 8080
+    3. sudo vi /etc/httpd/conf/httpd.conf
+    Find the line that starts with "Listen 80" and remove  it, then add "Listen 8080". Save and exit the file.
+
+    ## Enable, Start, and Check the status of httpd server
+    4. sudo systemctl enable httpd && sudo systemctl start httpd && sudo systemctl status httpd
+
+    ##Repeat the above 4 steps in remaining App server 2 and App Server 3
+
+    ## Log into the Jenins UI
+    5. username admin and password Adm!n321
+
+    ## Add SSH Build plugin
+    6. Manage Jenkins -> Manage plugins -> Available plugins -> select "Pipeline, Pipeline: API, Pipeline: Basic Steps, Pipeline: Build Step, Pipeline: Declarative, Pipeline: Declarative Extension Points API, Pipeline: Groovy, Pipeline: Groovy Libraries, Pipeline: Input Step, Pipeline: Job, Pipeline: Milestone Step, Pipeline: Model API, Pipeline: Multibranch, Pipeline: Nodes and Processes, Pipeline: SCM Step, Pipeline: Stage Step, Pipeline: Stage Tags Metadata, Pipeline: Step API, Pipeline: Supporting APIs, SSH Agent Plugin, SSH Build Agents plugin, SSH Credentials Plugin, git, credentials " -> install -> Restart Jenkins when installation is complete and no jobs are running on plugin installation/update
+
+    ## Add Gitea Username and Password in the Jenkins Credentials
+    7. Manage Jenkins -> Credentials -> System -> Global credentials (unrestricted) -> Add New credentials -> Select kind Username and password -> username sarah -> password Sarah_pass123 -> id GITEA_CRED -> description -> save
+
+    ## Create a New Jenkins Job
+    8. Click on "New Item" to create a new job -> Enter a name for your job, such as "nautilus-app-deployment." -> Select "Freestyle project" and click "OK."
+
+    ## Log into the Gitea and copy the Gitea web repo URL
+    9. Username: sarah Password: Sarah_pass123 Repo-URL: http://git.stratos.xfusioncorp.com/sarah/web.git
+
+    ## Log into Jenkins Server and generate the ssh-keygen and copy it to Storage Server sarah user for Jenkins Job build
+    10. ssh jenkins@jenkins 
+        ssh-keygen
+        ssh-copy-id sarah@ststor01
+
+    ## Open the job and add remaining Configuration
+    11. In the configuration:
+        Choose "Git" under Source Code Management.
+        Enter the repository URL: http://git.stratos.xfusioncorp.com/sarah/web.git
+        Add a build trigger: "Poll SCM" and set the schedule to * * * * * to check for changes frequently.
+        Add a build step: "Execute shell" and enter the script:
+
+        #!/bin/bash
+        cd /var/www/html
+        git pull origin master
+
+    ## Log into the storage server using sarah user to made the change and check the automatic builds
+    12. ssh sarah@ststor01
+        cd /var/www/html
+        echo 'Welcome to the xFusionCorp Industries' > index.html
+        git add index.html
+        git commit -m 'UPDATE -> index.html Updated'
+        git push origin master
+
+    ## Check the nautilus-app-deployment Jenkins Job
+    13. We have add a poll scm with * * * * *, so it will look every minute if any changes are happened  on the code. If there is a change then it will start building the application. In the above step we have made changes the index.html and pused it to gitea  Status, it should show green color indicating success of the deployment.
+    13. Go back to the Jenkins Dashboard, click on Manage Jenkins -> Navigate to -> Configure System -> Check out to local workspace from SCM -> Git Status, it should show green if everything is working fine. If not, troubleshoot accordingly.
+
+### Testing ###
+
+#### Nautilus Web Application ####
+
+**Test Case 1: Accessing the Website from Public Network **
+
+1. From any public network machine, access the website by entering the IP address of the load balancer (e.g., `http://54.86.74.
+1. Open a web browser and navigate to http://172.16.238.14/ (Public IP) or http://stlb01.stratos.xfusioncorp.com/ (Public DNS)
+1. From any computer on the public network, open a browser and navigate to `http://stlb01.stratos.xfusioncorp.com`
+   The website should load without error. If there is an error, troubleshoot as needed.
+
+**Test Case 2: Viewing the Welcome Message **
+
+1. On the homepage of the website, verify that the welcome message displays correctly. It should read “Welcome to the xFusionCorp Industries”.
+
+    
+
+
+
