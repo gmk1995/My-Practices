@@ -97,7 +97,7 @@ Ans)
 
 **Test Case 1: Accessing the Website from Public Network **
 
-1. From any public network machine, access the website by entering the IP address of the load balancer (e.g., `http://54.86.74.
+1. From any public network machine, access the website by entering the IP address of the load balancer (e.g., `http://172.16.238.14/
 1. Open a web browser and navigate to http://172.16.238.14/ (Public IP) or http://stlb01.stratos.xfusioncorp.com/ (Public DNS)
 1. From any computer on the public network, open a browser and navigate to `http://stlb01.stratos.xfusioncorp.com`
    The website should load without error. If there is an error, troubleshoot as needed.
