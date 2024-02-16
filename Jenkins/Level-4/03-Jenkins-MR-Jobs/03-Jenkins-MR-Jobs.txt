@@ -1,0 +1,318 @@
+Click on the Jenkins button on the top bar to access the Jenkins UI. Login using username admin and password Adm!n321.
+
+
+Similarly, click on the Gitea button on the top bar to access the Gitea UI. Login using username sarah and password Sarah_pass123.
+
+There is a repository named sarah/mr_job in Gitea, which is cloned on the Storage server under /home/natasha/mr_job directory.
+
+
+Update the index.html file under dev branch, and change its content from Welcome to Nautilus Group! to Welcome to xFusionCorp Industries!. Remember to push your changes to the origin repository.
+
+
+After pushing the required changes, login to the Gitea server and you will find a pull request with title My First PR under mr_job repository. Merge this pull request.
+
+
+Create/configure a Jenkins pipeline job named nginx-container, configure a pipeline as per details given below and run the pipeline on server App Server 1.
+
+
+The pipeline must have two stages Build and Deploy (names are case sensitive).
+
+In the Build stage, first clone the sarah/mr_job repository, then build an image named stregi01.stratos.xfusioncorp.com:5000/nginx:latest using the Dockerfile present under the root of the repository. stregi01.stratos.xfusioncorp.com:5000 is the image registry server. After building the image push the same to the image registry server.
+
+In the Deploy stage, create a container named nginx-app using the image you built in the Build stage. Make sure to map container port to the host port 8080 and run the container in detached mode.
+
+Make sure to build a successful job at least once so that you have at least one successful build # in the job history. Further, you can test the app using command curl http://stapp01:8080 from the jump host.
+
+Note:
+
+1. You might need to install some plugins and restart Jenkins service. So, we recommend clicking on Restart Jenkins when installation is complete and no jobs are running on plugin installation/update page i.e update centre. Also, Jenkins UI sometimes gets stuck when Jenkins service restarts in the back end. In this case, please make sure to refresh the UI page.
+
+
+2. For these kind of scenarios requiring changes to be done in a web UI, please take screenshots so that you can share it with us for review in case your task is marked incomplete. You may also consider using a screen recording software such as loom.com to record and share your work.
+
+Ans)
+
+    ##Log into the Storage Server and update the index.html
+    1. thor@jump_host ~$ ssh natasha@ststor01
+       The authenticity of host 'ststor01 (172.16.238.15)' can't be established.
+       ECDSA key fingerprint is SHA256:vg8Es8LYHyGjRtW8RhsHvnbIHQx3CtrEhHdK/slakx0.
+       Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
+       Warning: Permanently added 'ststor01,172.16.238.15' (ECDSA) to the list of known hosts.
+       natasha@ststor01's password:
+
+       ## List down the files in /home/natasha directory
+
+       [natasha@ststor01 ~]$ ls -larth
+       total 32K
+       -rw-r--r-- 1 natasha natasha  376 Jun 20  2022 .bashrc
+       -rw-r--r-- 1 natasha natasha  141 Jun 20  2022 .bash_profile
+       -rw-r--r-- 1 natasha natasha   18 Jun 20  2022 .bash_logout
+       drwxr-xr-x 1 root    root    4.0K Mar  7  2023 ..
+       -rw-r--r-- 1 natasha natasha   60 Feb 16 00:59 .gitconfig
+       -rw-r--r-- 1 natasha natasha   41 Feb 16 00:59 .token
+       drwx------ 1 natasha natasha 4.0K Feb 16 00:59 .
+       drwxr-xr-x 3 natasha natasha 4.0K Feb 16 00:59 mr_job
+
+       ## Changing the directory to mr_job
+       [natasha@ststor01 ~]$ cd mr_job/
+
+       ## Listing  down the content of mr_job directory
+       [natasha@ststor01 mr_job]$ ls -l
+       total 8
+       -rw-r--r-- 1 natasha natasha 72 Feb 16 00:59 Dockerfile
+       -rw-r--r-- 1 natasha natasha 27 Feb 16 00:59 index.html
+
+       ## Display the content in the index.html
+
+       [natasha@ststor01 mr_job]$ cat index.html 
+       Welcome to Nautilus Group!
+
+       ## Updating the content in the index.html
+       [natasha@ststor01 mr_job]$ echo 'Welcome to xFusionCorp Industries!' > index.html
+
+       ## Display the new changes in the index.html
+       [natasha@ststor01 mr_job]$ cat index.html 
+       Welcome to xFusionCorp Industries!
+
+    ## push the changes to the dev branch
+    2. ## Checking git branch
+       [natasha@ststor01 mr_job]$ git branch
+       * dev
+         master
+        
+       ## After modifying the  file, we need to add and commit the change before pushing it to the remote repository.
+       ## Checking the git status
+       [natasha@ststor01 mr_job]$ git status
+       On branch dev
+       Changes not staged for commit:
+         (use "git add <file>..." to update what will be committed)
+         (use "git restore <file>..." to discard changes in working directory)
+               modified:   index.html
+       
+       no changes added to commit (use "git add" and/or "git commit -a")
+
+       ## adding the index.html to stagaging  area using `git add` command
+       [natasha@ststor01 mr_job]$ git status
+       On branch dev
+       Changes to be committed:
+         (use "git restore --staged <file>..." to unstage)
+               modified:   index.html
+       
+       ## Commiting the recent changes with git commit command
+       [natasha@ststor01 mr_job]$ git commit -m 'UPDATE -> updated index.html'
+       [dev 5586289] UPDATE -> updated index.html
+        1 file changed, 1 insertion(+), 1 deletion(-)
+
+       ## Pushing the changes to remote(origin) branch
+       [natasha@ststor01 mr_job]$ git push origin dev
+       Enumerating objects: 5, done.
+       Counting objects: 100% (5/5), done.
+       Delta compression using up to 36 threads
+       Compressing objects: 100% (2/2), done.
+       Writing objects: 100% (3/3), 335 bytes | 335.00 KiB/s, done.
+       Total 3 (delta 0), reused 0 (delta 0), pack-reused 0
+       remote: 
+       remote: Visit the existing pull request:
+       remote:   http://git.stratos.xfusioncorp.com/sarah/mr_job/pulls/1
+       remote: 
+       remote: . Processing 1 references
+       remote: Processed 1 references in total
+       To http://git.stratos.xfusioncorp.com/sarah/mr_job.git
+          67df3f9..5586289  dev -> dev
+
+    ## Log into the Gitea and check latest changes and complete the merge request
+    3. Username: sarah Password: Sarah_pass123
+       
+       Click on the pull request with title My First PR under mr_job repository. Merge this pull request.
+
+    ## Log into the Jenins UI
+    4. username admin and password Adm!n321
+
+    ## Add SSH Build plugin
+    5. Manage Jenkins -> Manage plugins -> Available plugins -> select "Pipeline,Pipeline: Declarative, Pipeline: Declarative Pipeline: Groovy, Pipeline: Groovy Libraries, Pipeline: Job,  Pipeline: SCM Step, Pipeline: Stage Step, Pipeline: Stage Tags Metadata, Pipeline: Step API, Pipeline: Supporting APIs, SSH Agent Plugin, SSH Build Agents plugin, SSH Credentials Plugin, git, credentials " -> install -> Restart Jenkins when installation is complete and no jobs are running on plugin installation/update
+
+    ## Add Gitea and App Server 1 Username and Password in the Jenkins Credentials
+    6. Manage Jenkins -> Credentials -> System -> Global credentials (unrestricted) -> Add New credentials -> Select kind Username and password -> username sarah -> password Sarah_pass123 -> id GITEA_CRED -> description -> save
+      
+       Manage Jenkins -> Credentials -> System -> Global credentials (unrestricted) -> Add New credentials -> Select kind Username and password -> username tony -> password Ir0nM@n -> id app_server1 -> description -> save
+
+    ## Log into the App Server 1 and check java is installed or not
+    7. thor@jump_host ~$ ssh tony@stapp01
+       The authenticity of host 'stapp01 (172.16.238.10)' can't be established.
+       ECDSA key fingerprint is SHA256:oJYzmFx3XV/34svAD4p8wmWJDzHbVx0k0snc25eO85w.
+       Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
+       Warning: Permanently added 'stapp01,172.16.238.10' (ECDSA) to the list of known hosts.
+       tony@stapp01's password: 
+
+       ## Checking the java version
+
+       [tony@stapp01 ~]$ java -version
+       -bash: java: command not found
+
+    ## Java installation on App_server_1 nodes
+    8. [tony@stapp01 ~]$ sudo yum install java-11-openjdk -y
+    
+    ## Add Slave nodes
+    9. Manage Jenkins -> Manage nodes and clouds -> New Node -> Node Name  App_server_1 -> Type (Permanent Agent) -> description -> Number of executors 2 -> Remote root directory /home/tony/jenkins -> Labels App_server_1 : stapp01 -> Usage (Use this node as much as possible) -> Launch Method (Lauch agent via SSH) -> Host stapp01 -> Credentials (tony/*****(app_server1)) -> Host Key Verification Strategy (Non Verify Verification Strategy) -> Availability (Keep this agent online as much as possible) -> save
+
+    ## Create a New Jenkins nginx-container Job
+    10. Click on "New Item" to create a new job -> Enter a name for your job name , such as "nginx-container" -> Select "Pipeline" and click "OK" -> Pipeline Script -> save
+
+    pipeline {
+        agent { label 'stapp01' }
+    
+        stages {
+            stage('Build') {
+                steps {
+                    // Step 1: Git checkout
+                    git credentialsId: 'GITEA_CRED', url: 'http://git.stratos.xfusioncorp.com/sarah/mr_job.git'
+                    
+                    // Step 2: Docker build
+                    sh "docker build -t stregi01.stratos.xfusioncorp.com:5000/nginx:latest ."
+                    
+                    // Step 3: Docker push
+                    sh "docker push stregi01.stratos.xfusioncorp.com:5000/nginx:latest"
+                }
+            }
+            
+            stage('Deploy') {
+                steps {
+                    // Step 1: Run the container
+                    sh "docker run -d --name nginx-app -p 8080:80 stregi01.stratos.xfusioncorp.com:5000/nginx:latest"
+                }
+            }
+        }
+    }
+
+    ## Build the Jenkins nginx-container Job by clicking on Build Now
+    11. ## Console Output of the build
+
+        Started by user admin
+        [Pipeline] Start of Pipeline
+        [Pipeline] node
+        Running on App_server_1 in /home/tony/jenkins/workspace/nginx-container
+        [Pipeline] {
+        [Pipeline] stage
+        [Pipeline] { (Build)
+        [Pipeline] git
+        The recommended git tool is: NONE
+        using credential GITEA_CRED
+        Cloning the remote Git repository
+        Cloning repository http://git.stratos.xfusioncorp.com/sarah/mr_job.git
+         > git init /home/tony/jenkins/workspace/nginx-container # timeout=10
+        Fetching upstream changes from http://git.stratos.xfusioncorp.com/sarah/mr_job.git
+         > git --version # timeout=10
+         > git --version # 'git version 2.39.3'
+        using GIT_ASKPASS to set credentials GITEA_CRED
+         > git fetch --tags --force --progress -- http://git.stratos.xfusioncorp.com/sarah/mr_job.git +refs/heads/*:refs/remotes/origin/* #         timeout=10
+         > git config remote.origin.url http://git.stratos.xfusioncorp.com/sarah/mr_job.git # timeout=10
+         > git config --add remote.origin.fetch +refs/heads/*:refs/remotes/origin/* # timeout=10
+        Avoid second fetch
+        Checking out Revision 65e70e8a623f979c3c29a5fdf8a2378448b1c1aa (refs/remotes/origin/master)
+         > git rev-parse refs/remotes/origin/master^{commit} # timeout=10
+         > git config core.sparsecheckout # timeout=10
+         > git checkout -f 65e70e8a623f979c3c29a5fdf8a2378448b1c1aa # timeout=10
+         > git branch -a -v --no-abbrev # timeout=10
+         > git checkout -b master 65e70e8a623f979c3c29a5fdf8a2378448b1c1aa # timeout=10
+        Commit message: "Merge pull request 'My First PR' (#1) from dev into master"
+        First time build. Skipping changelog.
+        [Pipeline] sh
+        + docker build -t stregi01.stratos.xfusioncorp.com:5000/nginx:latest .
+        Sending build context to Docker daemon  73.22kB
+        
+        Step 1/2 : FROM nginx:stable-alpine3.17-slim
+        stable-alpine3.17-slim: Pulling from library/nginx
+        3c854c8cbf46: Pulling fs layer
+        241ff9bd896f: Pulling fs layer
+        30c9f7363937: Pulling fs layer
+        07eddbba594d: Pulling fs layer
+        fb1b4fc618d2: Pulling fs layer
+        e46bf4fa8bbe: Pulling fs layer
+        07eddbba594d: Waiting
+        fb1b4fc618d2: Waiting
+        e46bf4fa8bbe: Waiting
+        30c9f7363937: Verifying Checksum
+        30c9f7363937: Download complete
+        241ff9bd896f: Verifying Checksum
+        241ff9bd896f: Download complete
+        3c854c8cbf46: Verifying Checksum
+        3c854c8cbf46: Download complete
+        07eddbba594d: Verifying Checksum
+        07eddbba594d: Download complete
+        fb1b4fc618d2: Download complete
+        e46bf4fa8bbe: Verifying Checksum
+        e46bf4fa8bbe: Download complete
+        3c854c8cbf46: Pull complete
+        241ff9bd896f: Pull complete
+        30c9f7363937: Pull complete
+        07eddbba594d: Pull complete
+        fb1b4fc618d2: Pull complete
+        e46bf4fa8bbe: Pull complete
+        Digest: sha256:9cec4fd40a4e5156b4f4f555ee44a597491b6e8b91380c32b63ed45a4053a763
+        Status: Downloaded newer image for nginx:stable-alpine3.17-slim
+         ---> fbf65efdee02
+        Step 2/2 : COPY index.html /usr/share/nginx/html/
+         ---> 1acbd7c6d7a3
+        Successfully built 1acbd7c6d7a3
+        Successfully tagged stregi01.stratos.xfusioncorp.com:5000/nginx:latest
+        [Pipeline] sh
+        + docker push stregi01.stratos.xfusioncorp.com:5000/nginx:latest
+        The push refers to repository [stregi01.stratos.xfusioncorp.com:5000/nginx]
+        d43131d43d6c: Preparing
+        729d247f77b3: Preparing
+        eb96d7c5ddb8: Preparing
+        571e16e56ac6: Preparing
+        69f5264c89b0: Preparing
+        cbe466e5e6d0: Preparing
+        f4111324080c: Preparing
+        cbe466e5e6d0: Waiting
+        f4111324080c: Waiting
+        d43131d43d6c: Pushed
+        69f5264c89b0: Pushed
+        571e16e56ac6: Pushed
+        eb96d7c5ddb8: Pushed
+        729d247f77b3: Pushed
+        cbe466e5e6d0: Pushed
+        f4111324080c: Pushed
+        latest: digest: sha256:7762c37ee48ff355f0b35adb79a18837b58079e44af51efed7084a73c2bc5445 size: 1775
+        [Pipeline] }
+        [Pipeline] // stage
+        [Pipeline] stage
+        [Pipeline] { (Deploy)
+        [Pipeline] sh
+        + docker run -d --name nginx-app -p 8080:80 stregi01.stratos.xfusioncorp.com:5000/nginx:latest
+        2e1d82a20d95e483faf91d2401c1e2cc6b4d7cf31f0d80ffe53b384fa0447a31
+        [Pipeline] }
+        [Pipeline] // stage
+        [Pipeline] }
+        [Pipeline] // node
+        [Pipeline] End of Pipeline
+        Finished: SUCCESS
+
+    ## Access the nginx container using curl command on app server 1 and from jump_host
+    12. thor@jump_host ~$ curl http://stapp01:8080
+        Welcome to xFusionCorp Industries!
+        
+        [tony@stapp01 ~]$ curl http://stapp01:8080
+        Welcome to xFusionCorp Industries!
+
+    ## Check the logs of the container on App Server1
+    13. [tony@stapp01 ~]$ docker logs 3f4f4ec51520
+        /docker-entrypoint.sh: /docker-entrypoint.d/ is not empty, will attempt to perform configuration
+        /docker-entrypoint.sh: Looking for shell scripts in /docker-entrypoint.d/
+        /docker-entrypoint.sh: Launching /docker-entrypoint.d/10-listen-on-ipv6-by-default.sh
+        10-listen-on-ipv6-by-default.sh: info: Getting the checksum of /etc/nginx/conf.d/default.conf
+        10-listen-on-ipv6-by-default.sh: info: Enabled listen on IPv6 in /etc/nginx/conf.d/default.conf
+        /docker-entrypoint.sh: Launching /docker-entrypoint.d/20-envsubst-on-templates.sh
+        /docker-entrypoint.sh: Launching /docker-entrypoint.d/30-tune-worker-processes.sh
+        /docker-entrypoint.sh: Configuration complete; ready for start up
+        2024/02/16 01:52:34 [notice] 1#1: using the "epoll" event method
+        2024/02/16 01:52:34 [notice] 1#1: nginx/1.24.0
+        2024/02/16 01:52:34 [notice] 1#1: built by gcc 12.2.1 20220924 (Alpine 12.2.1_git20220924-r4) 
+        2024/02/16 01:52:34 [notice] 1#1: OS: Linux 5.4.0-1106-gcp
+        2024/02/16 01:52:34 [notice] 1#1: getrlimit(RLIMIT_NOFILE): 1048576:1048576
+        2024/02/16 01:52:34 [notice] 1#1: start worker process 113
+        172.16.238.3 - - [16/Feb/2024:01:52:49 +0000] "GET / HTTP/1.1" 200 35 "-" "curl/7.61.1" "-"
+        172.16.238.10 - - [16/Feb/2024:01:53:43 +0000] "GET / HTTP/1.1" 200 35 "-" "curl/7.61.1" "-"
+
+    
