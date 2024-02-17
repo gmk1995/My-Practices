@@ -1,0 +1,260 @@
+The development team of xFusionCorp Industries is working on to develop a new static website and they are planning to deploy the same on Nautilus App Servers using Jenkins pipeline. They have shared their requirements with the DevOps team and accordingly we need to create a Jenkins pipeline job. Please find below more details about the task:
+
+
+
+Click on the Jenkins button on the top bar to access the Jenkins UI. Login using username admin and password Adm!n321.
+
+
+Similarly, click on the Gitea button on the top bar to access the Gitea UI. Login using username sarah and password Sarah_pass123.
+
+
+There is a repository named sarah/web in Gitea that is already cloned on Storage server under /var/www/html directory.
+
+
+Update the content of the file index.html under the same repository to Welcome to xFusionCorp Industries and push the changes to the origin into the master branch.
+
+
+Apache is already installed on all app Servers its running on port 8080.
+
+
+Create a Jenkins pipeline job named deploy-job (it must not be a Multibranch pipeline job) and pipeline should have two stages Deploy and Test ( names are case sensitive ). Configure these stages as per details mentioned below.
+
+
+a. The Deploy stage should deploy the code from web repository under /var/www/html on the Storage Server, as this location is already mounted to the document root /var/www/html of all app servers.
+
+
+b. The Test stage should just test if the app is working fine and website is accessible. Its up to you how you design this stage to test it out, you can simply add a curl command as well to run a curl against the LBR URL (http://stlb01:8091) to see if the website is working or not. Make sure this stage fails in case the website/app is not working or if the Deploy stage fails.
+
+
+Click on the App button on the top bar to see the latest changes you deployed. Please make sure the required content is loading on the main URL http://stlb01:8091 i.e there should not be a sub-directory like http://stlb01:8091/web etc.
+
+
+Note:
+
+
+You might need to install some plugins and restart Jenkins service. So, we recommend clicking on Restart Jenkins when installation is complete and no jobs are running on plugin installation/update page i.e update centre. Also, Jenkins UI sometimes gets stuck when Jenkins service restarts in the back end. In this case, please make sure to refresh the UI page.
+
+
+For these kind of scenarios requiring changes to be done in a web UI, please take screenshots so that you can share it with us for review in case your task is marked incomplete. You may also consider using a screen recording software such as loom.com to record and share your work.
+
+Ans)
+
+    ## Log into the Storage Server and update the index.html
+    1. thor@jump_host ~$ ssh natasha@ststor01
+       The authenticity of host 'ststor01 (172.16.238.15)' can't be established.
+       ECDSA key fingerprint is SHA256:vg8Es8LYHyGjRtW8RhsHvnbIHQx3CtrEhHdK/slakx0.
+       Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
+       Warning: Permanently added 'ststor01,172.16.238.15' (ECDSA) to the list of known hosts.
+       natasha@ststor01's password:
+
+    ## Changing the directory to  /var/www/html
+    2. [natasha@ststor01 ~]$ cd /var/www/html/
+
+       ## List the directory
+       [natasha@ststor01 html]$ ls -larth
+       total 16K
+       drwxr-xr-x 3 natasha natasha 4.0K Feb 17 05:29 ..
+       -rw-r--r-- 1 natasha natasha    8 Feb 17 05:31 index.html
+       drwxr-xr-x 3 natasha natasha 4.0K Feb 17 05:31 .
+       drwxr-xr-x 8 natasha natasha 4.0K Feb 17 05:31 .git
+
+       ## Display the content in the index.html
+       [natasha@ststor01 html]$ cat index.html
+       Welcome
+
+       ## Update the content in index.html
+       [natasha@ststor01 html]$ echo 'Welcome to xFusionCorp Industries' > index.html
+
+       ## Display the content in the index.html
+       [natasha@ststor01 html]$ cat index.html
+       Welcome to xFusionCorp Industries
+
+    ## After modifying the index.html file, we need to add and commit the change before pushing it to the remote repository.
+    3. ## check the current branch
+       [natasha@ststor01 html]$ git branch
+       * master
+
+       ## Check the git status
+       [natasha@ststor01 html]$ git status
+       On branch master
+       Your branch is up to date with 'origin/master'.
+
+       Changes not staged for commit:
+         (use "git add <file>..." to update what will be committed)
+         (use "git restore <file>..." to discard changes in working directory)
+               modified:   index.html
+       
+       no changes added to commit (use "git add" and/or "git commit -a")
+
+       ## Add it to the stagaging area 
+       [natasha@ststor01 html]$ git add index.html
+
+       ## Commit the change
+       [natasha@ststor01 html]$ git commit -m 'UPDATE -> updated index.html'
+       [master 0bec0a9] UPDATE -> updated index.html
+        1 file changed, 1 insertion(+), 1 deletion(-)
+
+       ## Push the changes to web repository
+       [natasha@ststor01 html]$ git push origin master
+       Enumerating objects: 5, done.
+       Counting objects: 100% (5/5), done.
+       Writing objects: 100% (3/3), 301 bytes | 301.00 KiB/s, done.
+       Total 3 (delta 0), reused 0 (delta 0), pack-reused 0
+       remote: . Processing 1 references
+       remote: Processed 1 references in total
+       To http://git.stratos.xfusioncorp.com/sarah/web.git
+          8aca8ed..0bec0a9  master -> master
+
+    ## Check the Java version in the Storage Server
+    4. [natasha@ststor01 ~]$ java -version
+       -bash: java: command not found
+
+       ## Java is not installed in Storage Server, Needs to install it
+       [natasha@ststor01 ~]$ sudo yum install java-11-openjdk -y
+
+       We trust you have received the usual lecture from the local System
+       Administrator. It usually boils down to these three things:
+       
+           #1) Respect the privacy of others.
+           #2) Think before you type.
+           #3) With great power comes great responsibility.
+       
+       [sudo] password for natasha:
+
+       ## Check the java version after installation
+       [natasha@ststor01 ~]$ java -version
+       openjdk version "11.0.22" 2024-01-16 LTS
+       OpenJDK Runtime Environment (Red_Hat-11.0.22.0.7-1) (build 11.0.22+7-LTS)
+       OpenJDK 64-Bit Server VM (Red_Hat-11.0.22.0.7-1) (build 11.0.22+7-LTS, mixed mode, sharing)
+
+    ## Log into the Jenins UI
+    5. username admin and password Adm!n321
+
+    ## Add SSH Build plugin
+    6. Manage Jenkins -> Manage plugins -> Available plugins -> select "Pipeline,Pipeline: Declarative, Pipeline: Declarative Pipeline: Groovy, Pipeline: Groovy Libraries, Pipeline: Job,  Pipeline: SCM Step, Pipeline: Stage Step, Pipeline: Stage Tags Metadata, Pipeline: Step API, Pipeline: Supporting APIs, SSH Agent Plugin, SSH Build Agents plugin, SSH Credentials Plugin, git, credentials " -> install -> Restart Jenkins when installation is complete and no jobs are running on plugin installation/update 
+
+    ## Add Gitea and Storage Server Username and Password in the Jenkins Credentials
+    7. Manage Jenkins -> Credentials -> System -> Global credentials (unrestricted) -> Add New credentials -> Select kind Username and password -> username sarah -> password Sarah_pass123 -> id GITEA_CRED -> description -> save
+      
+       Manage Jenkins -> Credentials -> System -> Global credentials (unrestricted) -> Add New credentials -> Select kind Username and password -> username natasha -> password Bl@kW -> id app_server1 -> description -> save
+
+    ## Add Slave nodes
+    8. Manage Jenkins -> Manage nodes and clouds -> New Node -> Node Name  STORAGE_SERVER -> Type (Permanent Agent) -> description -> Number of executors 2 -> Remote root directory /home/natasha/jenkins -> Labels STORAGE_SERVER : ststor01 -> Usage (Use this node as much as possible) -> Launch Method (Lauch agent via SSH) -> Host ststor01 -> Credentials (natasha/*****(STORAGE_SERVER)) -> Host Key Verification Strategy (Non Verify Verification Strategy) -> Availability (Keep this agent online as much as possible) -> save
+
+    ## Create a New Jenkins deploy-job Job
+    9. Click on "New Item" to create a new job -> Enter a name for your job name , such as "deploy-job" -> Select "Pipeline" and click "OK" -> Pipeline Script -> save
+      pipeline {
+              agent { label 'ststor01' }
+          
+              stages {
+                  stage('Deploy') {
+                      steps {
+      
+      					
+      					// Step 1: Git checkout
+                          git credentialsId: 'GITEA_CRED', url: 'http://git.stratos.xfusioncorp.com/sarah/web.git'
+      					
+      					// Step 2: add deployment step
+      					sh " cp -v index.html /var/www/html/"
+             
+                      }
+                  }
+                  
+                  stage('Test') {
+                      steps {
+                          // Step 1: Check the web server is running or not
+      					// checking on Loadbalancer Serer
+                          sh "curl http://stlb01:8091"
+      					
+      					// checking on App Server 1
+                          sh "curl http://stapp01:8080"
+      					
+      					// checking on App Server 2
+                          sh "curl http://stapp02:8080"
+      					
+      					// checking on App Server 3
+                          sh "curl http://stapp03:8080"
+                      }
+                  }
+              }
+          }
+
+    ## Build the Jenkins deploy-job Job by clicking on Build Now
+    10. ## Console Output of the build
+        Started by user admin
+        [Pipeline] Start of Pipeline
+        [Pipeline] node
+        Running on STORAGE_SERVER in /home/natasha/jenkins/workspace/deploy-job
+        [Pipeline] {
+        [Pipeline] stage
+        [Pipeline] { (Deploy)
+        [Pipeline] git
+        The recommended git tool is: NONE
+        using credential GITEA_CRED
+        Cloning the remote Git repository
+        Cloning repository http://git.stratos.xfusioncorp.com/sarah/web.git
+         > git init /home/natasha/jenkins/workspace/deploy-job # timeout=10
+        Fetching upstream changes from http://git.stratos.xfusioncorp.com/sarah/web.git
+         > git --version # timeout=10
+         > git --version # 'git version 2.39.1'
+        using GIT_ASKPASS to set credentials GITEA_CRED
+         > git fetch --tags --force --progress -- http://git.stratos.xfusioncorp.com/sarah/web.git +refs/heads/*:refs/remotes/origin/* # timeout=10
+         > git config remote.origin.url http://git.stratos.xfusioncorp.com/sarah/web.git # timeout=10
+         > git config --add remote.origin.fetch +refs/heads/*:refs/remotes/origin/* # timeout=10
+        Avoid second fetch
+        Checking out Revision 172179e260486ed8c6a294b89d9c7f1e75910788 (refs/remotes/origin/master)
+         > git rev-parse refs/remotes/origin/master^{commit} # timeout=10
+         > git config core.sparsecheckout # timeout=10
+         > git checkout -f 172179e260486ed8c6a294b89d9c7f1e75910788 # timeout=10
+         > git branch -a -v --no-abbrev # timeout=10
+         > git checkout -b master 172179e260486ed8c6a294b89d9c7f1e75910788 # timeout=10
+        Commit message: "UPDATE -> updated index.html"
+        First time build. Skipping changelog.
+        [Pipeline] sh
+        + cp -v index.html /var/www/html/
+        'index.html' -> '/var/www/html/index.html'
+        [Pipeline] }
+        [Pipeline] // stage
+        [Pipeline] stage
+        [Pipeline] { (Test)
+        [Pipeline] sh
+        + curl http://stlb01:8091
+          % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                         Dload  Upload   Total   Spent    Left  Speed
+        
+          0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+        100    34  100    34    0     0    400      0 --:--:-- --:--:-- --:--:--   395
+        100    34  100    34    0     0    400      0 --:--:-- --:--:-- --:--:--   395
+        Welcome to xFusionCorp Industries
+        [Pipeline] sh
+        + curl http://stapp01:8080
+          % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                         Dload  Upload   Total   Spent    Left  Speed
+        
+          0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+        100    34  100    34    0     0  34000      0 --:--:-- --:--:-- --:--:-- 34000
+        Welcome to xFusionCorp Industries
+        [Pipeline] sh
+        + curl http://stapp02:8080
+          % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                         Dload  Upload   Total   Spent    Left  Speed
+        
+          0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+        100    34  100    34    0     0  34000      0 --:--:-- --:--:-- --:--:-- 34000
+        Welcome to xFusionCorp Industries
+        [Pipeline] sh
+        + curl http://stapp03:8080
+          % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                         Dload  Upload   Total   Spent    Left  Speed
+        
+          0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+        100    34  100    34    0     0   1259      0 --:--:-- --:--:-- --:--:--  1259
+        Welcome to xFusionCorp Industries
+        [Pipeline] }
+        [Pipeline] // stage
+        [Pipeline] }
+        [Pipeline] // node
+        [Pipeline] End of Pipeline
+        Finished: SUCCESS
+
+        
