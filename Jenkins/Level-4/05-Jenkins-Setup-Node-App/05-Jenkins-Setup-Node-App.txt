@@ -1,0 +1,288 @@
+The development team of xFusionCorp Industries is working on to develop a new node application and they are planning to deploy the same on Nautilus App Servers using Jenkins pipeline. They have shared their requirements with the DevOps team and accordingly we need to create a Jenkins pipeline job. Please find below more details about the task:
+Click on the Jenkins button on the top bar to access the Jenkins UI. Login using username admin and password Adm!n321.
+
+Similarly, click on the Gitea button on the top bar to access the Gitea UI. Login using username sarah and password Sarah_pass123 
+There is a repository named sarah/web in Gitea, which is cloned on the Storage server under /home/sarah/web directory. 
+• A Dockerfile is already present under the git repository, please push the same to the origin repo if not pushed already. 
+• Create a jenkins pipeline job named node-app and configure it as below: 
+• Configure it to deploy the app on App Server 1• 
+The pipeline must have two stages Build and Deploy (names are case sensitive) 
+4 • In the Build stage, build an image named stregi01.stratos.xfusioncorp.com :5000/node app:latest using the Dockerfile present under the Git repository. 
+stregi01.stratos.xfusioncorp.com:5000 is the image registry server. After building the image push the same to the image registry server. 
+• In the Deploy stage, create a container named node-app using the image you build it the Build stage. Make sure to map the container port with host port 8080
+
+Note:
+
+
+You might need to install some plugins and restart Jenkins service. So, we recommend clicking on Restart Jenkins when installation is complete and no jobs are running on plugin installation/update page i.e update centre. Also, Jenkins UI sometimes gets stuck when Jenkins service restarts in the back end. In this case, please make sure to refresh the UI page.
+
+
+For these kind of scenarios requiring changes to be done in a web UI, please take screenshots so that you can share it with us for review in case your task is marked incomplete. You may also consider using a screen recording software such as loom.com to record and share your work.
+
+
+Ans)
+    ## Log into Storage Server using sarah username and password to check the web repo is cloned or not
+    1. thor@jump_host ~$ ssh sarah@ststor01
+       sarah@ststor01's password: 
+       [sarah@ststor01 ~]$
+
+    ## List down the sarah user directories in ststor01 server
+    2. [sarah@ststor01 ~]$ ls -larth
+       total 32K
+       -rw-r--r-- 1 sarah sarah  376 Jun 20  2022 .bashrc
+       -rw-r--r-- 1 sarah sarah  141 Jun 20  2022 .bash_profile
+       -rw-r--r-- 1 sarah sarah   18 Jun 20  2022 .bash_logout
+       drwxr-xr-x 1 root  root  4.0K Feb 18 03:11 ..
+       -rw-r--r-- 1 sarah sarah   41 Feb 18 03:12 .token
+       -rw-r--r-- 1 sarah sarah   91 Feb 18 03:12 .gitconfig
+       drwx------ 3 sarah sarah 4.0K Feb 18 03:12 .
+       drwxr-xr-x 5 sarah sarah 4.0K Feb 18 03:12 web
+
+       ## List down the file/directories in  web directory of above command
+       [sarah@ststor01 ~]$ cd web/
+       [sarah@ststor01 web]$ ls -larth
+       total 48K
+       drwxr-xr-x  3 sarah sarah 4.0K Feb 18 01:38 views
+       drwxr-xr-x 52 sarah sarah 4.0K Feb 18 01:38 node_modules
+       -rw-r--r--  1 sarah sarah  300 Feb 18 03:11 package.json
+       -rw-r--r--  1 sarah sarah  14K Feb 18 03:11 package-lock.json
+       -rw-r--r--  1 sarah sarah  535 Feb 18 03:11 app.js
+       -rw-r--r--  1 sarah sarah  240 Feb 18 03:11 Dockerfile
+       drwx------  3 sarah sarah 4.0K Feb 18 03:12 ..
+       drwxr-xr-x  5 sarah sarah 4.0K Feb 18 03:12 .
+       drwxr-xr-x  8 sarah sarah 4.0K Feb 18 03:12 .git
+
+       ##  Checking git status 
+       [sarah@ststor01 web]$ git status
+       On branch master
+       Your branch is up to date with 'origin/master'.
+       
+       nothing to commit, working tree clean
+
+    ## Log into App server 1
+    3. thor@jump_host ~$ ssh tony@stapp01
+       The authenticity of host 'stapp01 (172.16.238.10)' can't be established.
+       ECDSA key fingerprint is SHA256:oJYzmFx3XV/34svAD4p8wmWJDzHbVx0k0snc25eO85w.
+       Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
+       Warning: Permanently added 'stapp01,172.16.238.10' (ECDSA) to the list of known hosts.
+       tony@stapp01's password:
+
+    ## Check the Java is installed or not. If not install the Java
+    4. [tony@stapp01 ~]$ java -version
+       -bash: java: command not found
+
+       ## Install the Java
+       [tony@stapp01 ~]$ sudo yum install java-11-openjdk -y
+       
+       We trust you have received the usual lecture from the local System
+       Administrator. It usually boils down to these three things:
+       
+           #1) Respect the privacy of others.
+           #2) Think before you type.
+           #3) With great power comes great responsibility.
+       
+       [sudo] password for tony:
+       
+       ## Check the Java version after installation
+       [tony@stapp01 ~]$ java -version
+       openjdk version "11.0.22" 2024-01-16 LTS
+       OpenJDK Runtime Environment (Red_Hat-11.0.22.0.7-1) (build 11.0.22+7-LTS)
+       OpenJDK 64-Bit Server VM (Red_Hat-11.0.22.0.7-1) (build 11.0.22+7-LTS, mixed mode, sharing)
+
+    ## Log into the Jenins UI
+    5. username admin and password Adm!n321
+
+    ## Add SSH Build plugin
+    6. Manage Jenkins -> Manage plugins -> Available plugins -> select "Pipeline,Pipeline: Declarative, Pipeline: Declarative Pipeline: Groovy, Pipeline: Groovy Libraries, Pipeline: Job,  Pipeline: SCM Step, Pipeline: Stage Step, Pipeline: Stage Tags Metadata, Pipeline: Step API, Pipeline: Supporting APIs, SSH Agent Plugin, SSH Build Agents plugin, SSH Credentials Plugin, git, credentials " -> install -> Restart Jenkins when installation is complete and no jobs are running on plugin installation/update 
+
+    ## Add Gitea and Storage Server Username and Password in the Jenkins Credentials
+    7. Manage Jenkins -> Credentials -> System -> Global credentials (unrestricted) -> Add New credentials -> Select kind Username and password -> username sarah -> password Sarah_pass123 -> id GITEA_CRED -> description -> save
+      
+    Manage Jenkins -> Credentials -> System -> Global credentials (unrestricted) -> Add New credentials -> Select kind Username and password -> username tony -> password Ir0nM@n -> id app_server1 -> description -> save
+
+    ## Add Slave nodes
+    8. Manage Jenkins -> Manage nodes and clouds -> New Node -> Node Name  APP_SERVER_1 -> Type (Permanent Agent) -> description -> Number of executors 2 -> Remote root directory /home/natasha/jenkins -> Labels APP_SERVER_1 : stapp01 -> Usage (Use this node as much as possible) -> Launch Method (Lauch agent via SSH) -> Host stapp01 -> Credentials (tony/*****(app_server1)) -> Host Key Verification Strategy (Non Verify Verification Strategy) -> Availability (Keep this agent online as much as possible) -> save
+
+    ## Log into the Gitea and copy the Gitea web repo URL
+    9. Username: sarah Password: Sarah_pass123 Repo-URL: http://git.stratos.xfusioncorp.com/sarah/web.git
+
+    ## Create a New Jenkins node-app Job
+    10. Click on "New Item" to create a new job -> Enter a name for your job name , such as "node-app" -> Select "Pipeline" and click "OK" -> Pipeline Script -> save
+
+    pipeline {
+        agent { label 'stapp01' }
+    
+        stages {
+            stage('Build') {
+                steps {
+                    // Step 1: Git checkout
+                    git credentialsId: 'GITEA_CRED', url: 'http://git.stratos.xfusioncorp.com/sarah/web.git'
+                    
+                    // Step 2: Docker build
+                    sh "docker build -t stregi01.stratos.xfusioncorp.com:5000/node-app:latest ."
+                    
+                    // Step 3: Docker push
+                    sh "docker push stregi01.stratos.xfusioncorp.com:5000/node-app:latest"
+					
+					// Step 4: Docker images check
+					sh "docker images"
+                }
+            }
+            
+            stage('Deploy') {
+                steps {
+                    // Step 1: Run the container
+                    sh "docker run -d --name node-app -p 8080:8080 stregi01.stratos.xfusioncorp.com:5000/node-app:latest"
+					
+					// Step 2: Docker Container Check
+					sh "docker ps"
+					
+					// Step 3: Check Docker Container Logs
+					sh "docker logs node-app"
+					
+                }
+            }
+        }
+    }
+
+    ## Build the Jenkins node-app Job by clicking on Build Now
+    11. ## Console Output of the build
+        Started by user admin
+        [Pipeline] Start of Pipeline
+        [Pipeline] node
+        Running on APP_SERVER_1 in /home/tony/jenkins/workspace/node-app
+        [Pipeline] {
+        [Pipeline] stage
+        [Pipeline] { (Build)
+        [Pipeline] git
+        The recommended git tool is: NONE
+        using credential GITEA_CRED
+        Cloning the remote Git repository
+        Cloning repository http://git.stratos.xfusioncorp.com/sarah/web.git
+         > git init /home/tony/jenkins/workspace/node-app # timeout=10
+        Fetching upstream changes from http://git.stratos.xfusioncorp.com/sarah/web.git
+         > git --version # timeout=10
+         > git --version # 'git version 2.39.3'
+        using GIT_ASKPASS to set credentials GITEA_CRED
+         > git fetch --tags --force --progress -- http://git.stratos.xfusioncorp.com/sarah/web.git +refs/heads/*:refs/remotes/origin/* # timeout=10
+        Avoid second fetch
+        Checking out Revision 0c922c8bf494a85b961cb2c52d3c885ec050201f (refs/remotes/origin/master)
+         > git config remote.origin.url http://git.stratos.xfusioncorp.com/sarah/web.git # timeout=10
+         > git config --add remote.origin.fetch +refs/heads/*:refs/remotes/origin/* # timeout=10
+         > git rev-parse refs/remotes/origin/master^{commit} # timeout=10
+         > git config core.sparsecheckout # timeout=10
+         > git checkout -f 0c922c8bf494a85b961cb2c52d3c885ec050201f # timeout=10
+        Commit message: "Added Dockerfile"
+        First time build. Skipping changelog.
+        [Pipeline] sh
+        + docker build -t stregi01.stratos.xfusioncorp.com:5000/node-app:latest .
+         > git branch -a -v --no-abbrev # timeout=10
+         > git checkout -b master 0c922c8bf494a85b961cb2c52d3c885ec050201f # timeout=10
+        Sending build context to Docker daemon  2.697MB
+        
+        Step 1/9 : FROM node:10-alpine
+        10-alpine: Pulling from library/node
+        ddad3d7c1e96: Pulling fs layer
+        de915e575d22: Pulling fs layer
+        7150aa69525b: Pulling fs layer
+        d7aa47be044e: Pulling fs layer
+        d7aa47be044e: Waiting
+        7150aa69525b: Verifying Checksum
+        7150aa69525b: Download complete
+        ddad3d7c1e96: Verifying Checksum
+        ddad3d7c1e96: Download complete
+        d7aa47be044e: Verifying Checksum
+        d7aa47be044e: Download complete
+        de915e575d22: Verifying Checksum
+        de915e575d22: Download complete
+        ddad3d7c1e96: Pull complete
+        de915e575d22: Pull complete
+        7150aa69525b: Pull complete
+        d7aa47be044e: Pull complete
+        Digest: sha256:dc98dac24efd4254f75976c40bce46944697a110d06ce7fa47e7268470cf2e28
+        Status: Downloaded newer image for node:10-alpine
+         ---> aa67ba258e18
+        Step 2/9 : RUN mkdir -p /home/node/app/node_modules && chown -R node:node /home/node/app
+         ---> Running in d4986ed6ad4e
+        Removing intermediate container d4986ed6ad4e
+         ---> 757dccd75f5a
+        Step 3/9 : WORKDIR /home/node/app
+         ---> Running in 911e3c8d3de1
+        Removing intermediate container 911e3c8d3de1
+         ---> 7814e772350c
+        Step 4/9 : COPY package*.json ./
+         ---> 9fe2c3cf8eb6
+        Step 5/9 : USER node
+         ---> Running in 117a6b24be84
+        Removing intermediate container 117a6b24be84
+         ---> c316853a8f5f
+        Step 6/9 : RUN npm install
+         ---> Running in 99d40faa7de1
+        [91mnpm WARN nodejs-image-demo@1.0.0 No repository field.
+        [0m[91m
+        [0madded 50 packages from 37 contributors and audited 50 packages in 1.488s
+        found 2 high severity vulnerabilities
+          run `npm audit fix` to fix them, or `npm audit` for details
+        Removing intermediate container 99d40faa7de1
+         ---> 1edaac2a0d1e
+        Step 7/9 : COPY --chown=node:node . .
+         ---> 068004b75bcd
+        Step 8/9 : EXPOSE 8080
+         ---> Running in fb81021ea9e4
+        Removing intermediate container fb81021ea9e4
+         ---> 29923b6bb808
+        Step 9/9 : CMD [ "node", "app.js" ]
+         ---> Running in 72c5541bf943
+        Removing intermediate container 72c5541bf943
+         ---> dc389014e518
+        Successfully built dc389014e518
+        Successfully tagged stregi01.stratos.xfusioncorp.com:5000/node-app:latest
+        [Pipeline] sh
+        + docker push stregi01.stratos.xfusioncorp.com:5000/node-app:latest
+        The push refers to repository [stregi01.stratos.xfusioncorp.com:5000/node-app]
+        625494ea5847: Preparing
+        0e2f912d7fd8: Preparing
+        844f1bcfcab2: Preparing
+        0ab626b91916: Preparing
+        edff9ff691d5: Preparing
+        cbe4b9146f86: Preparing
+        a6524c5b12a6: Preparing
+        9a5d14f9f550: Preparing
+        cbe4b9146f86: Waiting
+        a6524c5b12a6: Waiting
+        9a5d14f9f550: Waiting
+        edff9ff691d5: Pushed
+        0ab626b91916: Pushed
+        844f1bcfcab2: Pushed
+        625494ea5847: Pushed
+        0e2f912d7fd8: Pushed
+        9a5d14f9f550: Pushed
+        cbe4b9146f86: Pushed
+        a6524c5b12a6: Pushed
+        latest: digest: sha256:4618d7cbb306f095db3381379f297e39da0e03b0a1873d122aaf230ff4ba46c6 size: 1995
+        [Pipeline] sh
+        + docker images
+        REPOSITORY                                       TAG                 IMAGE ID            CREATED             SIZE
+        stregi01.stratos.xfusioncorp.com:5000/node-app   latest              dc389014e518        11 seconds ago      87.4MB
+        node                                             10-alpine           aa67ba258e18        2 years ago         82.7MB
+        [Pipeline] }
+        [Pipeline] // stage
+        [Pipeline] stage
+        [Pipeline] { (Deploy)
+        [Pipeline] sh
+        + docker run -d --name node-app -p 8080:8080 stregi01.stratos.xfusioncorp.com:5000/node-app:latest
+        9aee5a31e6405e4280c419d21a970892bf72e98335970a139c2a239ce2c7c06a
+        [Pipeline] sh
+        + docker ps
+        CONTAINER ID        IMAGE                                                   COMMAND                  CREATED                     STATUS                  PORTS                    NAMES
+        9aee5a31e640        stregi01.stratos.xfusioncorp.com:5000/node-app:latest   "docker-entrypoint.s…"   3 seconds ago       Up Less than a         second   0.0.0.0:8080->8080/tcp   node-app
+        [Pipeline] sh
+        + docker logs node-app
+        Example app listening on port 8080!
+        [Pipeline] }
+        [Pipeline] // stage
+        [Pipeline] }
+        [Pipeline] // node
+        [Pipeline] End of Pipeline
+        Finished: SUCCESS
+
