@@ -1,0 +1,158 @@
+One of the Nautilus DevOps team members is working on to develop a role for httpd installation and configuration. Work is almost completed, however there is a requirement to add a jinja2 template for index.html file. Additionally, the relevant task needs to be added inside the role. The inventory file ~/ansible/inventory is already present on jump host that can be used. Complete the task as per details mentioned below:
+
+
+a. Update ~/ansible/playbook.yml playbook to run the httpd role on App Server 1.
+
+
+b. Create a jinja2 template index.html.j2 under /home/thor/ansible/role/httpd/templates/ directory and add a line This file was created using Ansible on <respective server> (for example This file was created using Ansible on stapp01 in case of App Server 1). Also please make sure not to hard code the server name inside the template. Instead, use inventory_hostname variable to fetch the correct value.
+
+
+c. Add a task inside /home/thor/ansible/role/httpd/tasks/main.yml to copy this template on App Server 1 under /var/www/html/index.html. Also make sure that /var/www/html/index.html file's permissions are 0755.
+
+
+d. The user/group owner of /var/www/html/index.html file must be respective sudo user of the server (for example tony in case of stapp01).
+
+
+Note: Validation will try to run the playbook using command ansible-playbook -i inventory playbook.yml so please make sure the playbook works this way without passing any extra arguments.
+
+Ans)
+    ## Log into the jump_host
+    1. ssh thor@jump_host
+
+    ## List down the file and directories inside the jump_host home directory
+    2. thor@jump_host ~$ ls
+       ansible
+
+       ## change the directory to ansible and list down the files and directories
+       thor@jump_host ~$ cd ansible/
+       thor@jump_host ~/ansible$ ls -larth
+       total 20K
+       -rw-r--r-- 1 thor thor   73 Feb 19 02:27 playbook.yml
+       -rw-r--r-- 1 thor thor  322 Feb 19 02:27 inventory
+       drwxr----- 1 thor thor 4.0K Feb 19 02:27 ..
+       drwxr-xr-x 3 thor thor 4.0K Feb 19 02:27 role
+       drwxr-xr-x 3 thor thor 4.0K Feb 19 02:27 .
+
+       ## List down the content in playbook and inventory files
+       thor@jump_host ~/ansible$ cat playbook.yml 
+       ---
+       - hosts: 
+         become: yes
+         become_user: root
+         roles:
+           - role/httpd
+        
+        ## Display the content in the inventory file
+        thor@jump_host ~/ansible$ cat inventory 
+        stapp01 ansible_host=172.16.238.10 ansible_user=tony ansible_ssh_pass=Ir0nM@n ansible_become_pass=Ir0nM@n
+        stapp02 ansible_host=172.16.238.11 ansible_user=steve ansible_ssh_pass=Am3ric@ ansible_become_pass=Am3ric@
+        stapp03 ansible_host=172.16.238.12 ansible_user=banner ansible_ssh_pass=BigGr33n ansible_become_pass=BigGr33n
+
+    ## Change the directory to role and list down the file and directories
+    3. thor@jump_host ~/ansible$ cd role/
+       thor@jump_host ~/ansible/role$ ls -larth
+       total 12K
+       drwxr-xr-x  3 thor thor 4.0K Feb 19 02:27 .
+       drwxr-xr-x 10 thor thor 4.0K Feb 19 02:27 httpd
+       drwxr-xr-x  3 thor thor 4.0K Feb 19 02:27 ..
+
+       # Change the directory to httpd List down the httpd folder and display its contents using `ls -larth` command.
+         thor@jump_host ~/ansible/role$ cd httpd/
+         thor@jump_host ~/ansible/role/httpd$ ls -larth
+         total 44K
+         drwxr-xr-x  2 thor thor 4.0K Feb 19 02:27 files
+         -rw-r--r--  1 thor thor 1.3K Feb 19 02:27 README.md
+         drwxr-xr-x  3 thor thor 4.0K Feb 19 02:27 ..
+         drwxr-xr-x  2 thor thor 4.0K Feb 19 02:27 templates
+         drwxr-xr-x 10 thor thor 4.0K Feb 19 02:27 .
+         drwxr-xr-x  2 thor thor 4.0K Feb 19 02:27 vars
+         drwxr-xr-x  2 thor thor 4.0K Feb 19 02:27 defaults
+         drwxr-xr-x  2 thor thor 4.0K Feb 19 02:27 tests
+         drwxr-xr-x  2 thor thor 4.0K Feb 19 02:27 meta
+         drwxr-xr-x  2 thor thor 4.0K Feb 19 02:27 handlers
+         drwxr-xr-x  2 thor thor 4.0K Feb 19 02:27 tasks
+        
+        # Change the directories to templates and list down the contents in template directory
+          thor@jump_host ~/ansible/role/httpd$ cd templates/
+          thor@jump_host ~/ansible/role/httpd/templates$ ls -larth
+          total 8.0K
+          drwxr-xr-x 10 thor thor 4.0K Feb 19 02:27 ..
+          drwxr-xr-x  2 thor thor 4.0K Feb 19 02:27 .
+        # Create the  index.html.j2 file in the files directory using vi editor
+          thor@jump_host ~/ansible/role/httpd/templates$ vi index.html.j2
+          
+          This file was created using Ansible on {{ inventory_hostname }}.
+
+    ## Change the directory to task and update the main.yml file as below
+    4. thor@jump_host ~/ansible/role/httpd/tasks$ cat main.yml
+       ---
+       # tasks file for role/test
+       
+       - name: install the latest version of HTTPD
+         yum:
+           name: httpd
+           state: latest
+       
+       - name: Start service httpd
+         service:
+           name: httpd
+           state: started
+       - name: Copy index.html template to /var/www/html/
+         template:
+           src: index.html.j2
+           dest: /var/www/html/index.html
+           mode: '0755'
+         become: yes
+       - name: Set owner and group for /var/www/html/index.html
+         file:
+           path: /var/www/html/index.html
+           owner: "{{ ansible_user }}"
+           group: "{{ ansible_user }}"
+         become: yes
+
+    ## Update the Ansible playbook playbook.yml to run the  above defined roles in stapp01
+    5. thor@jump_host vi playbook.yml
+       ---
+       - hosts: stapp01
+         become: yes
+         become_user: root
+         roles:
+           - role/httpd
+
+    ## Run the Ansible Playbook
+    6. thor@jump_host ansible-playbook -i inventory playbook.yml
+
+       PLAY [all] ******************************************************************************
+       
+       TASK [Gathering Facts] ******************************************************************
+       ok: [stapp01]
+
+       TASK [role/httpd : install the latest version of HTTPD] *********************************
+       changed: [stapp01]
+
+       TASK [role/httpd : Start service httpd] *************************************************
+       changed: [stapp01]
+       
+       TASK [role/httpd : Copy index.html template to /var/www/html/] **************************
+       changed: [stapp01]
+       
+       TASK [role/httpd : Set owner and group for /var/www/html/index.html] ********************
+       changed: [stapp01]
+       
+       PLAY RECAP ******************************************************************************
+       stapp01                    : ok=5    changed=4    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+    
+    ## Check the changes in the stapp01 host server using ansible adhoc commands
+    7. thor@jump_host ~/ansible$ ansible -i inventory -m shell -ba "ls -larth /var/www/html" all 
+       stapp01 | CHANGED | rc=0 >>
+       total 12K
+       drwxr-xr-x 4 root root 4.0K Feb 19 02:43 ..
+       -rwxr-xr-x 1 tony tony   49 Feb 19 02:43 index.html
+       drwxr-xr-x 2 root root 4.0K Feb 19 02:43 .
+       
+       thor@jump_host ~/ansible$ ansible -i inventory -m shell -ba "cat /var/www/html/index.html" all
+       stapp01 | CHANGED | rc=0 >>
+       This file was created using Ansible on stapp01.
+
+
+      
