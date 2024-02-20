@@ -1,0 +1,199 @@
+Nautilus Application development team wants to test the Apache and PHP setup on one of the app servers in Stratos Datacenter. They want the DevOps team to prepare an Ansible playbook to accomplish this task. Below you can find more details about the task.
+
+
+There is an inventory file ~/playbooks/inventory on jump host.
+
+
+Create a playbook ~/playbooks/httpd.yml on jump host and perform the following tasks on App Server 2.
+
+
+a. Install httpd and php packages (whatever default version is available in yum repo).
+
+
+b. Change default document root of Apache to /var/www/html/myroot in default Apache config /etc/httpd/conf/httpd.conf. Make sure /var/www/html/myroot path exists (if not please create the same).
+
+
+c. There is a template ~/playbooks/templates/phpinfo.php.j2 on jump host. Copy this template to the Apache document root you created as phpinfo.php file and make sure user owner and the group owner for this file is apache user.
+
+
+d. Start and enable httpd service.
+
+
+Note: Validation will try to run the playbook using command ansible-playbook -i inventory httpd.yml, so please make sure the playbook works this way without passing any extra arguments.
+
+Ans)
+    ## Log into the jump_host and list down the file and directories  present at /home/jump_host directory using ls -larth command.
+    1. ssh thor@jump_host
+       ## list down the file and directories  present at /home/jump_host directory using ls -larth command
+       thor@jump_host ~$ ls -larth
+       total 32K
+       -rwxrwx--- 1 thor thor  141 Jun 20  2022 .bash_profile
+       -rwxrwx--- 1 thor thor   18 Jun 20  2022 .bash_logout
+       drwxr-xr-x 1 root root 4.0K Aug  4  2023 ..
+       drwxrwx--- 1 thor thor 4.0K Aug 29 17:10 .config
+       drwxr----- 2 thor thor 4.0K Feb 20 01:24 .ssh
+       -rwxrwx--- 1 thor thor  668 Feb 20 01:24 .bashrc
+       drwxr----- 1 thor thor 4.0K Feb 20 01:24 .
+       drwxr-xr-x 3 thor thor 4.0K Feb 20 01:24 playbooks
+
+       ## Change directory to playbooks and list down the files and directories
+       thor@jump_host ~$ cd playbooks/
+
+       ## list down the files and directories
+       thor@jump_host ~/playbooks$ ls -larth
+       total 20K
+       -rw-r--r-- 1 thor thor  237 Feb 20 01:23 inventory
+       -rw-r--r-- 1 thor thor   36 Feb 20 01:23 ansible.cfg
+       drwxr----- 1 thor thor 4.0K Feb 20 01:24 ..
+       drwxr-xr-x 2 thor thor 4.0K Feb 20 01:24 templates
+       drwxr-xr-x 3 thor thor 4.0K Feb 20 01:24 .
+
+       ## Display the content in the inventory
+       thor@jump_host ~/playbooks$ cat inventory 
+       stapp01 ansible_host=172.16.238.10 ansible_ssh_pass=Ir0nM@n ansible_user=tony
+       stapp02 ansible_host=172.16.238.11 ansible_ssh_pass=Am3ric@ ansible_user=steve
+       stapp03 ansible_host=172.16.238.12 ansible_ssh_pass=BigGr33n ansible_user=banner
+       
+       ## Change directory to templates and list down the files and directories
+       thor@jump_host ~/playbooks$ cd templates/
+
+       ## list down the files and directories
+       thor@jump_host ~/playbooks/templates$ ls -larth
+       total 12K
+       -rw-r--r-- 1 thor thor   19 Feb 20 01:23 phpinfo.php.j2
+       drwxr-xr-x 2 thor thor 4.0K Feb 20 01:24 .
+       drwxr-xr-x 3 thor thor 4.0K Feb 20 01:24 ..
+
+       ## Display the content in phpinfo.php.j2 
+       thor@jump_host ~/playbooks/templates$ cat phpinfo.php.j2 
+       <?php
+       phpinfo();
+    
+    ## Write a httpd.yml in this path ~/playbooks/httpd.yml
+    2. thor@jump_host vi httpd.yml
+       - name: Configure Apache on App Server 2 
+         hosts: stapp02
+         become: yes
+         become_user: root
+         tasks:
+           - name: install the latest version of HTTPD
+             yum:
+                 name: 
+                 - httpd
+                 - php
+                 state: latest
+           - name: Create a directory if it does not exist
+             ansible.builtin.file:
+                 path: /var/www/html/myroot
+                 state: directory
+                 mode: '0755'
+                 owner: "apache"
+                 group: "apache"
+           - name: Change default document root in httpd.conf
+             lineinfile:
+                 path: /etc/httpd/conf/httpd.conf
+                 regexp: '^DocumentRoot'
+                 line: 'DocumentRoot "/var/www/html/myroot"'
+             notify: restart httpd
+           - name: Copy phpinfo.php.j2 template to /var/www/html/myroot
+             template:
+                 src: ~/playbooks/templates/phpinfo.php.j2
+                 dest: /var/www/html/myroot/phpinfo.php
+                 mode: '0755'
+                 owner: "apache"
+                 group: "apache"
+           - name: Start service httpd
+             service:
+                 name: httpd
+                 state: started
+                 enabled: yes
+                 
+         handlers:
+           - name: restart httpd
+             systemd:
+                 name: httpd
+                 state: restarted
+
+    ## Run the httpd.yml playbook 
+    3. thor@jump_host ~/playbooks$ ansible-playbook -i inventory httpd.yml
+       PLAY [Configure Apache on App Server 2] *************************************************
+
+       TASK [Gathering Facts] ******************************************************************
+       ok: [stapp02]
+       
+       TASK [install the latest version of HTTPD] **********************************************
+       ok: [stapp02]
+       
+       TASK [Create a directory if it does not exist] ******************************************
+       ok: [stapp02]
+       
+       TASK [Change default document root in httpd.conf] ***************************************
+       ok: [stapp02]
+       
+       TASK [Copy phpinfo.php.j2 template to /var/www/html/myroot] *****************************
+       ok: [stapp02]
+       
+       TASK [Start service httpd] **************************************************************
+       ok: [stapp02]
+       
+       PLAY RECAP ******************************************************************************
+       stapp02                    : ok=6    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+
+    ## Verify whether playbook is created required contents and permissions
+    4. ## Check the myroot director is created or not and it having apache user is group owner
+       thor@jump_host ~/playbooks$ ansible -i inventory -m shell -ba "ls -larth /var/www/html/" stapp02
+       stapp02 | CHANGED | rc=0 >>
+       total 12K
+       drwxr-xr-x 4 root   root   4.0K Feb 20 01:52 ..
+       drwxr-xr-x 3 root   root   4.0K Feb 20 01:52 .
+       drwxr-xr-x 2 apache apache 4.0K Feb 20 01:52 myroot
+
+       ## List the files in the myroot directory
+       thor@jump_host ~/playbooks$ ansible -i inventory -m shell -ba "ls -larth /var/www/html/myroot/" stapp02
+       stapp02 | CHANGED | rc=0 >>
+       total 12K
+       drwxr-xr-x 3 root   root   4.0K Feb 20 01:52 ..
+       -rwxr-xr-x 1 apache apache   19 Feb 20 01:52 phpinfo.php
+       drwxr-xr-x 2 apache apache 4.0K Feb 20 01:52 .
+
+       ## Display the content in phpinfo.php file
+       thor@jump_host ~/playbooks$ ansible -i inventory -m shell -ba "cat /var/www/html/myroot/phpinfo.php" stapp02
+       stapp02 | CHANGED | rc=0 >>
+       <?php
+       phpinfo();
+       ?>
+
+       ## Check httpd is up and running or not
+       thor@jump_host ~/playbooks$ ansible -i inventory -m shell -ba "systemctl status httpd" stapp02
+       stapp02 | CHANGED | rc=0 >>
+       ● httpd.service - The Apache HTTP Server
+          Loaded: loaded (/usr/lib/systemd/system/httpd.service; enabled; vendor preset: disabled)
+         Drop-In: /usr/lib/systemd/system/httpd.service.d
+                  └─php-fpm.conf
+          Active: active (running) since Tue 2024-02-20 01:52:21 UTC; 5min ago
+            Docs: man:httpd.service(8)
+        Main PID: 2675 (httpd)
+          Status: "Running, listening on: port 80"
+           Tasks: 213 (limit: 1340692)
+          Memory: 19.8M
+          CGroup: /docker/9c3015e6253f6683bfbff437089f172a6780380c6917d3d2c30afe337024b290/system.slice/httpd.service
+                  ├─2675 /usr/sbin/httpd -DFOREGROUND
+                  ├─2689 /usr/sbin/httpd -DFOREGROUND
+                  ├─2690 /usr/sbin/httpd -DFOREGROUND
+                  ├─2691 /usr/sbin/httpd -DFOREGROUND
+                  └─2692 /usr/sbin/httpd -DFOREGROUND
+       
+       Feb 20 01:56:20 stapp02.stratos.xfusioncorp.com systemd[1]: httpd.service: Got notification message from PID 2675 (READY=1, STATUS=Running, listening on: port 80)
+       Feb 20 01:56:30 stapp02.stratos.xfusioncorp.com systemd[1]: httpd.service: Got notification message from PID 2675 (READY=1, STATUS=Running, listening on: port 80)
+       Feb 20 01:56:40 stapp02.stratos.xfusioncorp.com systemd[1]: httpd.service: Got notification message from PID 2675 (READY=1, STATUS=Running, listening on: port 80)
+       Feb 20 01:56:50 stapp02.stratos.xfusioncorp.com systemd[1]: httpd.service: Got notification message from PID 2675 (READY=1, STATUS=Running, listening on: port 80)
+       Feb 20 01:57:00 stapp02.stratos.xfusioncorp.com systemd[1]: httpd.service: Got notification message from PID 2675 (READY=1, STATUS=Running, listening on: port 80)
+       Feb 20 01:57:10 stapp02.stratos.xfusioncorp.com systemd[1]: httpd.service: Got notification message from PID 2675 (READY=1, STATUS=Running, listening on: port 80)
+       Feb 20 01:57:20 stapp02.stratos.xfusioncorp.com systemd[1]: httpd.service: Got notification message from PID 2675 (READY=1, STATUS=Running, listening on: port 80)
+       Feb 20 01:57:30 stapp02.stratos.xfusioncorp.com systemd[1]: httpd.service: Got notification message from PID 2675 (READY=1, STATUS=Running, listening on: port 80)
+       Feb 20 01:57:40 stapp02.stratos.xfusioncorp.com systemd[1]: httpd.service: Got notification message from PID 2675 (READY=1, STATUS=Running, listening on: port 80)
+       Feb 20 01:57:50 stapp02.stratos.xfusioncorp.com systemd[1]: httpd.service: Got notification message from PID 2675 (READY=1, STATUS=Running, listening on: port 80
+
+
+                
+            
