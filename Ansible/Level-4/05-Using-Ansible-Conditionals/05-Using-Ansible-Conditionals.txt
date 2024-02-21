@@ -1,0 +1,141 @@
+The Nautilus DevOps team had a discussion about, how they can train different team members to use Ansible for different automation tasks. There are numerous ways to perform a particular task using Ansible, but we want to utilize each aspect that Ansible offers. The team wants to utilise Ansible's conditionals to perform the following task:
+
+
+An inventory file is already placed under /home/thor/ansible directory on jump host, with all the Stratos DC app servers included.
+
+
+Create a playbook /home/thor/ansible/playbook.yml and make sure to use Ansible's when conditionals statements to perform the below given tasks.
+
+
+Copy blog.txt file present under /usr/src/sysops directory on jump host to App Server 1 under /opt/sysops directory. Its user and group owner must be user tony and its permissions must be 0755 .
+
+
+Copy story.txt file present under /usr/src/sysops directory on jump host to App Server 2 under /opt/sysops directory. Its user and group owner must be user steve and its permissions must be 0755 .
+
+
+Copy media.txt file present under /usr/src/sysops directory on jump host to App Server 3 under /opt/sysops directory. Its user and group owner must be user banner and its permissions must be 0755.
+
+
+NOTE: You can use ansible_nodename variable from gathered facts with when condition. Additionally, please make sure you are running the play for all hosts i.e use - hosts: all.
+
+
+Note: Validation will try to run the playbook using command ansible-playbook -i inventory playbook.yml, so please make sure the playbook works this way without passing any extra arguments.
+
+Ans)
+    ## Log into the jump_host using ssh
+    1. ssh thor@jump_host
+
+    ## List the files and directories in the /home/thor
+    2. thor@jump_host ~$ ls -larth
+       total 32K
+       -rwxrwx--- 1 thor thor  141 Jun 20  2022 .bash_profile
+       -rwxrwx--- 1 thor thor   18 Jun 20  2022 .bash_logout
+       drwxr-xr-x 1 root root 4.0K Aug  4  2023 ..
+       drwxrwx--- 1 thor thor 4.0K Aug 29 17:10 .config
+       drwxr----- 2 thor thor 4.0K Feb 21 04:18 .ssh
+       -rwxrwx--- 1 thor thor  668 Feb 21 04:18 .bashrc
+       drwxr----- 1 thor thor 4.0K Feb 21 04:19 .
+       drwxr-xr-x 2 thor thor 4.0K Feb 21 04:19 ansible
+
+       ## Change the directory to ansible
+       thor@jump_host ~$ cd ansible/
+
+       ## list down the files and directories in absible directory
+       thor@jump_host ~/ansible$ ls -larth
+       total 16K
+       -rw-r--r-- 1 thor thor  237 Feb 21 04:18 inventory
+       -rw-r--r-- 1 thor thor   36 Feb 21 04:18 ansible.cfg
+       drwxr----- 1 thor thor 4.0K Feb 21 04:19 ..
+       drwxr-xr-x 2 thor thor 4.0K Feb 21 04:19 .
+
+       ## Display the content in the inventory file
+       thor@jump_host ~/ansible$ cat inventory 
+       stapp01 ansible_host=172.16.238.10 ansible_ssh_pass=Ir0nM@n ansible_user=tony
+       stapp02 ansible_host=172.16.238.11 ansible_ssh_pass=Am3ric@ ansible_user=steve
+       stapp03 ansible_host=172.16.238.12 ansible_ssh_pass=BigGr33n ansible_user=banner
+
+    ## Check the hosts ansible_nodename using gather facts command
+    3. thor@jump_host ~/ansible$ ansible -i inventory all -m setup | grep -i ansible_nodename
+        "ansible_nodename": "stapp03.stratos.xfusioncorp.com",
+        "ansible_nodename": "stapp01.stratos.xfusioncorp.com",
+        "ansible_nodename": "stapp02.stratos.xfusioncorp.com",
+
+    ## Write a ansible playbook
+    4. thor@jump_host ~/ansible$ ansible-playbook -i inventory playbook.yml
+       - name: Copying Files to respective server 
+         hosts: all
+         become: true
+         gather_facts: true
+         tasks:
+           - name: Copy file with owner and permissions to App Server 1
+             ansible.builtin.copy:
+               src: /usr/src/sysops/blog.txt
+               dest: /opt/sysops
+               owner: "{{ ansible_user }}"
+               group: "{{ ansible_user }}"
+               mode: '0755'
+             when: ansible_nodename == "stapp01.stratos.xfusioncorp.com"
+           	
+           - name: Copy file with owner and permissions to App Server 2
+             ansible.builtin.copy:
+               src: /usr/src/sysops/story.txt
+               dest: /opt/sysops
+               owner: "{{ ansible_user }}"
+               group: "{{ ansible_user }}"
+               mode: '0755'
+             when: ansible_nodename == "stapp02.stratos.xfusioncorp.com"
+           	
+           - name: Copy file with owner and permissions to App Server 3
+             ansible.builtin.copy:
+               src: /usr/src/sysops/media.txt
+               dest: /opt/sysops
+               owner: "{{ ansible_user }}"
+               group: "{{ ansible_user }}"
+               mode: '0755'
+             when: ansible_nodename == "stapp03.stratos.xfusioncorp.com"
+
+    ## Run the ansible playbook.yml 
+    5. thor@jump_host ~/ansible$ ansible-playbook -i inventory playbook.yml
+
+       PLAY [Copying Files to respective server] ***********************************************
+       
+       TASK [Gathering Facts] ******************************************************************
+       ok: [stapp02]
+       ok: [stapp03]
+       ok: [stapp01]
+       
+       TASK [Copy file with owner and permissions to App Server 1] *****************************
+       skipping: [stapp02]
+       skipping: [stapp03]
+       changed: [stapp01]
+       
+       TASK [Copy file with owner and permissions to App Server 2] *****************************
+       skipping: [stapp01]
+       skipping: [stapp03]
+       changed: [stapp02]
+       
+       TASK [Copy file with owner and permissions to App Server 3] *****************************
+       skipping: [stapp01]
+       skipping: [stapp02]
+       changed: [stapp03]
+       
+       PLAY RECAP ******************************************************************************
+       stapp01                    : ok=2    changed=1    unreachable=0    failed=0    skipped=2    rescued=0    ignored=0   
+       stapp02                    : ok=2    changed=1    unreachable=0    failed=0    skipped=2    rescued=0    ignored=0   
+       stapp03                    : ok=2    changed=1    unreachable=0    failed=0    skipped=2    rescued=0    ignored=0
+
+    ## Check the changes are made on hosts server or Note
+    6. thor@jump_host ~/ansible$ ansible -i inventory -m shell -ba "ls -larth /opt/sysops" allstapp03 | CHANGED | rc=0 >>total 12K
+       drwxr-xr-x 1 root   root   4.0K Feb 21 04:19 ..
+       -rwxr-xr-x 1 banner banner   22 Feb 21 04:54 media.txt
+       drwxr-xr-x 2 root   root   4.0K Feb 21 04:54 .
+       stapp01 | CHANGED | rc=0 >>
+       total 12K
+       drwxr-xr-x 1 root root 4.0K Feb 21 04:19 ..
+       -rwxr-xr-x 1 tony tony   35 Feb 21 04:54 blog.txt
+       drwxr-xr-x 2 root root 4.0K Feb 21 04:54 .
+       stapp02 | CHANGED | rc=0 >>
+       total 12K
+       drwxr-xr-x 1 root  root  4.0K Feb 21 04:19 ..
+       -rwxr-xr-x 1 steve steve   27 Feb 21 04:54 story.txt
+       drwxr-xr-x 2 root  root  4.0K Feb 21 04:54 .
