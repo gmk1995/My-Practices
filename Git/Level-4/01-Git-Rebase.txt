@@ -1,0 +1,78 @@
+The Nautilus application development team has been working on a project repository /opt/media.git. This repo is cloned at /usr/src/kodekloudrepos on storage server in Stratos DC. They recently shared the following requirements with DevOps team:
+
+
+
+One of the developers is working on feature branch and their work is still in progress, however there are some changes which have been pushed into the master branch, the developer now wants to rebase the feature branch with the master branch without loosing any data from the feature branch, also they don't want to add any merge commit by simply merging the master branch into the feature branch. Accomplish this task as per requirements mentioned.
+
+
+Also remember to push your changes once done.
+
+Ans)
+    ## Log into the Storage Server
+    1. thor@jump_host ~$ ssh natasha@ststor01
+       The authenticity of host 'ststor01 (172.16.238.15)' can't be established.
+       ECDSA key fingerprint is SHA256:vg8Es8LYHyGjRtW8RhsHvnbIHQx3CtrEhHdK/slakx0.
+       Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
+       Warning: Permanently added 'ststor01,172.16.238.15' (ECDSA) to the list of known hosts.
+       natasha@ststor01's password:
+
+    ## First, navigate to the local repository of the feature branch
+       ## Change the directory to /usr/src/kodekloudrepos
+    2. [natasha@ststor01 ~]$ cd /usr/src/kodekloudrepos
+    
+       ## List down the files and directories in /usr/src/kodekloudrepos
+       [natasha@ststor01 kodekloudrepos]$ ls -larth
+       total 12K
+       drwxr-xr-x 1 root root 4.0K Feb 22 01:40 ..
+       drwxr-xr-x 3 root root 4.0K Feb 22 01:40 .
+       drwxr-xr-x 3 root root 4.0K Feb 22 01:40 media
+
+       ## Change the directory to media
+       [natasha@ststor01 kodekloudrepos]$ cd media/
+       [natasha@ststor01 media]$ ls -larth
+       total 20K
+       drwxr-xr-x 3 root root 4.0K Feb 22 01:40 ..
+       -rw-r--r-- 1 root root   34 Feb 22 01:40 info.txt
+       -rw-r--r-- 1 root root   22 Feb 22 01:40 feature.txt
+       drwxr-xr-x 8 root root 4.0K Feb 22 01:40 .git
+       drwxr-xr-x 3 root root 4.0K Feb 22 01:40 .
+
+    ## Check the git branch
+    3. [natasha@ststor01 media]$ sudo git branch
+       * feature
+         master
+
+    ## Check the git log 
+    4. natasha@ststor01 media]$ sudo git log --oneline
+       bffe139 (HEAD -> feature, origin/feature) Add new feature
+       11f6df4 initial commit
+
+    ## git rebase
+    5. [natasha@ststor01 media]$ sudo git rebase master
+       Successfully rebased and updated refs/heads/feature.
+
+    ## git logs
+    6. [natasha@ststor01 media]$ sudo git log
+       commit a563a37fde525418c7943145ca4210514a000b53 (HEAD -> master, origin/master)
+       Author: Admin <admin@kodekloud.com>
+       Date:   Thu Feb 22 01:40:20 2024 +0000
+       
+           Update info.txt
+       
+       commit 11f6df48e193189b936059c348b98f75a5f65495
+       Author: Admin <admin@kodekloud.com>
+       Date:   Thu Feb 22 01:40:20 2024 +0000
+       
+           initial commit
+
+    ## Push the changes to feature branch origin
+    7. [natasha@ststor01 media]$ sudo git push origin feature --force
+       Enumerating objects: 4, done.
+       Counting objects: 100% (4/4), done.
+       Delta compression using up to 36 threads
+       Compressing objects: 100% (2/2), done.
+       Writing objects: 100% (3/3), 297 bytes | 297.00 KiB/s, done.
+       Total 3 (delta 0), reused 0 (delta 0), pack-reused 0
+       To /opt/media.git
+        + bffe139...15d9701 feature -> feature (forced update)
+ 
