@@ -1,0 +1,104 @@
+Sarah and Max were working on writting some stories which they have pushed to the repository. Max has recently added some new changes and is trying to push them to the repository but he is facing some issues. Below you can find more details:
+
+
+SSH into storage server using user max and password Max_pass123. Under /home/max you will find the story-blog repository. Try to push the changes to the origin repo and fix the issues. The story-index.txt must have titles for all 4 stories. Additionally, there is a typo in The Lion and the Mooose line where Mooose should be Mouse.
+
+
+Click on the Gitea UI button on the top bar. You should be able to access the Gitea page. You can login to Gitea server from UI using username sarah and password Sarah_pass123 or username max and password Max_pass123.
+
+
+Note: For these kind of scenarios requiring changes to be done in a web UI, please take screenshots so that you can share it with us for review in case your task is marked incomplete. You may also consider using a screen recording software such as loom.com to record and share your work.
+
+Ans)
+    ## Log into the storage server using
+    1. thor@jump_host ~$ ssh max@ststor01
+       The authenticity of host 'ststor01 (172.16.238.15)' can't be established.
+       ECDSA key fingerprint is SHA256:0z85j/k+4Nf8WKbHJzxo1AOv4FeRA8LPET2N3BEkYyo.
+       Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
+       Warning: Permanently added 'ststor01,172.16.238.15' (ECDSA) to the list of known hosts.
+       max@ststor01's password: 
+       Welcome to xFusionCorp Storage server.
+
+    ## Check the files and directories in the max home directory
+    2. ## Check the present working directory
+       max $ pwd
+       /home/max
+       
+       ## List  all the files and directories
+       max $ ls -larth
+       total 32
+       drwxr-xr-x    1 root     root        4.0K Oct 26  2020 ..
+       -rw-r--r--    1 max      max           50 Oct 26  2020 .vimrc
+       -rw-r--r--    1 max      max          202 Oct 26  2020 .bashrc
+       -rw-r--r--    1 max      max          202 Oct 26  2020 .bash_profile
+       drwxr-sr-x    1 max      max         4.0K Feb 25 11:28 .
+       drwxr-sr-x    3 max      max         4.0K Feb 25 11:28 story-blog
+       
+       ## Change the directory to  the story-blog directory
+       max $ cd story-blog/
+
+       ## List the files and directories
+       max (master)$ ls -larth
+       total 32
+       -rw-r--r--    1 max      max         1.1K Feb 25 11:28 lion-and-mouse.txt
+       -rw-r--r--    1 max      max          792 Feb 25 11:28 frogs-and-ox.txt
+       drwxr-sr-x    1 max      max         4.0K Feb 25 11:28 ..
+       -rw-r--r--    1 max      max          102 Feb 25 11:28 story-index.txt
+       -rw-r--r--    1 max      max          807 Feb 25 11:28 fox-and-grapes.txt
+       drwxr-sr-x    8 max      max         4.0K Feb 25 11:28 .git
+       drwxr-sr-x    3 max      max         4.0K Feb 25 11:28 .
+
+       ## Check the content in the story-index.txt file 
+       max (master)$ cat story-index.txt
+       1. The Lion and the Mooose
+       2. The Frogs and the Ox
+       3. The Fox and the Grapes
+       4. The Donkey and the Dog
+
+    ## Update the story-index.txt file 
+    3. max (master)$ sed -i 's/Mooose/Mouse/g' story-index.txt
+
+       ## Check the updated content of the story-index.txt file
+       max (master)$ cat story-index.txt
+       1. The Lion and the Mouse
+       2. The Frogs and the Ox
+       3. The Fox and the Grapes
+       4. The Donkey and the Dog
+
+    ## Commit and Push the changes to Remote branch
+    4. ## git add  the modified file
+       max (master)$ git add story-index.txt
+
+       ## git Commit
+       max (master)$ git commit -m 'UPDATE -> updated story-index.txt file'
+       [master 55f8f2b] UPDATE -> updated story-index.txt file
+        Committer: Linux User <max@ststor01.stratos.xfusioncorp.com>
+       Your name and email address were configured automatically based
+       on your username and hostname. Please check that they are accurate.
+       You can suppress this message by setting them explicitly. Run the
+       following command and follow the instructions in your editor to edit
+       your configuration file:
+       
+           git config --global --edit
+       
+       After doing this, you may fix the identity used for this commit with:
+       
+           git commit --amend --reset-author
+       
+        1 file changed, 1 insertion(+), 1 deletion(-)
+
+        ## push the changes to the origin
+        max (master)$ git push origin -uf master
+        Username for 'http://git.stratos.xfusioncorp.com': max
+        Password for 'http://max@git.stratos.xfusioncorp.com': 
+        Counting objects: 21, done.
+        Delta compression using up to 36 threads.
+        Compressing objects: 100% (19/19), done.
+        Writing objects: 100% (21/21), 3.10 KiB | 0 bytes/s, done.
+        Total 21 (delta 7), reused 0 (delta 0)
+        remote: . Processing 1 references
+        remote: Processed 1 references in total
+        To http://git.stratos.xfusioncorp.com/sarah/story-blog.git
+         + df4626e...55f8f2b master -> master (forced update)
+        Branch master set up to track remote branch master from origin.
+
