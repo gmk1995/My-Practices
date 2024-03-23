@@ -1,0 +1,240 @@
+Some new developers have joined xFusionCorp Industries and have been assigned Nautilus project. They are going to start development on a new application, and some pre-requisites have been shared with the DevOps team to proceed with. Please note that all tasks need to be performed on storage server in Stratos DC.
+
+
+
+a. Install git, set up any values for user.email and user.name globally and create a bare repository /opt/demo.git.
+
+
+b. There is an update hook (to block direct pushes to the master branch) under /tmp on storage server itself; use the same to block direct pushes to the master branch in /opt/demo.git repo.
+
+
+c. Clone /opt/demo.git repo in /usr/src/kodekloudrepos/demo directory.
+
+
+d. Create a new branch named xfusioncorp_demo in repo that you cloned under /usr/src/kodekloudrepos directory.
+
+
+e. There is a readme.md file in /tmp directory on storage server itself; copy that to the repo, add/commit in the new branch you just created, and finally push your branch to the origin.
+
+
+f. Also create master branch from your branch and remember you should not be able to push to the master directly as per the hook you have set up.
+
+Ans)
+    ## Log into the storage server using
+    1. thor@jump_host ~$ ssh max@ststor01
+       The authenticity of host 'ststor01 (172.16.238.15)' can't be established.
+       ECDSA key fingerprint is SHA256:0z85j/k+4Nf8WKbHJzxo1AOv4FeRA8LPET2N3BEkYyo.
+       Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
+       Warning: Permanently added 'ststor01,172.16.238.15' (ECDSA) to the list of known hosts.
+       max@ststor01's password: 
+       Welcome to xFusionCorp Storage server.
+
+    ## Install the git
+    2. [root@ststor01 ~]# yum install git -y
+       
+       ## check the git version
+       [root@ststor01 ~]# git --version
+       git version 2.43.0
+
+    ## Configure the user name and user email
+    3. [root@ststor01 ~]# git config --global user.email "engineer@kodekloud.com"
+       [root@ststor01 ~]# git config --global user.name "engineer"
+
+    ## create a /opt/demo.git directory
+    4. [root@ststor01 ~]# mkdir -p /opt/demo.git
+       
+       ## move to the directory to /opt/demo.git
+       [root@ststor01 ~]# cd /opt/demo.git/
+
+       ## List down the files and directories in /opt/demo.git directory
+       [root@ststor01 demo.git]# ls -larth
+       total 8.0K
+       drwxr-xr-x 1 root root 4.0K Mar  6 02:06 ..
+       drwxr-xr-x 2 root root 4.0K Mar  6 02:06 .
+
+    ## Install the bare git repo
+    5. [root@ststor01 demo.git]# git init --bare
+       hint: Using 'master' as the name for the initial branch. This default branch name
+       hint: is subject to change. To configure the initial branch name to use in all
+       hint: of your new repositories, which will suppress this warning, call:
+       hint: 
+       hint:   git config --global init.defaultBranch <name>
+       hint: 
+       hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+       hint: 'development'. The just-created branch can be renamed via this command:
+       hint: 
+       hint:   git branch -m <name>
+       Initialized empty Git repository in /opt/demo.git/
+
+       ## List down the files and directories in /opt/demo.git director after installing the bare git repo
+       [root@ststor01 demo.git]# ls -larth
+       total 40K
+       drwxr-xr-x 1 root root 4.0K Mar  6 02:06 ..
+       drwxr-xr-x 2 root root 4.0K Mar  6 02:06 info
+       drwxr-xr-x 4 root root 4.0K Mar  6 02:06 refs
+       drwxr-xr-x 4 root root 4.0K Mar  6 02:06 objects
+       drwxr-xr-x 2 root root 4.0K Mar  6 02:06 hooks
+       -rw-r--r-- 1 root root   73 Mar  6 02:06 description
+       -rw-r--r-- 1 root root   66 Mar  6 02:06 config
+       drwxr-xr-x 2 root root 4.0K Mar  6 02:06 branches
+       -rw-r--r-- 1 root root   23 Mar  6 02:06 HEAD
+       drwxr-xr-x 7 root root 4.0K Mar  6 02:06 .
+
+    ## Move to the /tmp directory and check the update file
+    6. [root@ststor01 demo.git]# cd /tmp/
+
+       ## list down the files and directories in /tmp directory
+       [root@ststor01 tmp]# ls -larth
+       total 44K
+       -rwx------ 1 root root  701 Feb  7  2023 ks-script-l36mq90h
+       -rwx------ 1 root root  291 Feb  7  2023 ks-script-kzk1nzfd
+       -rwxr-xr-x 1 root root  120 Mar  6 01:56 update
+       -rw-r--r-- 1 root root   33 Mar  6 01:56 readme.md
+       drwxr-xr-x 1 root root 4.0K Mar  6 01:56 ..
+       drwxrwxrwt 2 root root 4.0K Mar  6 01:56 .font-unix
+       drwxrwxrwt 2 root root 4.0K Mar  6 01:56 .XIM-unix
+       drwxrwxrwt 2 root root 4.0K Mar  6 01:56 .X11-unix
+       drwxrwxrwt 2 root root 4.0K Mar  6 01:56 .Test-unix
+       drwxrwxrwt 2 root root 4.0K Mar  6 01:56 .ICE-unix
+       drwxrwxrwt 1 root root 4.0K Mar  6 02:03 .
+
+       ## Check the content in the update file
+       [root@ststor01 tmp]# cat update
+       #!/bin/sh
+       if [ "$1" == refs/heads/master ];
+       then
+         echo "Manual pushes to the master branch is restricted!!"
+         exit 1
+
+    ## Copy /tmp/update file to /opt/demo.git/hooks directory
+    7. root@ststor01 tmp]# cp update -R /opt/demo.git/hooks/
+       
+       ## Move to the  /opt/demo.git/hooks directory and check whether the update file copied successfully or not
+       [root@ststor01 tmp]# cd /opt/demo.git/hooks/
+
+       ## List down the  contents of /opt/demo.git/hooks directory again, you will see that the update file has been there
+       [root@ststor01 hooks]# ls -larth
+       total 76K
+       -rwxr-xr-x 1 root root 2.3K Mar  6 02:06 sendemail-validate.sample
+       -rwxr-xr-x 1 root root 2.8K Mar  6 02:06 push-to-checkout.sample
+       -rwxr-xr-x 1 root root 1.5K Mar  6 02:06 prepare-commit-msg.sample
+       -rwxr-xr-x 1 root root  544 Mar  6 02:06 pre-receive.sample
+       -rwxr-xr-x 1 root root 1.4K Mar  6 02:06 pre-push.sample
+       -rwxr-xr-x 1 root root  416 Mar  6 02:06 pre-merge-commit.sample
+       -rwxr-xr-x 1 root root 1.7K Mar  6 02:06 pre-commit.sample
+       -rwxr-xr-x 1 root root  424 Mar  6 02:06 pre-applypatch.sample
+       -rwxr-xr-x 1 root root  189 Mar  6 02:06 post-update.sample
+       -rwxr-xr-x 1 root root  478 Mar  6 02:06 applypatch-msg.sample
+       -rwxr-xr-x 1 root root 3.6K Mar  6 02:06 update.sample
+       -rwxr-xr-x 1 root root 4.8K Mar  6 02:06 pre-rebase.sample
+       -rwxr-xr-x 1 root root 4.7K Mar  6 02:06 fsmonitor-watchman.sample
+       -rwxr-xr-x 1 root root  896 Mar  6 02:06 commit-msg.sample
+       drwxr-xr-x 7 root root 4.0K Mar  6 02:06 ..
+       -rwxr-xr-x 1 root root  120 Mar  6 02:09 update
+       drwxr-xr-x 2 root root 4.0K Mar  6 02:09 .
+
+    ## move to /usr/src/kodekloudrepos directory and create a demo directory
+    8. [root@ststor01 ~]# cd /usr/src/kodekloudrepos/
+
+       ## List down the files  in the /usr/src/kodekloudrepos directory
+       [root@ststor01 kodekloudrepos]# ls -larth
+       total 8.0K
+       drwxr-xr-x 1 root root 4.0K Mar  6 01:56 ..
+       drwxr-xr-x 2 root root 4.0K Mar  6 01:56 .
+       
+       ## Create a demo directory
+       [root@ststor01 kodekloudrepos]# mkdir demo
+
+       ## List down the files  in the /usr/src/kodekloudrepos directory again, you should see the demo directory now
+       [root@ststor01 kodekloudrepos]# ls -larth
+       total 12K
+       drwxr-xr-x 1 root root 4.0K Mar  6 01:56 ..
+       drwxr-xr-x 2 root root 4.0K Mar  6 02:11 demo
+       drwxr-xr-x 3 root root 4.0K Mar  6 02:11 .
+
+    ## Move to demo directory and clone the /opt/demo.git repo
+    9. [root@ststor01 kodekloudrepos]# cd demo/
+
+       ## clone the /opt/demo.git repo
+       [root@ststor01 demo]# git clone /opt/demo.git .
+       Cloning into '.'...
+       warning: You appear to have cloned an empty repository.
+       done.
+
+       ## Check the content in the /usr/src/kodekloudrepos/demo directory again to see the .git repo is successfully created
+       [root@ststor01 demo]# ls -larth
+       total 12K
+       drwxr-xr-x 3 root root 4.0K Mar  6 02:11 ..
+       drwxr-xr-x 3 root root 4.0K Mar  6 02:11 .
+       drwxr-xr-x 7 root root 4.0K Mar  6 02:11 .git
+
+    ## Create a xfusioncorp_demo branch
+    10. root@ststor01 demo]# git checkout -b xfusioncorp_demo
+        Switched to a new branch 'xfusioncorp_demo'
+
+    ## Copy the read.me from /tmp directory to /usr/src/kodekloudrepos/demo directory
+    11. [root@ststor01 demo]# cp /tmp/readme.md .
+
+        ## List down the contents in /usr/src/kodekloudrepos/demo directory
+        [root@ststor01 demo]# ls -larth 
+        total 16K
+        drwxr-xr-x 3 root root 4.0K Mar  6 02:11 ..
+        drwxr-xr-x 7 root root 4.0K Mar  6 02:15 .git
+        -rw-r--r-- 1 root root   33 Mar  6 02:16 readme.md
+        drwxr-xr-x 3 root root 4.0K Mar  6 02:16 .
+
+    ## Check git status and do git add, git commit, and git push
+    12. [root@ststor01 demo]# git status
+        On branch xfusioncorp_demo
+        
+        No commits yet
+        
+        Untracked files:
+          (use "git add <file>..." to include in what will be committed)
+                readme.md
+        
+        nothing added to commit but untracked files present (use "git add" to track)
+        
+        ## git add 
+        [root@ststor01 demo]# git add .
+        
+        ## commit the change with message
+        [root@ststor01 demo]# git commit -m 'ADDED -> readme.md file'
+        [xfusioncorp_demo (root-commit) 3a48039] ADDED -> readme.md file
+         1 file changed, 1 insertion(+)
+         create mode 100644 readme.md
+
+        ## Check the branch again
+        [root@ststor01 demo]# git branch
+        * xfusioncorp_demo
+        
+        ## Push the changes to the origin
+        [root@ststor01 demo]# git push origin xfusioncorp_demo
+        Enumerating objects: 3, done.
+        Counting objects: 100% (3/3), done.
+        Writing objects: 100% (3/3), 252 bytes | 252.00 KiB/s, done.
+        Total 3 (delta 0), reused 0 (delta 0), pack-reused 0
+        To /opt/demo.git
+         * [new branch]      xfusioncorp_demo -> xfusioncorp_demo
+
+    ## Checkout to master branch and see whether you are able to push the changes from master branch
+    13. [root@ststor01 demo]# git checkout -b master
+        Switched to a new branch 'master'
+        Your branch is based on 'origin/master', but the upstream is gone.
+          (use "git branch --unset-upstream" to fixup)
+
+        ## Verify the current branch
+        [root@ststor01 demo]# git branch
+        * master
+          xfusioncorp_demo
+          
+        nothing to commit, working tree clean
+
+        ## Check whether you are able to push the changes from master branch
+        [root@ststor01 demo]# git push origin master
+        Total 0 (delta 0), reused 0 (delta 0), pack-reused 0
+        remote: Manual pushes to the master branch is restricted!!
+        remote: error: hook declined to update refs/heads/master
+        To /opt/demo.git
+         ! [remote rejected] master -> master (hook declined)
+        error: failed to push some refs to '/opt/demo.git'

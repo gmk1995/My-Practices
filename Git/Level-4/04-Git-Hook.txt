@@ -1,0 +1,96 @@
+The Nautilus application development team was working on a git repository /opt/demo.git which is cloned under /usr/src/kodekloudrepos directory present on Storage server in Stratos DC. The team want to setup a hook on this repository, please find below more details:
+
+
+
+Merge the feature branch into the master branch`, but before pushing your changes complete below point.
+
+Create a post-update hook in this git repository so that whenever any changes are pushed to the master branch, it creates a release tag with name release-2023-06-15, where 2023-06-15 is supposed to be the current date. For example if today is 20th June, 2023 then the release tag must be release-2023-06-20. Make sure you test the hook at least once and create a release tag for today's release.
+
+Finally remember to push your changes.
+
+Ans)
+     ## Log into the storage server using
+    1. thor@jump_host ~$ ssh max@ststor01
+       The authenticity of host 'ststor01 (172.16.238.15)' can't be established.
+       ECDSA key fingerprint is SHA256:0z85j/k+4Nf8WKbHJzxo1AOv4FeRA8LPET2N3BEkYyo.
+       Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
+       Warning: Permanently added 'ststor01,172.16.238.15' (ECDSA) to the list of known hosts.
+       max@ststor01's password: 
+       Welcome to xFusionCorp Storage server.
+
+    ## move to /opt/demo.git/hooks/ and change the post-update.sample file name to post-update
+    2. root@ststor01 ~]# cd /opt/blog.git/hooks/
+       
+       ## List down the files and directories in /opt/blog.git/hooks/ directory
+       [root@ststor01 hooks]# ls -larth
+       total 68K
+       -rwxr-xr-x 1 root root 3.6K Mar 23 03:12 update.sample
+       -rwxr-xr-x 1 root root 2.8K Mar 23 03:12 push-to-checkout.sample
+       -rwxr-xr-x 1 root root 1.5K Mar 23 03:12 prepare-commit-msg.sample
+       -rwxr-xr-x 1 root root  544 Mar 23 03:12 pre-receive.sample
+       -rwxr-xr-x 1 root root 4.8K Mar 23 03:12 pre-rebase.sample
+       -rwxr-xr-x 1 root root 1.4K Mar 23 03:12 pre-push.sample
+       -rwxr-xr-x 1 root root  416 Mar 23 03:12 pre-merge-commit.sample
+       -rwxr-xr-x 1 root root 1.7K Mar 23 03:12 pre-commit.sample
+       -rwxr-xr-x 1 root root  424 Mar 23 03:12 pre-applypatch.sample
+       -rwxr-xr-x 1 root root  189 Mar 23 03:12 post-update.sample
+       -rwxr-xr-x 1 root root 4.7K Mar 23 03:12 fsmonitor-watchman.sample
+       -rwxr-xr-x 1 root root  896 Mar 23 03:12 commit-msg.sample
+       -rwxr-xr-x 1 root root  478 Mar 23 03:12 applypatch-msg.sample
+       drwxr-xr-x 2 root root 4.0K Mar 23 03:12 .
+       drwxr-xr-x 7 root root 4.0K Mar 23 03:12 ..
+
+       ## Change the post-update.sample file name to post-update
+       root@ststor01 hooks]# mv post-update.sample post-update
+
+       ## Write the script  that will execute when the post-update event occurs
+       [root@ststor01 hooks]# vi post-update
+       #!/bin/bash
+       date=$(date +%Y-%m-%d)
+       git tag release-$date
+
+    ## move to /usr/src/kodekloudrepos/demo directory and do git checkout to master branch and merge the feature branch and then push and pull the master Branch
+    3. [root@ststor01 ~]# cd /usr/src/kodekloudrepos/blog/
+
+       ## List down the files and directories in /usr/src/kodekloudrepos/demo directory
+       [root@ststor01 blog]# ls -larth
+       total 20K
+       drwxr-xr-x 3 root root 4.0K Mar 23 03:12 ..
+       -rw-r--r-- 1 root root   34 Mar 23 03:12 info.txt
+       -rw-r--r-- 1 root root   22 Mar 23 03:12 feature.txt
+       drwxr-xr-x 3 root root 4.0K Mar 23 03:12 .
+       drwxr-xr-x 8 root root 4.0K Mar 23 03:12 .git
+
+       ## Check the current branch
+       [root@ststor01 blog]# git branch
+       * feature
+         master
+
+       ## Checkout the branch to master
+       [root@ststor01 blog]# git checkout master
+       Switched to branch 'master'
+       Your branch is up to date with 'origin/master'.
+
+       ## merge the feature branch into master branch
+       [root@ststor01 blog]# git merge feature
+       Updating 2927d49..8d27cb8
+       Fast-forward
+        feature.txt | 1 +
+        1 file changed, 1 insertion(+)
+        create mode 100644 feature.txt
+
+    ## Push the master branch to origin
+    [root@ststor01 blog]# git push
+    Total 0 (delta 0), reused 0 (delta 0), pack-reused 0
+    To /opt/blog.git
+       2927d49..8d27cb8  master -> master
+
+    ## Pull the master branch  from origin to get the latest code
+    [root@ststor01 blog]# git pull
+    From /opt/blog
+     * [new tag]         release-2024-03-23 -> release-2024-03-23
+    Already up to date.
+
+## Check the git tag whether we are receiving the release name with date or not
+4. [root@ststor01 blog]# git tag
+   release-2024-03-23
