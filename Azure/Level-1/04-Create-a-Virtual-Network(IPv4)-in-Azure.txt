@@ -1,0 +1,26 @@
+4 Create a Virtual Network (IPv4) in Azure
+
+The Nautilus DevOps team is strategically planning the migration of a portion of their infrastructure to the Azure cloud. Acknowledging the magnitude of this endeavor, they have chosen to tackle the migration incrementally rather than as a single, massive transition. Their approach involves creating Virtual Networks (VNets) as the initial step, as they will be provisioning various services under different VNets.
+
+Create a Virtual Network (VNet) named nautilus-vnet in the East US region with 192.168.0.0/24 IPv4 CIDR.
+
+
+
+Use below given Azure Credentials: (You can run the showcreds command on the azure-client host to retrieve credentials)
+
+Portal URL	https://portal.azure.com
+Username	kk_lab_user_main-cffec5bb3d5b4e01@azurekmlprodkodekloud.onmicrosoft.com
+Password	G3Boev3^^@3QsuTX
+Start Time	Wed Jan 15 11:58:45 UTC 2025
+End Time	Wed Jan 15 12:58:45 UTC 2025
+
+
+Ans)
+    ## Access the Azure Portal
+    1. Access the Azure Portal using this URL: https://portal.azure.com
+
+    ## Log into Azure Portal
+    2. Username: kk_lab_user_main-cffec5bb3d5b4e01@azurekmlprodkodekloud.onmicrosoft.com and Password: G3Boev3^^@3QsuTX
+
+    ## Create a Virtual Network (IPv4) in Azure
+    3. Search Virtual Network -> Click to Create a New Virtual Network -> Resource Group Existing -> Name nautilus-vnet -> Region East US -> Subnet Enter the IPv4 CIDR Range 192.168.0.0/24 -> Review+Create

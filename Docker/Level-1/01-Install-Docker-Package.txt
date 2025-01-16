@@ -7,7 +7,7 @@ Install docker-ce and docker-compose packages on App Server 2.
 Start docker service.
 
 Ans)
-    ## Docker Instllation Steps
+    ## Docker Installation Steps
     
     ## Download Docker installation Script
     1. curl -fsSL https://get.docker.com -o get-docker.sh

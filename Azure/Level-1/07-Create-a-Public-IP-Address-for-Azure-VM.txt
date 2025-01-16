@@ -1,0 +1,25 @@
+7 Create a Public IP Address for Azure VM
+
+The Nautilus DevOps team is strategizing the migration of a portion of their infrastructure to the Azure cloud. Recognizing the scale of this undertaking, they have opted to approach the migration in incremental steps rather than as a single massive transition. To achieve this, they have segmented large tasks into smaller, more manageable units. This granular approach enables the team to execute the migration in gradual phases, ensuring smoother implementation and minimizing disruption to ongoing operations. By breaking down the migration into smaller tasks, the Nautilus DevOps team can systematically progress through each stage, allowing for better control, risk mitigation, and optimization of resources throughout the migration process.
+
+For this task, allocate a Public IP address, name it as xfusion-pip.
+
+
+
+Use below given Azure Credentials: (You can run the showcreds command on the azure-client host to retrieve credentials)
+
+Portal URL	https://portal.azure.com
+Username	kk_lab_user_main-4a473f2e63f8426e@azurekmlprodkodekloud.onmicrosoft.com
+Password	jmDmVv8zMYdhc@1z
+Start Time	Thu Jan 16 03:51:26 UTC 2025
+End Time	Thu Jan 16 04:51:26 UTC 2025
+
+Ans)
+    ## Access the Azure Portal
+    1. Access the Azure Portal using this URL: https://portal.azure.com
+
+    ## Log into Azure Portal
+    2. Username: kk_lab_user_main-4a473f2e63f8426e@azurekmlprodkodekloud.onmicrosoft.com and Password: jmDmVv8zMYdhc@1z
+
+    ## Create a Public IP Address for Azure VM
+    3. Search Public IP Address -> Click on Create New -> Name xfusion-pip -> Review+Create

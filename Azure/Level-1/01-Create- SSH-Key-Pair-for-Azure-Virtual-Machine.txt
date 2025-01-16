@@ -1,0 +1,27 @@
+Create SSH Key Pair for Azure Virtual Machine
+
+The Nautilus DevOps team is strategizing the migration of a portion of their infrastructure to the Azure cloud. Recognizing the scale of this undertaking, they have opted to approach the migration in incremental steps rather than as a single massive transition. To achieve this, they have segmented large tasks into smaller, more manageable units. This granular approach enables the team to execute the migration in gradual phases, ensuring smoother implementation and minimizing disruption to ongoing operations. By breaking down the migration into smaller tasks, the Nautilus DevOps team can systematically progress through each stage, allowing for better control, risk mitigation, and optimization of resources throughout the migration process.
+
+For this task, create an SSH key pair with the following requirements:
+
+The name of the SSH key pair should be nautilus-kp.
+
+The key pair type must be rsa.
+
+Use below given Azure Credentials: (You can run the showcreds command on the azure-client host to retrieve these credentials)
+
+Portal URL	https://portal.azure.com
+Username	kk_lab_user_main-6f6ae1004ae04dff@azurekmlprodkodekloud.onmicrosoft.com
+Password	omp^2VdChyqLjeXw
+Start Time	Wed Jan 15 03:14:48 UTC 2025
+End Time	Wed Jan 15 04:14:48 UTC 2025
+
+Ans)
+    ## Access the Azure Portal
+    1. Access the Azure Portal using this URL: https://portal.azure.com
+
+    ## Log into Azure Portal
+    2. Username: kk_lab_user_main-6f6ae1004ae04dff@azurekmlprodkodekloud.onmicrosoft.com and Password: omp^2VdChyqLjeXw
+
+    ## Create SSH Key Pair for Azure Virtual Machine
+    3. In the Azure portal Search SSH Key Pair -> Click on the create SSH key -> Provide nautilus-kp as a SSH key name, key pair type rsa and then click on review+create 

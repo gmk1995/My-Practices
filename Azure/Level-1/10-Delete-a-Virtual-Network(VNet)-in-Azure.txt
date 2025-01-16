@@ -1,0 +1,26 @@
+10 Delete a Virtual Network (VNet) in Azure
+
+The Nautilus DevOps team is strategically planning the migration of a portion of their infrastructure to the Azure cloud. Acknowledging the magnitude of this endeavor, they have chosen to tackle the migration incrementally rather than as a single, massive transition. They created some services in different regions and later found that some of those can be deleted now.
+
+Delete a Virtual Network (VNet) named datacenter-vnet present in East US region.
+
+
+
+Use below given Azure Credentials: (You can run the showcreds command on the azure-client host to retrieve these credentials)
+
+Portal URL	https://portal.azure.com
+Username	kk_lab_user_main-3f002357cb6b4a80@azurekmlprodkodekloud.onmicrosoft.com
+Password	CEcn34loxwVJ%Eke
+Start Time	Thu Jan 16 04:25:10 UTC 2025
+End Time	Thu Jan 16 05:25:10 UTC 2025
+
+Ans)
+    ## Access the Azure Portal
+    1. Access the Azure Portal using this URL: https://portal.azure.com
+
+    ## Log into Azure Portal
+    2. Username: kk_lab_user_main-3f002357cb6b4a80@azurekmlprodkodekloud.onmicrosoft.com and Password: CEcn34loxwVJ%Eke
+
+    ## Delete a Virtual Network (VNet) in Azure
+    3. Navigate the Virtual Network -> Identify Virtual Network (VNet) named datacenter-vnet present in East US region -> Delete the Virtual Network (VNet) named datacenter-vnet present in East US region.
+    

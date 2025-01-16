@@ -1,0 +1,27 @@
+9 Delete Azure Virtual Machine Using CLI
+
+During the migration process, several resources were created under the Azure account. Later on, some of these resources became obsolete as alternative solutions were implemented. Similarly, there is a Virtual Machine that needs to be deleted as it is no longer in use.
+
+Recent security restrictions have revoked Azure Portal access. Nevertheless, the team retains CLI access via the azure-client host (the landing host for this lab), allowing them to manage Azure resources effectively.
+
+1) Using Azure CLI, delete a virtual machine named devops-vm present in the eastus region.
+
+2) Before submitting your task, make sure the VM is in deallocated or deleted state.
+
+Ans)
+    ## Access the Terminal
+    1. Go to terminal
+
+    ## Check the list of Azure Virtual Machine Using CLI 
+    2. az vm list 
+
+    ## Delete Azure Virtual Machine Using CLI
+    3. az vm delete -n devops-vm -g kml_rg_main-c3aae133ccf84471 -y
+
+        ## -n -> The name of the Virtual Machine.
+        ## -g -> Name of resource group.
+        ## -y -> Do not prompt for confirmation.
+
+    ## Confirm Virtual Machine Deleted or not
+    4. az vm list 
+    

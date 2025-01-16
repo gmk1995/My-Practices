@@ -1,0 +1,25 @@
+6 Create a Subnet in Azure Virtual Network
+
+The Nautilus DevOps team is strategizing the migration of a portion of their infrastructure to the Azure cloud. Recognizing the scale of this undertaking, they have opted to approach the migration in incremental steps rather than as a single massive transition.
+
+For this task, create a Virtual Network (VNet) named xfusion-vnet and one subnet named xfusion-subnet within the VNet in the East US region. Make sure the IPv4 address range is 10.0.0.0/16.
+
+
+
+Use below given Azure Credentials: (You can run the showcreds command on the azure-client host to retrieve these credentials)
+
+Portal URL	https://portal.azure.com
+Username	kk_lab_user_main-b6ebfd7f42b240e9@azurekmlprodkodekloud.onmicrosoft.com
+Password	coUnM!N%Hyo9@fLX
+Start Time	Thu Jan 16 03:43:09 UTC 2025
+End Time	Thu Jan 16 04:43:09 UTC 2025
+
+Ans)
+    ## Access the Azure Portal
+    1. Access the Azure Portal using this URL: https://portal.azure.com
+
+    ## Log into Azure Portal
+    2. Username: kk_lab_user_main-b6ebfd7f42b240e9@azurekmlprodkodekloud.onmicrosoft.com and Password: coUnM!N%Hyo9@fLX
+
+    ## Create a Subnet in Azure Virtual Network
+    3. Search Virtual Network -> Click to Create a New Virtual Network -> Resource Group Existing -> Name xfusion-vnet -> Region East US -> Enter Subnet Name: xfusion-subnet Enter the IPv4 CIDR Range 10.0.0.0/16 -> Review+Create
