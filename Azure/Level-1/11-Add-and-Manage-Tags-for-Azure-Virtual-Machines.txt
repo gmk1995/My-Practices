@@ -1,0 +1,23 @@
+The Nautilus DevOps team is migrating a portion of their infrastructure to Azure. During the migration, they have created several virtual machines (VMs) in different regions. The team has identified one VM that is not tagged properly so they decided to tag it as needed.
+
+Add the tag Environment=dev to the virtual machine named devops-vm.
+
+
+
+Use the below given Azure Credentials: (You can run the showcreds command on the azure-client host to retrieve these credentials)
+
+Portal URL	https://portal.azure.com
+Username	kk_lab_user_main-8a093a31ebeb4758@azurekmlprodkodekloud.onmicrosoft.com
+Password	c^q9^ARXIz^tM3kp
+Start Time	Thu Jan 16 09:54:43 UTC 2025
+End Time	Thu Jan 16 10:54:43 UTC 2025
+
+Ans)
+    ## Access the Azure Portal
+    1. Access the Azure Portal using this URL: https://portal.azure.com
+
+    ## Log into Azure Portal
+    2. Username: kk_lab_user_main-8a093a31ebeb4758@azurekmlprodkodekloud.onmicrosoft.com and Password: c^q9^ARXIz^tM3kp
+
+    ## 11-Add-and-Manage-Tags-for-Azure-Virtual-Machines
+    3. Navigate to virtual machine -> Identify devops-vm Virtual Machines -> Click On Tags -> Add the tag Environment=dev -> Save

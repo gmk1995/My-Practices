@@ -1,0 +1,50 @@
+12 SSH into an Azure Virtual Machine
+
+The Nautilus DevOps team is working on setting up secure SSH access for their virtual machines in Azure. One of the requirements is to add the SSH public key of the root user from the Azure client host (landing host) to the devops-vm Azure VM's authorized_keys file. This ensures secure and password-less SSH access to the VM.
+
+Task Details:
+1) VM Details:
+
+The VM is named devops-vm and is running in the East US region.
+You need to add the root user's SSH public key from the Azure client host to the authorized_keys file of the VM's root user.
+The SSH public key of the root user on the Azure client host is located at /root/.ssh/id_rsa.pub.
+2) Public Key Addition:
+
+Copy the public key located at /root/.ssh/id_rsa.pub on the Azure client host to the authorized_keys file of the root user on devops-vm.
+Ensure that the proper permissions for the .ssh folder and authorized_keys file are set on the VM.
+3) Verification:
+
+After adding the public key, make sure that you are able to SSH into the devops-vm VM from the Azure client host without needing a password.
+Important Notes:
+Ensure that the VM is up and running before attempting to SSH.
+You may need to adjust the firewall or security group rules for the VM to allow SSH access.
+
+Use the following Azure credentials to access the Azure portal:
+
+Portal URL	https://portal.azure.com
+Username	kk_lab_user_main-8f7c2c5cfe6748b4@azurekmlprodkodekloud.onmicrosoft.com
+Password	R3F8vx826yAE%vVh
+Start Time	Thu Jan 16 10:04:56 UTC 2025
+End Time	Thu Jan 16 11:04:56 UTC 2025
+
+Ans)
+    ## Access the Azure Portal
+    1. Access the Azure Portal using this URL: https://portal.azure.com
+
+    ## Log into Azure Portal
+    2. Username: kk_lab_user_main-8a093a31ebeb4758@azurekmlprodkodekloud.onmicrosoft.com and Password: c^q9^ARXIz^tM3kp
+
+    ## SSH into an Azure Virtual Machine
+    3. Check the Virtual Machine devops-vm and is running in the East US region. Here the VM is running in East US Region. 
+
+    ## Check the Public Key of the Azure client host
+    4. cat .ssh/id_rsa.pub on the Azure client host to get the public key.
+       ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDewmMSEzsFCPKktXivfaVTgOKEdWw/kOM9RvaxU0L+J63uyHP1Dtc/Zy6di3LElj79cXj/2nD2DUc/++oFeyLsIQNfLjKFTpNL4LDiks1baorGGOOSzCz6LZK5vNBC3VgpRueehzU9hpCuzGClAT4UxX3ibfX5OQo6YYN6Z+Df+S0rUN56Guf/QLmwDEmXJrjL+APBu87rFpBeIixh2BbTdw/eJixe7zvUqdq7WYQXi8ARXQZO6w1RURjKyElIN5LFQe8ZSgca3xh8wcOFWgEnMYZpxgv2/UTsfTn1P7V60rJ8714L6h4ni/sUrVQwff85imAuIKcVghzSfbmdGKkV root@azure-client
+
+    ## Copy the public key located at /root/.ssh/id_rsa.pub on the Azure client host to the authorized_keys file of the root user on devops-vm.
+    5. ssh azureuser@138.91.79.33
+       sudo -i 
+       vi .ssh/authorized_keys -> Paste the Azure client host id_rsa.pub key to .ssh/authorized_keys
+
+    ## Verification
+    6. ssh root@138.91.79.33
