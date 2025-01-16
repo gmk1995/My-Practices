@@ -1,0 +1,30 @@
+The Nautilus DevOps team is migrating services to Azure. They are breaking down tasks to ensure better control and optimization. You are tasked with attaching an existing data disk to a virtual machine (VM).
+
+An existing VM named devops-vm and a managed disk named devops-disk already exist in the East US region.
+
+Attach the disk devops-disk to the VM devops-vm as a data disk.
+Ensure the disk is attached to the VM devops-vm.
+Make sure that the virtual machine initialization has been completed before submitting this task.
+
+
+
+Use below given Azure Credentials: (You can run the showcreds command on the azure-client host to retrieve credentials)
+
+Portal URL	https://portal.azure.com
+Username	kk_lab_user_main-25fe1b49d20f4e96@azurekmlprodkodekloud.onmicrosoft.com
+Password	LOvO!xmFBFJlj!uM
+Start Time	Thu Jan 16 11:40:53 UTC 2025
+End Time	Thu Jan 16 12:40:53 UTC 2025
+
+Ans) 
+     ## Access the Azure Portal
+    1. Access the Azure Portal using this URL: https://portal.azure.com
+
+    ## Log into Azure Portal
+    2. Username: kk_lab_user_main-25fe1b49d20f4e96@azurekmlprodkodekloud.onmicrosoft.com and Password: LOvO!xmFBFJlj!uM
+
+    ## Check the VM and Disks
+    3. Navigate to the resource group where the VM and disk are located.
+
+    ## Attach the Disk devops-disk to the vm devops-vm
+    4. Click on the VM devops-vm and click on the "Disks"   -> Click on Attach existing disks -> Select devops-disk -> Apply
